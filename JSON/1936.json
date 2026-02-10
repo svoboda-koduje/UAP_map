@@ -1,0 +1,20 @@
+{
+  "year": "1936",
+  "count": 2,
+  "events": [
+    {
+      "id": "1936-07210B2D",
+      "hex_id": "07210B2D",
+      "date": "10/10/1936",
+      "description": "4:15 a.m. Capt. Mario Rossi, flight instructor at the airfield at Orbetello, Grosseto, Italy, is flying a Savoia-Marchetti SM.62 at 12,465 feet over Talamone, Italy, when he sees an unusual light ahead of his plane. He follows the light, which is at a slightly higher altitude and moving at nearly 440 mph. Rossi loses it after flying into a cloud for 12 minutes and finding himself over Elba.",
+      "source_id": "492"
+    },
+    {
+      "id": "1936-1E718608",
+      "hex_id": "1E718608",
+      "date": "Winter 1936",
+      "description": "Robert Damion, an astronomer of Nice, Alpes-Maritimes, France, who has a private observatory in the Alps, claims that for several nights a “certain portion of the sky in the vicinity of Mars” has been lit up with a deep bluish tint for 40 seconds each time. He is convinced that Mars is trying to signal Earth.",
+      "source_id": "494"
+    }
+  ]
+}

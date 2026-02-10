@@ -1,0 +1,27 @@
+{
+  "year": "1928",
+  "count": 3,
+  "events": [
+    {
+      "id": "1928-A3EEF174",
+      "hex_id": "A3EEF174",
+      "date": "6/13/1928",
+      "description": "9:00–10:00 p.m. Something like a “great blurred electric light” appears over Miami, Florida, for more than 30 minutes. One witness, amateur astronomer R. C. Fahrion, describes it as a comet without a tail, but it does not move, is of an “enormous size,” and disappears very suddenly.",
+      "source_id": "428"
+    },
+    {
+      "id": "1928-EECD9BDA",
+      "hex_id": "EECD9BDA",
+      "date": "Summer 1928",
+      "description": "A 6-year-old girl sees a black, faceless, 5-foot-high figure with a large head and dangling arms in a field off Anstey Lane, Leicester, England. She thinks it is a scarecrow but notices a “large globe on legs” near the figure. She wakes up her father (who is resting in the open air) but when she turns around, the scarecrow and the globe are gone.",
+      "source_id": "427"
+    },
+    {
+      "id": "1928-F09F4184",
+      "hex_id": "F09F4184",
+      "date": "10/1928",
+      "description": "Richard E. Byrd’s first expedition to Antarctica. He set up a large base on the Ross Ice Shelf, called Little America. This was the first of the American bases on the continent and was well-equipped.\nType: historical event Reference: link Location: Antarctica Source: Maj2\nEvent 660 (6C4AAC6D)\nDate: Early 11/1928\nDescription: 10:30 p.m. Norman H. Sabie and Thorsten Sabie are driving cattle near Milton, North Dakota, watch a round, metallic object, like a “soup bowl turned upside down,” speed by at a low altitude (15–20 feet), emitting 4–5 rays of light that illuminate the ground and startle cattle. It makes a sound like air pouring through a tube.",
+      "source_id": "431"
+    }
+  ]
+}

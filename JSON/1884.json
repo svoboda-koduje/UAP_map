@@ -1,0 +1,20 @@
+{
+  "year": "1884",
+  "count": 2,
+  "events": [
+    {
+      "id": "1884-D13F29FE",
+      "hex_id": "D13F29FE",
+      "date": "6/6/1884",
+      "description": "1:00 p.m. Rancher John W. Ellis and some of his ranch hands in south-central Dundy County, Nebraska, allegedly see a blazing object fall from the sky and crash into many pieces, burning the grass and fusing the sand. The light is so intense it blinds one of them. The newspaper suggests it is a “vessel belonging originally to some other planet.” The remains of the object are said to have dissolved in a rainstorm. However, the tale is actually a fictional story written by a correspondent in Benkelman.",
+      "source_id": "76"
+    },
+    {
+      "id": "1884-80EB590D",
+      "hex_id": "80EB590D",
+      "date": "7/3/1884",
+      "description": "8:30 p.m. L. C. Yale of Norwood, New York, watches an object with a long tail move slowly from east to west. It has a “nucleus like a globe, as large as the moon, surrounded by a bright ring, two dark lines crossing the nucleus in vertical direction, the lines larger in the middle, straight on inside, curved on outside, tapering both ways to points.” The general appearance is of a “gigantic sword of fire, moving handle first.”",
+      "source_id": "79"
+    }
+  ]
+}

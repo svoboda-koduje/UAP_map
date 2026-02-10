@@ -1,0 +1,76 @@
+{
+  "year": "1914",
+  "count": 10,
+  "events": [
+    {
+      "id": "1914-8CF367D4",
+      "hex_id": "8CF367D4",
+      "date": "1/1/1914",
+      "description": "The world’s first scheduled passenger airline service took off from St. Petersburg, FL and landed at its destination in Tampa, FL, about 17 miles (27 kilometers) away. The St. Petersburg-Tampa Airboat Line was a short-lived endeavor — only four months — but it paved the way for today’s daily transcontinental flights.\nType: aerospace Reference: link\nLocation: St. Petersburg, FL Source: Maj2\nEvent 540 (DEC46897)\nDate: 3/1914\nDescription: Twilight. A farmer is returning to his house at Lajoumard, Haute-Vienne, France, when he sees a round, green, luminous object hovering just above a hilltop. Several small beings emerge, walk around the machine, and go back inside. The object takes off.",
+      "source_id": "345"
+    },
+    {
+      "id": "1914-FC8EDE59",
+      "hex_id": "FC8EDE59",
+      "date": "8/10/1914 End date: 8/11/1914",
+      "description": "Night. Maj. Becke, commander of defenses at Barrow-in-Furness, Cumbria, England, reports that two or three cigar-shaped airships are seen above the Vickers shipyard. Soldiers fire upon them with machine guns and the only anti-aircraft battery on the west coast.",
+      "source_id": "347"
+    },
+    {
+      "id": "1914-5326683F",
+      "hex_id": "5326683F",
+      "date": "8/13/1914",
+      "description": "7:30 p.m. High Constable Hobson and numerous residents of Sweaburg, Ontario, see “two large aeroplanes” pass from east to west. Sporadic sightings of mystery airplanes continue in the region for the next two weeks.",
+      "source_id": "348"
+    },
+    {
+      "id": "1914-25417C8D",
+      "hex_id": "25417C8D",
+      "date": "8/14/1914",
+      "description": "Afternoon. A large ball of fire sweeps over the southeast portion of Montpelier, Vermont, seen by employees of the C. P. Gill stone cutting plant near the Winooski River. It is accompanied by a loud noise. One man says the heat of the object has scorched his hands. The plant motor stops as the object passes over, and insulation from some electrical wires is found burned off.",
+      "source_id": "351"
+    },
+    {
+      "id": "1914-FCFC2E0E",
+      "hex_id": "FCFC2E0E",
+      "date": "9/6/1914",
+      "description": "Flight Commander C. E. Rathbone of the Felixstowe Naval Air Station, Suffolk, England returned from an early morning patrol in his seaplane to make perhaps the first report of a UFO sighting by a military officer. He reported that, “At 5:35 a.m. whilst on patrol, I sighted an airship steering south-southeast with a silver-colored envelope on the horizon, while flying at 1,300 feet, 27 miles south of Orfordness.”",
+      "source_id": "5671"
+    },
+    {
+      "id": "1914-CD44F48C",
+      "hex_id": "CD44F48C",
+      "date": "9/9/1914",
+      "description": "Mid-day. Amateur astronomer William Herbert Steavenson points his 3-inch refracting telescope in West Norwood, south London, England, at the planet Mercury, then about 8° distant from the Sun, when a round, luminous object the apparent size of the planet, but brighter, speeds across his field, passing centrally from south to north in about 3 seconds. A few seconds later, another appears going in the same direction. More follow, and the display continues until at least 3:00 p.m. when the sky becomes overcast. He watches several hundred bodies pass; about half are perfectly round and the rest are dumbbell shaped. All the objects are well defined and intrinsically brighter than Venus. The prevailing color is yellowish white. Steavenson sends a telegram to the Rev. T. E. R. Phillips at Ashstead, Surrey, but the sky is now overcast and he cannot confirm the observation. Steavensen thinks high-altitude seeds are the most likely explanation.",
+      "source_id": "352"
+    },
+    {
+      "id": "1914-7B310323",
+      "hex_id": "7B310323",
+      "date": "10/5/1914",
+      "description": "At Silver Bell Siding in Tasmania, Australia a lighted object appeared traveling from MacQuarie Heads to Mount Dundas. Two lights were distinctly visible, and intermittent rays of light were thrown to the ground.",
+      "source_id": "6561"
+    },
+    {
+      "id": "1914-0E9756C5",
+      "hex_id": "0E9756C5",
+      "date": "10/10/1914",
+      "description": "Afternoon. Albert Alfred Buss is observing the sun using a spectrographic telescope at Manchester, England, when he sees an “absolutely black spindle-shaped object” against the sun.",
+      "source_id": "353"
+    },
+    {
+      "id": "1914-0ABC8348",
+      "hex_id": "0ABC8348",
+      "date": "11/21/1914",
+      "description": "Some 20–30 people watch an airship flying at 2,300 feet descend to about 1,300 feet and shine a searchlight on a passing ship near Skjaervser lighthouse on the island of Mindlandet, Nordland, Norway.",
+      "source_id": "354"
+    },
+    {
+      "id": "1914-EB06560B",
+      "hex_id": "EB06560B",
+      "date": "12/15/1914",
+      "description": "4:10 p.m. The crew of a Hull trawler, the SS Ape, is streaming toward Great Yarmouth, Norfolk, England, when they see a “black object astern” which gradually approaches them. It turns and heads for the Lincolnshire coast where it vanishes in the fog.",
+      "source_id": "356"
+    }
+  ]
+}

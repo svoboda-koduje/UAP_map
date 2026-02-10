@@ -1,0 +1,20 @@
+{
+  "year": "1874",
+  "count": 2,
+  "events": [
+    {
+      "id": "1874-EA0D0855",
+      "hex_id": "EA0D0855",
+      "date": "4/24/1874",
+      "description": "3:30 p.m. Chemist and astronomer Vojtěch Šafařík of Prague [now in the Czech Republic] sees “an object of so peculiar a character that I do not know what to make of it.” It is a dazzling white object slowly crossing the moon. He first sees it in front of the moon, then watches it against the “deep blue sky like Sirius or Vega in daylight.” Reference: Eberhart",
+      "source_id": "3854"
+    },
+    {
+      "id": "1874-BEEFC721",
+      "hex_id": "BEEFC721",
+      "date": "8/13/1874",
+      "description": "11:00 p.m. A large, “luminous electric cloud” flies over the western edge of Pascagoula, Mississippi, from the northwest to the southeast. It illuminates the ground and emits heat so intense that some witnesses think their houses are about to ignite. When last seen over the Gulf of Mexico, it renders the spars and rigging of a ship “distinctly visible.”",
+      "source_id": "61"
+    }
+  ]
+}

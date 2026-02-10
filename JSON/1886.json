@@ -1,0 +1,34 @@
+{
+  "year": "1886",
+  "count": 4,
+  "events": [
+    {
+      "id": "1886-541A13A7",
+      "hex_id": "541A13A7",
+      "date": "1886",
+      "description": "French novelist Jules Verne publishes Robur the Conqueror, which describes the appearance of mysterious objects and strange lights in the sky all over the world. It turns out that the sightings are of a flying machine, invented by the novel’s anti-hero Robur, who kidnaps people and takes them on board the airship.",
+      "source_id": "80"
+    },
+    {
+      "id": "1886-5CA8AB02",
+      "hex_id": "5CA8AB02",
+      "date": "10/24/1886",
+      "description": "Night. Nine persons who are sleeping in a hut some 10 miles from Maracaibo, Venezuela, are awakened by a loud humming noise and a dazzling light that illuminates the interior. The people begin to pray but they start vomiting as extensive swellings appear on the upper part of their bodies, especially around the face and lips. They feel no heat, although the light has a smoky appearance and a peculiar smell. The next morning, the swellings subside but leave black blotches. By November 2, the skin peels off and the blotches are round sores. Portions of their hair falls off. Trees around the hut show no damage until November 2, when they suddenly wither. The symptoms are similar to those of ionizing radiation syndrome.",
+      "source_id": "81"
+    },
+    {
+      "id": "1886-A4B972CD",
+      "hex_id": "A4B972CD",
+      "date": "10/24/1886",
+      "description": "On this night a loud humming noise awakened a family of nine in a hut in a village in Maracaibo, Venezuela. A vivid, dazzling light illuminated the inside of the hut. The family suffered symptoms of apparent radiation exposure, including vomiting, hair loss, swelling, black blotches, and sores. Trees in the area withered and died nine days later.",
+      "source_id": "7066"
+    },
+    {
+      "id": "1886-F0FEF267",
+      "hex_id": "F0FEF267",
+      "date": "11/1886",
+      "description": "Heinrich Hertz became the first person to transmit and receive controlled radio waves. Type: scientific advance",
+      "source_id": "82"
+    }
+  ]
+}

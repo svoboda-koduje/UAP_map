@@ -1,0 +1,20 @@
+{
+  "year": "1902",
+  "count": 2,
+  "events": [
+    {
+      "id": "1902-CC3B746C",
+      "hex_id": "CC3B746C",
+      "date": "2/9/1902",
+      "description": "At 7:40 p.m. a “meteor” turned, looped, and curved for 12 seconds over Paris, France. Its tail lasted 90 seconds.",
+      "source_id": "7213"
+    },
+    {
+      "id": "1902-F0F8496D",
+      "hex_id": "F0F8496D",
+      "date": "10/28/1902 Time: 0305\n",
+      "description": "Three persons aboard the “Fort Salisbury,” including Second Officer A. H. Raymer, saw a huge, dark object bearing lights in the sea ahead. It was observed sinking slowly. Estimated length: 200 m.\nType: ufo sighting",
+      "source_id": "32"
+    }
+  ]
+}

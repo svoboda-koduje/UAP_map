@@ -1,0 +1,27 @@
+{
+  "year": "1892",
+  "count": 3,
+  "events": [
+    {
+      "id": "1892-2A77DEA5",
+      "hex_id": "2A77DEA5",
+      "date": "3/23/1892",
+      "description": "Evening–1:00 a.m. Residents of Warsaw, Poland, watch a balloon over the city that casts rays of light from an electrical apparatus. It remains stationary until 1:00 a.m., then it takes off to the west. Other supposed balloons are seen March 22 or earlier over Kaunas Fortress, Lithuania; and Modlin Fortress (in Nowy Dwór Mazowiecki), Sosnowiec, Dąbrowa Górnicza, and Dąbrowice, Poland. As they remain stationary for as long as 40 minutes, some assume they are piloted by German spies.",
+      "source_id": "90"
+    },
+    {
+      "id": "1892-33EEB508",
+      "hex_id": "33EEB508",
+      "date": "4/16/1892",
+      "description": "Witnesses at Przemyśl Fortress, Poland, see a bright point of light in the north that seems to be a sphere emitting searchlight beams above and below it. The object is hovering at an altitude of 2,100 feet and begins circling. Reference: Eberhart",
+      "source_id": "91"
+    },
+    {
+      "id": "1892-F082AE45",
+      "hex_id": "F082AE45",
+      "date": "6/1/1892",
+      "description": "Night. A large balloon carrying a searchlight and four passengers passes over Newark, New Jersey, descending as low as 20 feet from the ground.",
+      "source_id": "96"
+    }
+  ]
+}

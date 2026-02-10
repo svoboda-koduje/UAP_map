@@ -1,0 +1,27 @@
+{
+  "year": "1938",
+  "count": 3,
+  "events": [
+    {
+      "id": "1938-8AA8FD60",
+      "hex_id": "8AA8FD60",
+      "date": "7/25/1938",
+      "description": "11:30 p.m. A lieutenant and his aide see a strong light coming from a hovering lens-shaped object near Guadalajara, Spain. It is over 35 feet in diameter and 15 feet high. A platform with two moving figures is lowered from underneath. A blue beam from the object shines on the witnesses, who feel a sudden chill. The platform rises back up, and the object glows with an intense white light and flies away.",
+      "source_id": "509"
+    },
+    {
+      "id": "1938-593EC860",
+      "hex_id": "593EC860",
+      "date": "7/25/1938",
+      "description": "A lieutenant in the Spanish Army in Guadalajara, Spain saw a dark, lens-shaped UFO descend toward the ground at 11:30 p.m. The disc was eleven meters in diameter and the top and bottom secions spun in opposite directions. A transparent column from underneath the object came down slowly, and two figures could be seen moving around inside the column. A blue beam of light was projected at the witness by the UFO, and he felt a chilling cold sensation.",
+      "source_id": "512"
+    },
+    {
+      "id": "1938-04E62AA0",
+      "hex_id": "04E62AA0",
+      "date": "12/17/1938",
+      "description": "The process of nuclear fission is discovered by chemist Otto Hahn and his assistant Fritz Strassmann at the Kaiser Wilhelm Institut für Chemie in Berlin, Germany, producing barium by bombarding uranium with neutrons.",
+      "source_id": "514"
+    }
+  ]
+}

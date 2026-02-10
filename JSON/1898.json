@@ -1,0 +1,27 @@
+{
+  "year": "1898",
+  "count": 3,
+  "events": [
+    {
+      "id": "1898-7E803BE3",
+      "hex_id": "7E803BE3",
+      "date": "4/25/1898",
+      "description": "Astronomer Michailovitch at the Belgrade Observatory in Serbia, Yugoslavia sighted a fireball at 9:32 p.m. that stopped still in the sky and hovered in one spot for six minutes before continuing on.",
+      "source_id": "2288"
+    },
+    {
+      "id": "1898-1944A863",
+      "hex_id": "1944A863",
+      "date": "5/2/1898",
+      "description": "Dusk. Bystanders in front of the Pearson building in downtown New Castle, Pennsylvania, notice a bright arc light moving in from the southwest just below the clouds and remaining visible for 5 minutes.",
+      "source_id": "238"
+    },
+    {
+      "id": "1898-36292BEC",
+      "hex_id": "36292BEC",
+      "date": "10/4/1898",
+      "description": "9:00 p.m. A brilliant object passes over Italy, Greenville, Garland, and Blossom, Texas. Initially moving in an easterly direction, it seems to change course and shoot upwards then burst, throwing out three distinct objects, one red, the other white, and the last one blue. The red and blue lights die out, but the white one continue a few seconds before it too bursts, emitting a shower of sparks. Blossom merchant Dick Moore says the light is so glaring that he thinks his “house was falling on him.” About 2.5 miles north of Sherman, 12-year-old George Campbell is riding with his father when they see the fireball descending, apparently coming as close as 3 feet above the ground before moving upward; they can hear a buzzing noise and think the object is about 10 feet in diameter.",
+      "source_id": "239"
+    }
+  ]
+}

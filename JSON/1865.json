@@ -1,0 +1,13 @@
+{
+  "year": "1865",
+  "count": 1,
+  "events": [
+    {
+      "id": "1865-FE887F16",
+      "hex_id": "FE887F16",
+      "date": "1865",
+      "description": "James Clerk Maxwell publishes “A Dynamical Theory of the Electromagnetic Field” on electromagnetism. Maxwell derives an electromagnetic wave equation with a velocity for light in close agreement with measurements made by experiment, and deduces that light is an electromagnetic wave.\nType: scientific advance Reference: Wikipedia Source: Maj2\nEvent 68 (90D875C3)\nDate: 1865\nDescription: French novelist Jules Verne publishes From the Earth to the Moon. It tells the story of the Baltimore Gun Club, a post–American Civil War society of weapons enthusiasts, and their attempts to build an enormous Columbiad space gun and launch three people—the Gun Club’s president, his Philadelphian armor-making rival, and a French poet\n—in a projectile with the goal of a lunar landing.",
+      "source_id": "48"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "year": "1921",
+  "count": 2,
+  "events": [
+    {
+      "id": "1921-66EBCE19",
+      "hex_id": "66EBCE19",
+      "date": "Late 7/1921",
+      "description": "2:00 a.m. Annie Baker of 39 Highland Road, Southsea, Portsmouth, England, sees a “strange looking bladder like monster the shape of an airship only much wider” during a thunderstorm. It is luminous and remains stationary for several minutes but moves away and disappears quickly.",
+      "source_id": "398"
+    },
+    {
+      "id": "1921-12201D07",
+      "hex_id": "12201D07",
+      "date": "9/1/1921",
+      "description": "J. H. C. Macbeth of the Marconi Wireless Telegraph Company announces that inventor\nGuglielmo Marconi is convinced he has intercepted wireless signals from Mars while cruising in the Mediterranean Sea on his mobile laboratory and yacht, the Electra. The signals are regular and “produced high in the meter band.” One of them resembles the letter “V” in the Marconi Code.",
+      "source_id": "399"
+    }
+  ]
+}

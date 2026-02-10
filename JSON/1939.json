@@ -1,0 +1,27 @@
+{
+  "year": "1939",
+  "count": 3,
+  "events": [
+    {
+      "id": "1939-1B44B986",
+      "hex_id": "1B44B986",
+      "date": "1939\nEnd date: 1941",
+      "description": "Richard E. Byrd’s third Antarctic expedition. President Roosevelt asked Byrd to command the U.S. Antarctic programme. This time they again used the Little America base but also set up on Stonington Island, near the Antarctic Peninsula. This expedition would complete extensive studies of Antarctic geology, biology, meteorology and continue exploring new areas. Due to the impending involvement of America in the Second World War, Byrd was recalled to active duty in 1940 and assigned to the Office of the Chief of Naval Operations. The expedition continued without him.\nType: historical event Reference: Wikipedia Location: Antartica Source: Maj2\nEvent 779 (D056EC4D)\nDate: 1/13/1939\nDescription: The process of nuclear fission is explained theoretically in Stockholm, Sweden, by Lise Meitner and her nephew Otto Robert Frisch, who compares it to the biological fission of living cells.",
+      "source_id": "518"
+    },
+    {
+      "id": "1939-1DCDFD06",
+      "hex_id": "1DCDFD06",
+      "date": "9/1/1939 End date: 9/2/1945",
+      "description": "World War 2 Type: war",
+      "source_id": "523"
+    },
+    {
+      "id": "1939-72F93390",
+      "hex_id": "72F93390",
+      "date": "11/13/1939",
+      "description": "In 1939 a building foreman drove past a deserted farm in the early morning in Brockworth, England and heard a high-pitched humming sound. He looked and saw a gray, bell-shaped object hovering over a nearby field. It had dark windows on its side, and a curtain of green light underneath, which retracted upwards as if solid.",
+      "source_id": "7623"
+    }
+  ]
+}

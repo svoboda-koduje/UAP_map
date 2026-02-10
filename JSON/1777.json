@@ -1,0 +1,13 @@
+{
+  "year": "1777",
+  "count": 1,
+  "events": [
+    {
+      "id": "1777-B0ED6E4F",
+      "hex_id": "B0ED6E4F",
+      "date": "6/17/1777",
+      "description": "11:46 a.m. French astronomer Charles Messier views a large number of round, dark-brown globules\n\npassing in front of the disc of the sun for 5 minutes from west-southwest to east-northeast. He sees them through an achromatic refractor at the naval observatory located in the Hôtel de Cluny in Paris, France. His estimate of their size (one-600th the size of the solar disc) puts them near the limit of resolution for his telescope, but Messier claims the objects are far away and in focus.",
+      "source_id": "20"
+    }
+  ]
+}

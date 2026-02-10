@@ -1,0 +1,27 @@
+{
+  "year": "2015",
+  "count": 3,
+  "events": [
+    {
+      "id": "2015-F7A65DF2",
+      "hex_id": "F7A65DF2",
+      "date": "1/10/2015",
+      "description": "John Greenewald Jr. puts the Fold3 Blue Book files online into his Black Vault website and makes many of the case files into easily downloadable PDFs. The work is done by a contributor to the ATS website since 2012.\nUnfortunately, the JPG conversion to PDFs is done incorrectly so that documents with many pages are out of correct order.",
+      "source_id": "7696"
+    },
+    {
+      "id": "2015-89B7CEA2",
+      "hex_id": "89B7CEA2",
+      "date": "3/1/2015",
+      "description": "Las Vegas Review-Journal Article: “Area 51 worker sees hope in Supreme Court ruling” Type: newspaper article",
+      "source_id": "7698"
+    },
+    {
+      "id": "2015-3E7FD19F",
+      "hex_id": "3E7FD19F",
+      "date": "12/22/2015",
+      "description": "Janel Sturzl, 31, an employee of the Daily Mining Gazette in Houghton, Michigan, dies while in a coma after being diagnosed with thallium poisoning at the Mayo Clinic in Rochester, Minnesota. The police investigate her death as a homicide.",
+      "source_id": "7701"
+    }
+  ]
+}

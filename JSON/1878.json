@@ -1,0 +1,13 @@
+{
+  "year": "1878",
+  "count": 1,
+  "events": [
+    {
+      "id": "1878-FA361EDE",
+      "hex_id": "FA361EDE",
+      "date": "7/29/1878",
+      "description": "About 12:30 p.m. Astronomers James Craig Watson, director of the Ann Arbor (Mich.) Observatory, and Lewis Swift, an amateur from Rochester, New York, both claim to see a planet-like object close to the Sun during the total solar eclipse. Watson, observing from Separation, Wyoming, places the object about 2.5° southwest of the Sun and estimates its magnitude at 4.5. Swift, observing from a location near Denver, Colorado, sees what he takes to be an intra-mercurial planet about 3° southwest of the Sun. He estimates its brightness to be the same as that of Theta Cancri, a fifth-magnitude star which is also visible during totality, about six or seven minutes from the object. Both Watson and Swift describe the object as red in color. Watson says it has a definite disc, unlike stars, which appear as shimmering pinpoints of light.",
+      "source_id": "64"
+    }
+  ]
+}

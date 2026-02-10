@@ -1,0 +1,20 @@
+{
+  "year": "1879",
+  "count": 2,
+  "events": [
+    {
+      "id": "1879-74FF3FB5",
+      "hex_id": "74FF3FB5",
+      "date": "3/14/1879 End date: 4/18/1955",
+      "description": "Albert Einstein born Type: scientist",
+      "source_id": "2847"
+    },
+    {
+      "id": "1879-F6B8D03E",
+      "hex_id": "F6B8D03E",
+      "date": "5/15/1879 Time: 2140",
+      "description": "Two very large “wheels” were seen spinning in the air and slowly coming to the surface of the sea. Estimated diameter: 40 m. Distance between the objects: 150 m. Speed: 80 km/h/ Duration: 35 min. Witnesses aboard the ship “Vultur”\nType: ufo sighting",
+      "source_id": "4"
+    }
+  ]
+}

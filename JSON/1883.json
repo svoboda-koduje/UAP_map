@@ -1,0 +1,27 @@
+{
+  "year": "1883",
+  "count": 3,
+  "events": [
+    {
+      "id": "1883-1D5111D9",
+      "hex_id": "1D5111D9",
+      "date": "2/5/1883",
+      "description": "A huge fireball flew over Lake Glasfjorden near Arvika, Sweden towards the northwest for 18 seconds. It turned toward the southeast and zigzagged through the sky for an additional 50 seconds.",
+      "source_id": "74"
+    },
+    {
+      "id": "1883-CEC3A540",
+      "hex_id": "CEC3A540",
+      "date": "8/12/1883",
+      "description": "On this day at around 8:00 a.m. Astronomer Bonilla at the Zacatecas Observatory in Zacatecas, Mexico\n\nwatched as 283 objects passed across the face of the sun. He took a photograph of one of them. Reference: Johnson",
+      "source_id": "4926"
+    },
+    {
+      "id": "1883-66272935",
+      "hex_id": "66272935",
+      "date": "8/12/1883 End date: 8/13/1883",
+      "description": "Astronomer José Árbol y Bonilla, director of the El Cerro de la Bufa Meteorological Observatory in Zacatecas, Mexico, is observing the sun by eyepiece projection when he and an assistant see a large number of small bodies crossing the solar disc. Over the course of two days, they count a total of 447 dark objects. They seem bright as they approach the sun but are dark as they pass across its face. He takes several photographs and suspects that they are relatively near the earth. Mexican astronomers in 2011 suggested that a comet may have split into several pieces; these objects were estimated to have had a size of between 150 and 3,350 feet, and to have passed only 334 to 5,000 miles from the Earth; they thought a fragmented Comet 12P/Pons-Brooks was one possibility, in which case Earth barely avoided multiple Tunguska events or even a mass extinction; this was reported in the media and disputed in October 2011; but the source of these objects could also have been comet C/1883 D1 (Brooks-Swift) or even a third, unknown comet that year; the event also coincided with the annual Perseid meteor shower; even migrating birds cannot be ruled out.",
+      "source_id": "75"
+    }
+  ]
+}

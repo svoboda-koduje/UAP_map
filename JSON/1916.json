@@ -1,0 +1,41 @@
+{
+  "year": "1916",
+  "count": 5,
+  "events": [
+    {
+      "id": "1916-09B72601",
+      "hex_id": "09B72601",
+      "date": "1/31/1916",
+      "description": "8:25 p.m. Royal Flying Corps Lieut. Reginald Maxwell is cruising his B.E.2c biplane at 10,000 feet near Romford, Essex, England, patrolling for German Zeppelins. He sees an “artificial light” to the north. He follows it northeast for 20 minutes, but it moves higher and he loses it in the clouds. At the same time, Royal Flying Corps pilot Sub-Lieut. J. Eric Morgan, also flying a B.E.2c at 5,000 feet near Rochford, Essex, and looking for Zeppelins, sees an object about 100 feet away with a row of windows “like a railway carriage with the blinds drawn.” He tries to close on it, but his engine is malfunctioning. When he fires his pistol at it, the lights rise and rapidly disappear. Morgan is forced to make a crash landing.",
+      "source_id": "633"
+    },
+    {
+      "id": "1916-F523DCD7",
+      "hex_id": "F523DCD7",
+      "date": "2/29/1916",
+      "description": "In Superior, Wisconsin at 4:30 a.m. several dock workers observed the passage of a large flying machine in which three men were clearly visible.",
+      "source_id": "363"
+    },
+    {
+      "id": "1916-0F90B37B",
+      "hex_id": "0F90B37B",
+      "date": "3/12/1916",
+      "description": "Early evening. Claude D. McGee is walking home from a trip to a ranch outside Lowry, South Dakota, when he sees a strange glowing light in the hills ahead of him. Suddenly the light swings in a huge arc down into the valley but stays close to the wall of hills where it comes to rest. It stays there a few moments then swings back to where it had been about 2 miles away. It repeats the action twice then disappears.",
+      "source_id": "365"
+    },
+    {
+      "id": "1916-CD3531EB",
+      "hex_id": "CD3531EB",
+      "date": "7/19/1916",
+      "description": "A luminous blimp-shaped flying object flew over Huntington, West Virginia at eleven o’clock at night. It vanished and reappeared.",
+      "source_id": "366"
+    },
+    {
+      "id": "1916-0F6B1D4C",
+      "hex_id": "0F6B1D4C",
+      "date": "12/17/1916",
+      "description": "On the Western front in Europe, Canadian soldier Maurice Philipp Tuteur and two sergeant majors watch a Zeppelin-like object rise into the clouds in the rear of their lines. It darts ahead at an estimated speed of 200 mph, turns around, darts backward, and shoots up and disappears.",
+      "source_id": "369"
+    }
+  ]
+}

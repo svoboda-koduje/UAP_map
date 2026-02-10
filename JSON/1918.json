@@ -1,0 +1,27 @@
+{
+  "year": "1918",
+  "count": 3,
+  "events": [
+    {
+      "id": "1918-93B73342",
+      "hex_id": "93B73342",
+      "date": "3/1/1918",
+      "description": "Early morning. A woman at Tahunanui Beach, Nelson, New Zealand, sees two distinct “seaplanes” flying together near the surface of the water. They soon diverge, one going in the direction of the eastern hills and both getting lost in the clouds.",
+      "source_id": "380"
+    },
+    {
+      "id": "1918-2BD7BA41",
+      "hex_id": "2BD7BA41",
+      "date": "Summer 1918",
+      "description": "7:30 p.m. At an isolated ranch 60 miles from Malta, Montana, 9-year-old Theodore Warren sees a cigar-shaped “airship” with windows that shine with greenish light. It flies in from the mountains in the east and hovers above the ranch house. He watches it for a while, and then it “whooshes” away to the northwest.",
+      "source_id": "382"
+    },
+    {
+      "id": "1918-2F057179",
+      "hex_id": "2F057179",
+      "date": "8/13/1918",
+      "description": "Evening. Mr. C. Rawlinson is cycling to a dance on Carrington Road, New Plymouth, New Zealand, when he sees a bright star against some mountains about 6 miles away. It starts flashing red and white and moves closer and downward, then rises to 400–500 feet and performs other maneuvers. He rides home to tell his sisters, who also see the light until about 8:30 p.m., when it moves off to the sea.",
+      "source_id": "379"
+    }
+  ]
+}

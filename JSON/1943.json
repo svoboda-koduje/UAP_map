@@ -1,0 +1,90 @@
+{
+  "year": "1943",
+  "count": 12,
+  "events": [
+    {
+      "id": "1943-0D47893C",
+      "hex_id": "0D47893C",
+      "date": "1/7/1943",
+      "description": "Nikola Test dies Type: death",
+      "source_id": "189"
+    },
+    {
+      "id": "1943-DE95B771",
+      "hex_id": "DE95B771",
+      "date": "1/15/1943",
+      "description": "During a US bombing raid over Cherbourg, Manche, France, several crews see “large numbers of projectiles resembling ‘schools of flying fish,’ about a foot long and similar to incendiary bombs, coming up from a direction of the town.”",
+      "source_id": "592"
+    },
+    {
+      "id": "1943-034B93BD",
+      "hex_id": "034B93BD",
+      "date": "4/5/1943",
+      "description": "A military pilot reported that over Long Beach, California at 9:50 a.m. a round, orange object flew alongside and then dove at an Army Air Force BT13A trainer aircraft. It subsequently shot away.",
+      "source_id": "1840"
+    },
+    {
+      "id": "1943-59733403",
+      "hex_id": "59733403",
+      "date": "4/9/1943",
+      "description": "5:00 p.m. Kazimierz Bzowski and other resistance fighters are monitoring a fire in the Warsaw Ghetto in Poland. They notice a flying object approaching them at about 60 mph. Through binoculars it appears to be a sphere colored with tangled strips of both raspberry and blue-green colors. Bzowski estimates it is at an elevation of 200 feet and is about 25 feet in diameter. They observe German and Lithuanian snipers on Bonifraterska street shooting at it, although the bullets seem to pass through it. The object alters course and heads toward Old Town, then stops dead and shoots away at great speed.",
+      "source_id": "593"
+    },
+    {
+      "id": "1943-317E9D61",
+      "hex_id": "317E9D61",
+      "date": "5/1943",
+      "description": "Einstein hired by USN to work on sub warfare/high explosives. Dr. Vannever Bush asks Einstein to consult for the OSRD, but apparently Einstein turned him down.\nType: nuclear weapons Reference: link Location: Princeton, NJ Attributes: Einstein Source: Maj2\nEvent 896 (1DDA3E56)\nDate: 5/19/1943\nDescription: The Northrop N-9M flying wing bomber prototype crashes 12 miles west of Muroc Army Air Base [now Edwards AFB], California, killing its pilot Max Constant.",
+      "source_id": "596"
+    },
+    {
+      "id": "1943-D863C8E9",
+      "hex_id": "D863C8E9",
+      "date": "5/27/1943",
+      "description": "USAAF bomber crews flying over Essen, Germany encountered a giant, cigarrette shaped UFO. Reference: Johnson",
+      "source_id": "3111"
+    },
+    {
+      "id": "1943-AAA56F37",
+      "hex_id": "AAA56F37",
+      "date": "6/1943",
+      "description": "The Army Air Force’s Air Tactical Service Command asks Lockheed to develop a jet fighter Type: aerospace",
+      "source_id": "602"
+    },
+    {
+      "id": "1943-D4604A7A",
+      "hex_id": "D4604A7A",
+      "date": "9/1943",
+      "description": "During an air battle between the Germans and Russians, a member of the Spanish Blue Division fighting with the Germans near Pushkin outside Leningrad [now Saint Petersburg], Russia, notices a disc-shaped object above the planes. It appears to be observing the battle, then disappears at a fantastic speed.",
+      "source_id": "605"
+    },
+    {
+      "id": "1943-F7990250",
+      "hex_id": "F7990250",
+      "date": "10/10/1943",
+      "description": "Construction begins for the first reactor at the Hanford site in Washington. Reference: Eberhart",
+      "source_id": "606"
+    },
+    {
+      "id": "1943-37B5699C",
+      "hex_id": "37B5699C",
+      "date": "10/14/1943",
+      "description": "Night. A group of B-17s from the 384th Bombardment Group are returning from a mission over Germany when they see a cluster of silver-colored discs in the path of their formation and closing with the bombers. The crews talk back and forth, discussing and confirming the sight before them. They describe the objects as “about one inch thick and three inches in diameter…gliding down slowly in a very uniform cluster.” One of the bombers goes directly through the cluster “with absolutely no effect on engines or plane surface,” even though one is heard to strike the tail assembly. A mass of black debris about 3-4 feet long is also observed.",
+      "source_id": "607"
+    },
+    {
+      "id": "1943-EE73B27A",
+      "hex_id": "EE73B27A",
+      "date": "11/1943",
+      "description": "Ray Palmer publishes an article, “An Ancient Language?” on the language of Mantong in the January 1944 issue of Amazing Stories and enters into correspondence with Richard S. Shaver, who responds with a 10,000- word document titled “A Warning to Future Man.” Shaver writes of advanced prehistoric races who built underground cities before abandoning Earth for another planet because of damaging radiation from the Sun. Those ancients also abandoned some of their own offspring here, a minority of whom remained noble and human “Teros,” while most degenerate over time into a population of mentally impaired sadists known as “Deros”— short for “detrimental robots.” Shaver’s robots are not mechanical constructs, but robot-like due to their savage behavior. These Deros still live in the cave cities, according to Shaver, kidnapping surface-dwelling people by the thousands for meat or torture. Deros can be blamed for nearly all misfortunes, from minor “accidental” injuries or illnesses to airplane crashes and catastrophic natural disasters. Though generally confined to their caves, the Deros sometimes travel in spaceships or rockets, and have dealings with equally evil extraterrestrials. Shaver claims to possess first-hand knowledge of the Deros and their caves, insisting he had been their prisoner for several years. The article stirs considerable reader interest, and the pages of Amazing Stories are soon filled with stories and articles about the “Shaver mystery.”",
+      "source_id": "609"
+    },
+    {
+      "id": "1943-B77E07BE",
+      "hex_id": "B77E07BE",
+      "date": "11/4/1943",
+      "description": "The X-10 Graphite Reactor at Oak Ridge, Tennessee, goes critical. The Y-12 plant is separating uranium-235 from natural uranium, which is 99.3% uranium-238, by using calutrons to perform electromagnetic isotope separation.",
+      "source_id": "618"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "year": "1869",
+  "count": 2,
+  "events": [
+    {
+      "id": "1869-D107C31D",
+      "hex_id": "D107C31D",
+      "date": "8/7/1869",
+      "description": "Around midday a luminous square body settled near the center of an empty lot in Adamstown, Pennsylvania in Lancaster county. It shot up a shiny column four feet high and two feet thick that glittered like burnished silver. It gradually faded away, and was gone in 10 minutes. It frightened the four witnesses, but left no traces.",
+      "source_id": "52"
+    },
+    {
+      "id": "1869-F5C87461",
+      "hex_id": "F5C87461",
+      "date": "8/7/1869",
+      "description": "12:00 noon. Four or five witnesses watch a luminous object land in a vacant lot about 200 yards north of the village of Adamstown, Pennsylvania. It is originally square-shaped but shoots up into a column about 3–4 feet high and 2 feet thick. The object glitters like a “column of burnished silver.” It gradually fades away and disappears after 10 minutes. No unusual traces are found on the lot.",
+      "source_id": "1610"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "year": "1926",
+  "count": 4,
+  "events": [
+    {
+      "id": "1926-E1B10AAD",
+      "hex_id": "E1B10AAD",
+      "date": "1926",
+      "description": "UFO’s seen around Altai Himalaya Type: UFO sighting",
+      "source_id": "412"
+    },
+    {
+      "id": "1926-E2B8C223",
+      "hex_id": "E2B8C223",
+      "date": "1/1926\n",
+      "description": "Aviator Bert Acosta is flying somewhere between Wichita, Kansas, and Colorado Springs, Colorado, when he notices 6 or so objects that look like manhole covers flying off his starboard wing 600 feet away. They keep pace with his plane for 5 minutes. Finally they turn, change course, and fly away.",
+      "source_id": "413"
+    },
+    {
+      "id": "1926-CE0BE721",
+      "hex_id": "CE0BE721",
+      "date": "6/1926",
+      "description": "After midnight. Farmer Ion Bunescu is with his horses on the Leurda plateau near Colun, Romania, when he sees a light ascend from the village of Cârța. An illuminated globe moves toward him with a light so strong that it brightens the River Olt some 2.5 miles away.",
+      "source_id": "417"
+    },
+    {
+      "id": "1926-004ECAE5",
+      "hex_id": "004ECAE5",
+      "date": "11/1926",
+      "description": "Early evening. Playing hide-and-seek with friends in Bolton, Lancashire, England, Henry Thomas slips into a backyard and finds three figures dressed in odd suits made of silvery gray rubber tubes. They are looking into a window in the back of a house. A tube extends from their helmets into a tank on each figure’s back. They turn to look at him and he sees their heads are pale and “shaped like lightbulbs” and they have slits for mouths. Thomas runs away.",
+      "source_id": "420"
+    }
+  ]
+}

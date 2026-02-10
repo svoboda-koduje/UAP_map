@@ -1,0 +1,20 @@
+{
+  "year": "1820",
+  "count": 2,
+  "events": [
+    {
+      "id": "1820-976A8B86",
+      "hex_id": "976A8B86",
+      "date": "2/12/1820",
+      "description": "10:45 a.m. A German astronomer and cleric named Steinheibel watches a clearly defined dark orange-red spot traversing the disc of the Sun in about five hours.",
+      "source_id": "28"
+    },
+    {
+      "id": "1820-C14826F3",
+      "hex_id": "C14826F3",
+      "date": "9/7/1820",
+      "description": "At 8:00 p.m. many observers in Embrun, Hautes-Alpes, France watched flying saucers maneuver with military precision during a lunar eclipse, making 90 degree turns and other maneuvers, for five minutes.",
+      "source_id": "5706"
+    }
+  ]
+}

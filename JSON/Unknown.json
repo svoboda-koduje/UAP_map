@@ -1,0 +1,48 @@
+{
+  "year": "Unknown",
+  "count": 6,
+  "events": [
+    {
+      "id": "Unknown-979AEFAA",
+      "hex_id": "979AEFAA",
+      "date": "0’s",
+      "description": "Greek and Roman records of UFO’s Type: ufo sightings",
+      "source_id": "0"
+    },
+    {
+      "id": "Unknown-FCEBDB15",
+      "hex_id": "FCEBDB15",
+      "date": "9/24/47",
+      "description": "A covert operation, MAJESTIC-12, is established and classified Top Secret by President H.Truman. It consists of 12 persons selected to control all branches of government, both military and non-military. This ultimately led to silencing of UFO witnesses, confiscating of UFO photos, harassing and debunking of witnesses (and rumors of worse). (ref. “Black Budget”; JMP letter)\nType: majestic document Reference: Pea Research Reference: link\n\nAttributes: Majestic See also: 2/15/87 See also: 9/4/87 See also: 7/47 Source: Maj2\nEvent 1781 (9D75ADF4)\nDate: 9/24/1947\nDescription: President Truman meets with Vannevar Bush, chairman of the Research and Development Board, at the White House. Secretary of Defense James Forrestal is also present.",
+      "source_id": "1154"
+    },
+    {
+      "id": "Unknown-652DA331",
+      "hex_id": "652DA331",
+      "date": "9/28/47",
+      "description": "Student and Einstein assistant Shirley J. Wright: Newspaper college freshman photo Type: scientist",
+      "source_id": "1162"
+    },
+    {
+      "id": "Unknown-34310350",
+      "hex_id": "34310350",
+      "date": "11/12/57",
+      "description": "FBI STATUS REPORT: “Ever since the Russians release ‘Sputnik’ there has been a great increase in the number of flying saucers and other UFOs reportedly seen by people all over the U.S.” [Angle: Artificial satellite spurs Alien interest in mankind. Other Angle: Artificial satellite causes populace to go sky crazy.]\nType: status report Reference: Pea Research Location: Washington, DC Source: Maj2\nEvent 6392 (ED15C092)\nDate: 11/13/1957\nDescription: In 1957 a UFO exploded over the State Hospital in Crownsville, Maryland at 9:10 in the morning. Fragments were recovered and sent to the US Air Force for analysis. On this same date a UFO was seen high in the sky east of Port Broughton, South Australia. It drifted slowly toward the northwest.",
+      "source_id": "3089"
+    },
+    {
+      "id": "Unknown-48ED05F7",
+      "hex_id": "48ED05F7",
+      "date": "12/5/57",
+      "description": "Engineer Norman S. Bean gives a talk titled “Satellites and Saucers” Type: status report",
+      "source_id": "3113"
+    },
+    {
+      "id": "Unknown-686E562C",
+      "hex_id": "686E562C",
+      "date": "Late 70’s",
+      "description": "In an interview, Colonel-General Gennady Reshetnikov, chief of the Top Command Academy of the Air Defence Forces reported several incidents where aircraft were scrambled to chase UFO’s. He also investigated sightings of a cigar shaped object with portholes in the late 70’s over Arctic region of Norilsk, alarming local military units.\nType: ufo sightings Reference: link\nLocation: Norilsk, Soviet Union Source: Maj2\nYear: 1978\nEvent 13523 (A3D65693)\nDate: 1/1978\nDescription: Playboy publishes a “panel discussion” on UFOs that features essays by J. Allen Hynek, R. Leo Sprinkle, James A. Harder, Frank Salisbury, Jacques Vallée, Philip J. Klass, and Ernest H. Taves.",
+      "source_id": "5639"
+    }
+  ]
+}

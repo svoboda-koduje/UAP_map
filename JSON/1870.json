@@ -1,0 +1,20 @@
+{
+  "year": "1870",
+  "count": 2,
+  "events": [
+    {
+      "id": "1870-6D6E7E40",
+      "hex_id": "6D6E7E40",
+      "date": "3/22/1870",
+      "description": "6:30 p.m. Capt. Frederick William Banner, master of the barque Lady of the Lake, is sailing in the North Atlantic 400 miles north of the Equator and 860 miles from the coast of West Africa when he sees a “curious- shaped” light-gray cloud in the south-southeast. It is circular, with four rays or arms extending from the center to the edge, and a curved tail. It is visible for about 50 minutes until it is too dark to see.",
+      "source_id": "53"
+    },
+    {
+      "id": "1870-83ED5B84",
+      "hex_id": "83ED5B84",
+      "date": "9/26/1870",
+      "description": "A luminous object with a tail is seen in the constellation Lyra by Reginald Brabazon, 12th Earl\nof Meath, second secretary of the British legation to the North German Confederation, in Berlin, Germany. Possibly a light pillar reflection caused by a bright arc-light source at a military installation on Eiswerder island.",
+      "source_id": "54"
+    }
+  ]
+}

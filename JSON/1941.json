@@ -1,0 +1,27 @@
+{
+  "year": "1941",
+  "count": 3,
+  "events": [
+    {
+      "id": "1941-87149704",
+      "hex_id": "87149704",
+      "date": "3/17/1941",
+      "description": "US Army establishes the Western Defense Command for coordinating the defense of the Pacific Coast Type: military",
+      "source_id": "539"
+    },
+    {
+      "id": "1941-05307460",
+      "hex_id": "05307460",
+      "date": "6/20/1941",
+      "description": "The Army Air Corps becomes the US Army Air Forces to provide the air arm greater autonomy. Reference: Eberhart",
+      "source_id": "548"
+    },
+    {
+      "id": "1941-32383368",
+      "hex_id": "32383368",
+      "date": "10/9/1941",
+      "description": "Roosevelt approves an atomic weapons program after meeting with Office of Scientific Research and Development Director Vannevar Bush and Vice President Henry A. Wallace. On Bush’s advice, Roosevelt chooses the US Army to run the project rather than the Navy, although the Navy has shown far more interest in the field, and is already conducting research into atomic energy for powering ships. Bush’s negative experiences with the Navy has convinced him that it would not listen to his advice and cannot handle large-scale construction projects.",
+      "source_id": "554"
+    }
+  ]
+}

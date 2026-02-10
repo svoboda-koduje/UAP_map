@@ -1,0 +1,41 @@
+{
+  "year": "1940",
+  "count": 5,
+  "events": [
+    {
+      "id": "1940-738A833D",
+      "hex_id": "738A833D",
+      "date": "1940",
+      "description": "Astronomer Royal Harold Spencer Jones publishes Life on Other Worlds, an essay on the cosmos, the possibility of life arising, science’s tools, the development of the Earth, solar system bodies without atmospheres, the giant gas planets, Venus, Mars, the origin of solar systems, and possibilities for life beyond the solar system.",
+      "source_id": "524"
+    },
+    {
+      "id": "1940-6DFC3AA1",
+      "hex_id": "6DFC3AA1",
+      "date": "3/1940",
+      "description": "Otto Robert Frisch and Rudolf Peierls, two researchers at the University of Birmingham in England—who ironically have been assigned to investigate nuclear weapons by Australian physicist Mark Oliphant because, as enemy aliens in Britain, they are ineligible to participate in secret war work—issue the Frisch-Peierls memorandum. It contradicts the common thinking of the time that many tons of uranium would be needed to make a bomb, requiring delivery by ship. The calculation in the memorandum shows that a bomb might be possible using as little as 1–10 kilograms of pure uranium-235, which would be quite practical for aircraft to carry.",
+      "source_id": "528"
+    },
+    {
+      "id": "1940-E74CD209",
+      "hex_id": "E74CD209",
+      "date": "4/10/1940",
+      "description": "The first meeting of the MAUD Committee in England, established in response to the Frisch-Peierls memorandum to determine if an atomic bomb is feasible, meets in the Royal Society committee room in Burlington House, London. The original members are physicists George Paget Thomson, James Chadwick, John Cockcroft, Mark Oliphant, and Philip Burton Moon; physicists Patrick Blackett, Charles Drummond Ellis, and chemist Norman Haworth are subsequently added, along with a representative of the Director of Scientific Research at the Ministry of Aircraft Production (MAP).",
+      "source_id": "532"
+    },
+    {
+      "id": "1940-D76E97DE",
+      "hex_id": "D76E97DE",
+      "date": "5/26/1940 End date: 6/4/1940",
+      "description": "Dunkirk evacuation (Operation Dynamo) Type: historical event",
+      "source_id": "3162"
+    },
+    {
+      "id": "1940-D6847173",
+      "hex_id": "D6847173",
+      "date": "Summer 1940 Alternate date: Summer 1941",
+      "description": "Near St. Clair, Pennsylvania, as he is walking along a country road, young Frank Sever hears a loud noise in the nearby woods. He sees something like an “aluminum building” partly concealed in the trees. A short distance from it he sees “six small men milling about or looking for something on the ground.” Thinking they are ghosts, he runs. Later he comes back and confirms there is no building on the spot.",
+      "source_id": "536"
+    }
+  ]
+}

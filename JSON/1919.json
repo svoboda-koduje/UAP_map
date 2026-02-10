@@ -1,0 +1,34 @@
+{
+  "year": "1919",
+  "count": 4,
+  "events": [
+    {
+      "id": "1919-04B20FF5",
+      "hex_id": "04B20FF5",
+      "date": "1919",
+      "description": "Wireless inventor Guglielmo Marconi claims that he has detected large-wavelength radio signals from Mars. He claims the most frequent signal is the Morse code for “S,” or three short dots. The signals, however, are subsequently traced to an experiment conducted by chemist Irving Langmuir at the General Electric Laboratories in Schenectady, New York.",
+      "source_id": "386"
+    },
+    {
+      "id": "1919-0AB60165",
+      "hex_id": "0AB60165",
+      "date": "1/22/1919",
+      "description": "A two foot wide, intense glowing ball flew slowly at a low altitude over Shuttlewood, Derbyshire, England at 8:10 p.m. It engaged in controlled maneuvers for 45 minutes. There were at least 40 witnesses.",
+      "source_id": "387"
+    },
+    {
+      "id": "1919-159C5A50",
+      "hex_id": "159C5A50",
+      "date": "6/2/1919",
+      "description": "At 9:00 a.m. a nine-year-old boy in Otter Tail, Minnesota saw a black object emerge from a quick descent, forming an unusual cloud. Windows rattled and the house he was in creaked as the object pealed off, made 6-7 barrel rolls, and left contrails in its wake.",
+      "source_id": "389"
+    },
+    {
+      "id": "1919-27F7345B",
+      "hex_id": "27F7345B",
+      "date": "12/1/1919",
+      "description": "Boni & Liveright publishes Charles Fort’s first book of scientific anomalies, The Book of the Damned. Fort gathers reports of objects or “vessels” that he humorously speculates might be visitors from a multitude of worlds that have come to earth over the centuries. Among his wilder expressions is the suggestion that floating land masses in the sky harbor civilizations and oceans. Fort also speculates that someone is fishing for us and that an alien race considers us its property, warning off all interlopers. It receives positive reviews from Ben Hecht and Booth Tarkington.",
+      "source_id": "390"
+    }
+  ]
+}
