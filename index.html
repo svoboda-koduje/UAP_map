@@ -237,6 +237,17 @@
         font-size: 0.65em;
         padding: 5px;
     }
+    /* Zrychlení dotykové odezvy pro všechna tlačítka a panely */
+button, .nav-btn, .sidebar-panel, .custom-button, label {
+    touch-action: manipulation; /* Zakáže zpoždění kliknutí na mobilu */
+    -webkit-tap-highlight-color: transparent; /* Odstraní šedý záblesk při kliku na Safari */
+}
+
+/* Hardwarová akcelerace pro plynulý pohyb panelů */
+.sidebar-panel {
+    will-change: transform, top, left;
+    backface-visibility: hidden;
+}
 }
 
         /* === PRELOADER === */
@@ -2913,8 +2924,17 @@ if (isMobile) {
                 document.getElementById('season-filter').addEventListener('change', () => updateMarkers(allData));
                 document.getElementById('timeofday-filter').addEventListener('change', () => updateMarkers(allData));
                 document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
-                    radio.addEventListener('change', () => updateMarkers(allData));
-                });
+    radio.addEventListener('change', () => {
+        // Okamžitá vizuální zpětná vazba - změna kurzoru
+        document.body.style.cursor = 'wait';
+        
+        // setTimeout uvolní hlavní vlákno, aby prohlížeč stihl vykreslit "zaškrtnutí" tlačítka
+        setTimeout(() => {
+            updateMarkers(allData);
+            document.body.style.cursor = 'default';
+        }, 10); 
+    });
+});
 
                 let commentTimeout;
                 document.getElementById('comment-search').addEventListener('input', () => {
@@ -4469,17 +4489,15 @@ if (isMobile) {
             }
             // Robustní funkce pro přímé geokódování s ošetřením chyb
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
-                // Přidáme email parameter, jak vyžaduje Nominatim Usage Policy
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
+    // Použijeme veřejnou CORS proxy pro obejití restrikcí během vývoje
+    const proxyUrl = "https://corsproxy.io/?";
+    const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
+    const url = proxyUrl + encodeURIComponent(targetUrl);
 
-                try {
-                    // Fetch s explicitní hlavičkou může pomoci proti některým firewallům
-                    const response = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'User-Agent': 'UAP-Map-App/1.0' 
-                        }
-                    });
+    try {
+        const response = await fetch(url, {
+            headers: { 'Accept': 'application/json' }
+        });
 
                     if (!response.ok) {
                         // Pokud server vrátí 429 (Too Many Requests) nebo 403/425
