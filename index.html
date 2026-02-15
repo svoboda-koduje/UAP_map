@@ -252,8 +252,9 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 12px var(--shadow-color);
-            z-index: 4000; /* Výchozí z-index */
+            z-index: 4000;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             border: 1px solid #444;
             display: none;
             flex-direction: column;
@@ -392,15 +393,18 @@
                 left: 50% !important;
                 transform: translateX(-50%); 
                 top: 70px !important; 
-                width: 95% !important; /* Širší panel na mobilu pro lepší čitelnost */
-                max-height: 80vh; /* Aby nepřetekl přes spodní lištu prohlížeče */
-                overflow-y: auto; /* Povolit posuvník uvnitř panelu */
+                width: 92% !important; /* Širší panel na mobilu pro lepší čitelnost */
+                max-width: 400px;
+                max-height: 75vh !important; /* Aby nepřetekl přes spodní lištu prohlížeče */
                 display: none; /* Výchozí stav */
                 flex-direction: column;
+                margin: 0 auto;
+                /* Zajištění, že panel bude nad vším kromě preloaderu */
+                z-index: 5000;
             }
             /* Reset transformace při tažení, aby panel neuskočil */
             .sidebar-panel[style*="left"] {
-                transform: none;
+                transform: none !important;
             }
         }
 
@@ -900,56 +904,6 @@
 
         <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání:</label>
         <input type="text" id="comment-search" placeholder="Hledat text..." >
-    </div>
-
-        <h3 data-translate-key="filterTime">Filtry času</h3>
-        
-        <label for="season-filter" data-translate-key="filterSeason">Roční období:</label>
-        <select id="season-filter">
-            <option value="all" data-translate-key="filterSeasonAll">-- Všechna období --</option>
-            <option value="spring" data-translate-key="filterSeasonSpring">Jaro (Bře, Dub, Kvě)</option>
-            <option value="summer" data-translate-key="filterSeasonSummer">Léto (Čer, Čvc, Srp)</option>
-            <option value="autumn" data-translate-key="filterSeasonAutumn">Podzim (Zář, Říj, Lis)</option>
-            <option value="winter" data-translate-key="filterSeasonWinter">Zima (Pro, Led, Úno)</option>
-        </select>
-
-        <label for="timeofday-filter" style="margin-top: 15px;" data-translate-key="filterTimeOfDay">Denní doba:</label>
-        <select id="timeofday-filter">
-            <option value="all" data-translate-key="filterTimeOfDayAll">-- Všechny časy --</option>
-            <option value="day" data-translate-key="filterTimeOfDayDay">Den (6:00 - 18:59)</option>
-            <option value="night" data-translate-key="filterTimeOfDayNight">Noc (19:00 - 5:59)</option>
-            <option value="unknown" data-translate-key="filterTimeOfDayUnknown">Neznámý čas</option>
-        </select>
-
-        <hr style="border-color: #444; margin: 15px 0;">
-
-        <label for="year-min" data-translate-key="filterYearMin">Minimální rok: <span id="year-min-val">1900</span></label>
-        <input type="range" id="year-min" min="1900" max="2025" value="1900">
-
-        <label for="year-max" data-translate-key="filterYearMax">Maximální rok: <span id="year-max-val">2025</span></label>
-        <input type="range" id="year-max" min="1900" max="2025" value="2025">
-
-        <label for="specific-year" style="margin-top: 15px;" data-translate-key="filterYearSpecific">Zadat konkrétní rok:</label>
-        <input type="number" id="specific-year" placeholder="Např. 1997" min="1900" max="2025"
-            data-translate-key-placeholder="filterYearSpecificPlaceholder">
-
-        <h3 data-translate-key="filterData" style="margin-top: 20px;">Filtry pro konkrétní data</h3>
-        <label for="shape-filter" data-translate-key="filterShape">Tvar objektu (Shape):</label>
-        <select id="shape-filter">
-            <option value="all" data-translate-key="filterShapeOptionAll">-- Všechny tvary --</option>
-        </select>
-
-        <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání v komentářích:</label>
-        <input type="text" id="comment-search" placeholder="Hledat např. 'Nimitz', 'triangle', 'červený'"
-            data-translate-key-placeholder="filterSearchPlaceholder">
-
-        <button id="apply-filters" class="primary-button" data-translate-key="filterApply" style="margin-top: 15px;">Aplikovat manuální filtry</button>
-        <button id="reset-filters" style="background-color: #607d8b; margin-top: 5px;" data-translate-key="filterReset">Resetovat filtry</button>
-
-        <div id="info-output" style="margin-top: 20px; font-size: 0.8em; color: #aaa;" data-translate-key="infoLoading">
-            Mapa je připravena. Načítám záznamy UAP/UFO pozorování...
-        </div>
-    </div>
 
     <div id="panel-view" class="sidebar-panel">
         <button class="panel-close-btn" onclick="togglePanel('panel-view')">✕</button>
@@ -5121,72 +5075,57 @@ function makeElementDraggable(elementId) {
     const elmnt = document.getElementById(elementId);
     if (!elmnt) return;
 
-    // Najdeme hlavičku panelu, za kterou se tahá
+    // Najdeme hlavičku panelu (H3 nebo panel-header), nebo použijeme prvek samotný
     const header = elmnt.querySelector("h3") || elmnt.querySelector(".panel-header") || elmnt;
 
-    // Proměnné pro uložení stavu
     let startX = 0, startY = 0;
     let initialLeft = 0, initialTop = 0;
-    let rafId = null; // ID pro requestAnimationFrame
+    let rafId = null; // Zůstává zachováno z tvého kódu
 
-    // Listenery pro MYŠ
     header.onmousedown = dragStart;
-    // Listenery pro DOTYK (Touch)
     header.ontouchstart = dragStart;
 
     function dragStart(e) {
-        // Ignorovat interakci s tlačítky/inputy uvnitř hlavičky
+        // Ignorovat interakci pro ovládací prvky (tlačítka, inputy, selecty)
         if (e.target.closest('button') || 
             e.target.closest('.panel-close-btn') || 
             e.target.closest('input') || 
+            e.target.closest('select') ||
             e.target.closest('a') ||
             e.target.tagName === 'SUMMARY') { 
             return; 
         }
 
-        // Zjistíme, zda jde o dotyk nebo myš
         const evt = e.type === 'touchstart' ? e.touches[0] : e;
-
-        // Pokud jde o dotyk, zabráníme scrollování stránky
-        if (e.type === 'touchstart') {
-            // e.preventDefault() zde může být problematické v některých prohlížečích,
-            // ale díky CSS 'touch-action: none' na hlavičce to obvykle není nutné volat zde.
-        } else {
-            e.preventDefault();
-        }
         
-        // Dát panel do popředí
+        // Zabráníme označování textu při tahu (pouze u myši)
+        if (e.type === 'mousedown') e.preventDefault();
+
+        // Aktivace správy Z-indexu (původní funkce)
         if (typeof bringToFront === 'function') bringToFront(elmnt);
 
-        // Získání aktuální pozice prvku
         const rect = elmnt.getBoundingClientRect();
         
-        // Reset transformace (CSS centering), pokud existuje, abychom přešli na absolutní pozicování
-        // Toto je klíčové pro mobilní telefony, kde CSS používá 'transform: translateX(-50%)'
-        if (window.getComputedStyle(elmnt).transform !== 'none') {
+        // DŮLEŽITÉ PRO MOBILY: Pokud má panel CSS transform (středění), 
+        // převedeme ho na absolutní souřadnice, aby neuskočil.
+        const style = window.getComputedStyle(elmnt);
+        if (style.transform !== 'none') {
             elmnt.style.transform = 'none';
-            // Musíme přepočítat left, aby panel neuskočil ke kraji
             elmnt.style.left = rect.left + "px";
             elmnt.style.top = rect.top + "px";
-        } else {
-            // Pokud už je absolutní, jen načteme hodnoty
-            elmnt.style.left = elmnt.offsetLeft + "px";
-            elmnt.style.top = elmnt.offsetTop + "px";
         }
 
-        // Fix šířky, aby se nezměnila při změně pozicování
-        elmnt.style.width = rect.width + "px"; 
+        // Zafixování šířky a reset marginů/right/bottom pro čistý pohyb
+        elmnt.style.width = rect.width + "px";
         elmnt.style.right = 'auto';
         elmnt.style.bottom = 'auto';
         elmnt.style.margin = "0";
 
-        // Uložíme startovní souřadnice
         startX = evt.clientX;
         startY = evt.clientY;
-        initialLeft = parseInt(elmnt.style.left || 0);
-        initialTop = parseInt(elmnt.style.top || 0);
+        initialLeft = rect.left;
+        initialTop = rect.top;
 
-        // Připojíme listenery na dokument (aby se dalo táhnout i rychle mimo hlavičku)
         if (e.type === 'touchstart') {
             document.ontouchend = closeDragElement;
             document.ontouchmove = onTouchMove;
@@ -5202,42 +5141,43 @@ function makeElementDraggable(elementId) {
     }
 
     function onTouchMove(e) {
-        // U dotyku musíme volat preventDefault, aby se nehýbala celá stránka
-        if (e.cancelable) e.preventDefault(); 
+        // preventDefault u touchmove zabrání scrollování celého webu při pohybu panelu
+        if (e.cancelable) e.preventDefault();
         performDrag(e.touches[0].clientX, e.touches[0].clientY);
     }
 
     function performDrag(clientX, clientY) {
+        // Využití requestAnimationFrame z tvého kódu pro maximální výkon
         if (rafId) cancelAnimationFrame(rafId);
 
         rafId = requestAnimationFrame(() => {
-            // Výpočet rozdílu (delta)
             const deltaX = clientX - startX;
             const deltaY = clientY - startY;
 
-            // Výpočet nové pozice
             let newLeft = initialLeft + deltaX;
             let newTop = initialTop + deltaY;
 
-            // Ochrana proti zajetí pod hlavičku (Header height cca 60px)
-            const headerHeight = 60; 
-            if (newTop < headerHeight + 5) {
-                newTop = headerHeight + 5;
-            }
+            // --- OCHRANNÉ LIMITY (ZACHOVÁNY) ---
             
-            // Ochrana proti vyjetí z obrazovky doleva/doprava
+            // 1. Ochrana proti zajetí pod menu (Header height)
+            const headerHeight = 65; 
+            if (newTop < headerHeight) newTop = headerHeight;
+
+            // 2. Ochrana proti vyjetí do stran
             const maxLeft = window.innerWidth - elmnt.offsetWidth;
             if (newLeft < 0) newLeft = 0;
             if (newLeft > maxLeft) newLeft = maxLeft;
 
-            // Aplikace souřadnic
+            // 3. Ochrana proti vyjetí dolů
+            const maxTop = window.innerHeight - 50; 
+            if (newTop > maxTop) newTop = maxTop;
+
             elmnt.style.top = newTop + "px";
             elmnt.style.left = newLeft + "px";
         });
     }
 
     function closeDragElement() {
-        // Zrušení listenerů
         document.onmouseup = null;
         document.onmousemove = null;
         document.ontouchend = null;
@@ -5273,6 +5213,7 @@ function makeElementDraggable(elementId) {
             // 5. Graf (Chart modal) - volitelně, pokud chcete hýbat i grafem
             // makeElementDraggable("chart-container"); // U modalu je to složitější kvůli overlayi, raději nechat.
             makeElementDraggable("sources-panel");
+            makeElementDraggable("help-panel");
             
             // === OVLÁDÁNÍ PANELŮ (RYCHLÉ - BEZ LAGŮ) ===
             window.togglePanel = function(panelId) {
