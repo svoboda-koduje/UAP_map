@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="UAP Mapa">
 <meta name="theme-color" content="#212121">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json?v=3">
     <title>Interaktivní mapa UAP/UFO pozorování - Jaroslav Svoboda</title>
 
     <link rel="icon" type="image/png" href="favicon.png">
@@ -612,7 +612,7 @@
         /* Informační bublina */
         #info-dropdown-bottom-left {
             position: absolute;
-            bottom: 70px; /* Trochu výše nad patičkou */
+            bottom: 100px; /* Trochu výše nad patičkou */
             left: 10px;   /* ZMĚNA: Přesunuto doleva, aby nepřekáželo pravému panelu */
             z-index: 2005; /* Vyšší než panely, aby bylo klikatelné */
         }
@@ -4059,7 +4059,9 @@ if (isMobile) {
 
                 // F) Spuštění načítání hlavních dat
                 // Poznámka: setLanguage('cs') obvykle volá updateMarkers, ale pokud ne, zavoláme loadData:
-                if (typeof loadDataWithPapaParse === 'function') loadDataWithPapaParse();
+                setTimeout(() => {
+    if (typeof loadDataWithPapaParse === 'function') loadDataWithPapaParse();
+}, 1500);
 
                 // G) Listenery pro tlačítka v panelech
                 const exportBtn = document.getElementById('export-csv');
@@ -4358,75 +4360,88 @@ if (isMobile) {
 
                         let processedCount = 0;
 
-                       // Uvnitř funkce loadLiveData, nahraď celý cyklus 'for':
-                        
-                        for (let i = 0; i < recentItems.length; i++) {
-                            const item = recentItems[i];
+                       // === VYLEPŠENÁ SMYČKA PRO ZPRACOVÁNÍ LOKACÍ (Fix "recording/being") ===
+                            for (let i = 0; i < recentItems.length; i++) {
+                                const item = recentItems[i];
 
-                            // === HEURISTIKA PRO ZÍSKÁNÍ MĚSTA (VERZE 4.0 - ULTRA ČISTÁ) ===
-                            let titlePart = item.title.split('-')[0]; 
+                                // 1. Ultra rozšířený seznam Stop Words (vše malými písmeny)
+                                const invalidLocations = [
+                                    "ufo", "ufos", "uap", "uaps", "alien", "aliens", "sighting", "sightings", 
+                                    "video", "footage", "photo", "caught", "camera", "report", "reported", "reports",
+                                    "witness", "witnesses", "witnessed", "mystery", "mysterious", "light", "lights", 
+                                    "sky", "skies", "night", "day", "flying", "object", "saucer", "craft",
+                                    "recording", "recorded", "being", "this", "that", "there", "here", "what", "when", 
+                                    "experts", "study", "shows", "likelihood", "rocket", "fuel", "behind",
+                                    "clearest", "ever", "something", "powered", "off", "main", "scary",
+                                    "during", "above", "below", "near", "over", "from", "with", "about",
+                                    "calling", "new", "more", "than", "abducted", "taken", "took", "says", "saying",
+                                    "claims", "claimed", "bizarre", "strange", "files", "revealed", "woman", "man",
+                                    "captured", "watch", "look", "real", "fake", "viral", "spark", "sparks",
+                                    "residents", "left", "baffled", "police", "news", "breaking", "just",
+                                    "after", "before", "possible", "likely", "unidentified", "phenomena",
+                                    "latest", "update", "warns", "warning", "could", "would", "should",
+                                    "history", "truth", "finally", "image", "images", "shape", "shaped", 
+                                    "the", "a", "an", "and", "but", "for", "are", "were", "been", "video"
+                                ];
 
-                            let locationRaw = titlePart
-                                // 1. Odstranění klíčových slov a balastu
-                                .replace(/UFOs?/gi, "")
-                                .replace(/UAP/gi, "")
-                                .replace(/alien/gi, "")
-                                .replace(/sighting/gi, "")
-                                .replace(/video/gi, "")
-                                .replace(/footage/gi, "")
-                                .replace(/caught/gi, "")
-                                .replace(/report(ed)?/gi, "")
-                                .replace(/witness(es)?/gi, "")
-                                .replace(/mystery/gi, "")
-                                .replace(/lights/gi, "")
-                                .replace(/sky/gi, "")
-                                // 2. Odstranění frází z logů (tohle způsobovalo chyby)
-                                .replace(/Experts calling new/gi, "")
-                                .replace(/Study shows likelihood/gi, "")
-                                .replace(/More than \d+/gi, "") 
-                                .replace(/Rocket fuel behind/gi, "")
-                                .replace(/clearest ever/gi, "")
-                                .replace(/Is something/gi, "")
-                                .replace(/powered off/gi, "")
-                                // 3. Odstranění spojek a předložek
-                                .replace(/\b(in|at|near|over|from|by|with|and|the|a|an|of|is|are)\b/gi, " ")
-                                // 4. Odstranění všech čísel
-                                .replace(/[0-9]+/g, "")
-                                // 5. Odstranění samostatných písmen (zbytků jako "s Maine")
-                                .replace(/\b[a-z]\b/gi, " ")
-                                // 6. Odstranění interpunkce
-                                .replace(/[?!.,:;]/g, "")
-                                .trim();
+                                // 2. Získání čistého kandidáta na lokaci
+                                let titlePart = item.title.split('-')[0].trim(); 
+                                
+                                // Rozdělíme nadpis na jednotlivá slova pro analýzu pozice
+                                let allWords = titlePart.split(/\s+/);
+                                let locationCandidate = "";
 
-                            // Redukce mezer
-                            locationRaw = locationRaw.replace(/\s+/g, " ");
+                                // Projdeme slova a hledáme ta, která:
+                                // - Začínají velkým písmenem
+                                // - Nejsou v blacklistu
+                                // - Nejsou na úplném začátku věty (index 0), pokud je to jediné slovo
+                                for (let j = 0; j < allWords.length; j++) {
+                                    let cleanWord = allWords[j].replace(/[?!.,:;]/g, "");
+                                    let lowerWord = cleanWord.toLowerCase();
+                                    
+                                    // Kontrola: Začíná velkým? Není v blacklistu? Délka > 2?
+                                    if (/^[A-Z]/.test(cleanWord) && !invalidLocations.includes(lowerWord) && cleanWord.length > 2) {
+                                        
+                                        // Ignorujeme slovo na indexu 0, pokud po něm nenásleduje další velké písmeno 
+                                        // (ochrana proti "Is", "The", "Study", "Experts" na začátku věty)
+                                        if (j === 0 && (allWords.length > 1 && !/^[A-Z]/.test(allWords[1]))) {
+                                            continue;
+                                        }
 
-                            // Pokud je text příliš dlouhý, vezmeme jen první slovo (největší šance na stát/město)
-                            if (locationRaw.split(' ').length > 2) {
-                                locationRaw = locationRaw.split(' ')[0];
-                            }
-                            
-                            // Validace délky (méně než 3 znaky je podezřelé)
-                            if (locationRaw.length < 3) {
-                                console.log("Text neobsahuje validní lokaci, přeskakuji:", locationRaw);
-                                liveDataMarkersMap[i] = 'NOT_FOUND'; 
-                                addToArchive(item, { display_name: "Lokace nerozpoznána", lat: 0, lon: 0, address: { country_code: 'unknown' } });
+                                        locationCandidate = cleanWord;
+
+                                        // Bonus: Pokud i další slovo začíná velkým, spojíme je (např. "New", "Jersey")
+                                        if (j + 1 < allWords.length) {
+                                            let nextWord = allWords[j+1].replace(/[?!.,:;]/g, "");
+                                            if (/^[A-Z]/.test(nextWord) && !invalidLocations.includes(nextWord.toLowerCase())) {
+                                                locationCandidate += " " + nextWord;
+                                            }
+                                        }
+                                        break; // Našli jsme prvního silného kandidáta, končíme smyčku
+                                    }
+                                }
+
+                                // 4. Finální validace
+                                if (!locationCandidate || locationCandidate.length < 3) {
+                                    console.log(`LiveNews: Lokace v nadpisu "${titlePart}" nerozpoznána, přeskakuji.`);
+                                    liveDataMarkersMap[i] = 'NOT_FOUND';
+                                    addToArchive(item, { display_name: "Lokace nerozpoznána", lat: 0, lon: 0, address: { country_code: 'unknown' } });
+                                    processedCount++;
+                                    continue; 
+                                }
+
+                                if (newsStatusEl) {
+                                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationCandidate}</strong>"</span>`;
+                                }
+
+                                // 5. Bezpečná pauza pro API (Rate Limiting)
+                                await new Promise(r => setTimeout(r, 3000));
+
+                                // Voláme geokódování s očištěným kandidátem
+                                await geocodeAndAddToMap(locationCandidate, item, i);
+
                                 processedCount++;
-                                continue; 
                             }
-
-                            if (newsStatusEl) {
-                                newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationRaw}</strong>"</span>`;
-                            }
-
-                            // === ZPOMALENÍ NA 2.5 SEKUNDY ===
-                            // Nominatim vyžaduje max 1 req/sec. Dáváme 2.5s, abychom se dostali ze stavu blokace (425/429).
-                            await new Promise(r => setTimeout(r, 2500));
-
-                            await geocodeAndAddToMap(locationRaw, item, i);
-
-                            processedCount++;
-                        }
 
                         if (newsStatusEl) {
                             newsStatusEl.style.color = '#2a9f62';
@@ -4452,18 +4467,29 @@ if (isMobile) {
                     newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsErrorDownload}</div>`;
                 }
             }
-            // Robustní funkce pro přímé geokódování
+            // Robustní funkce pro přímé geokódování s ošetřením chyb
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
+                // Přidáme email parameter, jak vyžaduje Nominatim Usage Policy
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
 
                 try {
-                    const response = await fetch(url);
-
-                    if (!response.ok)
-                    if(response.status === 429 || response.status === 403) {
-                            console.warn("Nominatim API Rate Limit hit.");
+                    // Fetch s explicitní hlavičkou může pomoci proti některým firewallům
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'UAP-Map-App/1.0' 
                         }
-                    throw new Error("API error");
+                    });
+
+                    if (!response.ok) {
+                        // Pokud server vrátí 429 (Too Many Requests) nebo 403/425
+                        if (response.status === 429 || response.status === 425) {
+                            console.warn(`Nominatim API Rate Limit (${response.status}) pro: ${locationQuery}`);
+                            liveDataMarkersMap[index] = 'NOT_FOUND';
+                            return; // Ukončíme slušně
+                        }
+                        throw new Error(`API error status: ${response.status}`);
+                    }
 
                     const results = await response.json();
 
@@ -4512,19 +4538,16 @@ if (isMobile) {
                         console.log(`Nalezeno: ${locationQuery} -> ${lat}, ${lon}`);
 
                     } else {
-                        // === SCÉNÁŘ 2: LOKACE NENALEZENA (NOVÁ LOGIKA) ===
-                        console.warn(`Nenalezeno: ${locationQuery} - Ukládám do archivu bez souřadnic`);
+                        // === SCÉNÁŘ 2: LOKACE NENALEZENA ===
+                        console.warn(`Nenalezeno (prázdný výsledek): ${locationQuery}`);
                         liveDataMarkersMap[index] = 'NOT_FOUND';
-
-                        // Vytvoříme "falešný" geoResult pro archivaci, aby se data neztratila
-                        const fallbackGeoResult = {
+                        
+                        // Uložíme do archivu i bez souřadnic, ať se zpráva neztratí
+                        addToArchive(rssItem, {
                             display_name: "Lokace nezjištěna",
-                            lat: 0,
-                            lon: 0,
+                            lat: 0, lon: 0,
                             address: { country_code: 'unknown' }
-                        };
-                        // Uložíme i tak
-                        addToArchive(rssItem, fallbackGeoResult);
+                        });
                     }
                 } catch (error) {
                     console.error(`Chyba geokódování pro "${locationQuery}":`, error);
