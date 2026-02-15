@@ -4,6 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UAP Mapa">
+<meta name="theme-color" content="#212121">
+<link rel="manifest" href="manifest.json">
     <title>Interaktivní mapa UAP/UFO pozorování - Jaroslav Svoboda</title>
 
     <link rel="icon" type="image/png" href="favicon.png">
@@ -201,6 +206,25 @@
             .nav-menu.active { display: flex; }
             .nav-btn { width: 100%; text-align: left; border-bottom: 1px solid #333; }
         }
+        /* Mobilní optimalizace ovládacích prvků */
+@media (max-width: 768px) {
+    .leaflet-bar a, .leaflet-control-layers-toggle {
+        width: 44px !important; /* Standard pro dotykové body */
+        height: 44px !important;
+        line-height: 44px !important;
+    }
+    
+    .nav-btn {
+        padding: 15px 12px; /* Větší plocha pro kliknutí v menu */
+        font-size: 1em;
+    }
+
+    /* Skrytí méně důležitých prvků na malých displejích pro úsporu místa */
+    #footer-bar {
+        font-size: 0.65em;
+        padding: 5px;
+    }
+}
 
         /* === PRELOADER === */
         #preloader {
@@ -3172,7 +3196,9 @@ function loadDataWithPapaParse() {
                 else {
                     // Limit pro přepnutí na WebGL (zvyš výkon)
                     // Pokud je bodů více než 5000, použijeme GPU akceleraci
-                    const USE_WEBGL_LIMIT = 5000; 
+                    // Dynamický limit pro WebGL: Na mobilu přepínáme dříve kvůli slabému CPU
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+const USE_WEBGL_LIMIT = isMobile ? 1000 : 5000;
 
                     if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
                         // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
