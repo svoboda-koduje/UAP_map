@@ -389,11 +389,12 @@
         /* Responzivita: Na mobilu chceme panely vycentrovat */
         @media (max-width: 768px) {
             .sidebar-panel { 
-                left: 50%; 
+                left: 50% !important;
                 transform: translateX(-50%); 
-                top: 80px; 
-                width: 90%; 
-                right: auto; /* Reset right property */
+                top: 70px !important; 
+        width: 95% !important; /* Širší panel na mobilu pro lepší čitelnost */
+        max-height: 85vh; /* Aby nepřetekl přes spodní lištu prohlížeče */
+        right: auto; /* Reset right property */
             }
             /* Reset transformace při tažení, aby panel neuskočil */
             .sidebar-panel[style*="left"] {
@@ -408,6 +409,8 @@
         #archive-panel h3,
         #sources-panel h3,
         .panel-header {
+        touch-action: none; 
+    padding: 10px;
             cursor: move; /* Indikuje možnost přesunu */
             user-select: none; /* Zabrání označování textu při tahání */
             width: 100%;
@@ -5138,107 +5141,139 @@ function populateArchiveYears() {
                 statusEl.innerHTML = `<span style='color:red'>Chyba: ${err.message}</span>`;
             }
         }
-       // === FINÁLNÍ OPTIMALIZOVANÁ FUNKCE DRAG & DROP (Bez sekání) ===
-        function makeElementDraggable(elementId) {
-            const elmnt = document.getElementById(elementId);
-            if (!elmnt) return;
+       // === FINÁLNÍ OPTIMALIZOVANÁ FUNKCE DRAG & DROP (MYŠ I DOTYK) ===
+function makeElementDraggable(elementId) {
+    const elmnt = document.getElementById(elementId);
+    if (!elmnt) return;
 
-            // Najdeme hlavičku panelu, za kterou se tahá
-            const header = elmnt.querySelector("h3") || elmnt.querySelector(".panel-header") || elmnt;
-            
-            // Proměnné pro uložení stavu
-            let startX = 0, startY = 0;
-            let startLeft = 0, startTop = 0;
-            let rafId = null; // ID pro requestAnimationFrame
+    // Najdeme hlavičku panelu, za kterou se tahá
+    const header = elmnt.querySelector("h3") || elmnt.querySelector(".panel-header") || elmnt;
 
-            header.onmousedown = dragMouseDown;
+    // Proměnné pro uložení stavu
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+    let rafId = null; // ID pro requestAnimationFrame
 
-            function dragMouseDown(e) {
-                e = e || window.event;
+    // Listenery pro MYŠ
+    header.onmousedown = dragStart;
+    // Listenery pro DOTYK (Touch)
+    header.ontouchstart = dragStart;
 
-                // Ignorovat interakci s tlačítky/inputy uvnitř hlavičky
-                if (e.target.closest('button') || 
-                    e.target.closest('.panel-close-btn') || 
-                    e.target.closest('input') || 
-                    e.target.closest('a') ||
-                    e.target.tagName === 'SUMMARY') { 
-                    return; 
-                }
-
-                e.preventDefault();
-                
-                // Dát panel do popředí
-                bringToFront(elmnt);
-
-                // 1. ZÍSKAT POZICI JEN JEDNOU PŘI KLIKNUTÍ (Zabrání Layout Thrashingu)
-                // Převedeme offsety na čísla a uložíme si počáteční stav
-                const rect = elmnt.getBoundingClientRect();
-                
-                // Pokud prvek nemá nastavený top/left v CSS (je 'auto'), rect nám dá aktuální vizuální pozici
-                // Přepneme pozicování na fixed/absolute hodnoty, aby se s ním dalo hýbat
-                elmnt.style.width = rect.width + "px"; // Fix šířky, aby neuskočila
-                elmnt.style.left = elmnt.offsetLeft + "px";
-                elmnt.style.top = elmnt.offsetTop + "px";
-                // Reset right/bottom, aby se nehádaly
-                elmnt.style.right = 'auto';
-                elmnt.style.bottom = 'auto';
-                elmnt.style.margin = "0";
-
-                // Uložíme startovní souřadnice myši a prvku
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = elmnt.offsetLeft;
-                startTop = elmnt.offsetTop;
-
-                document.onmouseup = closeDragElement;
-                document.onmousemove = onMouseMove;
-            }
-
-            function onMouseMove(e) {
-                e.preventDefault();
-                
-                // Místo přímého zápisu do DOMu jen naplánujeme update
-                // Pokud už je update naplánovaný, zrušíme ho a naplánujeme novější
-                if (rafId) {
-                    cancelAnimationFrame(rafId);
-                }
-
-                rafId = requestAnimationFrame(() => {
-                    elementDrag(e);
-                });
-            }
-
-            function elementDrag(e) {
-                // Výpočet rozdílu (delta) od stisknutí
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-
-                // Výpočet nové pozice
-                let newLeft = startLeft + deltaX;
-                let newTop = startTop + deltaY;
-
-                // Ochrana proti zajetí pod hlavičku (Header height cca 60px)
-                const headerHeight = 60; 
-                if (newTop < headerHeight + 5) {
-                    newTop = headerHeight + 5;
-                }
-
-                // Aplikace souřadnic (Zápis do DOMu - pouze jednou za frame)
-                elmnt.style.top = newTop + "px";
-                elmnt.style.left = newLeft + "px";
-            }
-
-            function closeDragElement() {
-                // Zrušení listenerů
-                document.onmouseup = null;
-                document.onmousemove = null;
-                // Zrušení případného běžícího framu
-                if (rafId) {
-                    cancelAnimationFrame(rafId);
-                    rafId = null;
-                }
-            }
+    function dragStart(e) {
+        // Ignorovat interakci s tlačítky/inputy uvnitř hlavičky
+        if (e.target.closest('button') || 
+            e.target.closest('.panel-close-btn') || 
+            e.target.closest('input') || 
+            e.target.closest('a') ||
+            e.target.tagName === 'SUMMARY') { 
+            return; 
         }
+
+        // Zjistíme, zda jde o dotyk nebo myš
+        const evt = e.type === 'touchstart' ? e.touches[0] : e;
+
+        // Pokud jde o dotyk, zabráníme scrollování stránky
+        if (e.type === 'touchstart') {
+            // e.preventDefault() zde může být problematické v některých prohlížečích,
+            // ale díky CSS 'touch-action: none' na hlavičce to obvykle není nutné volat zde.
+        } else {
+            e.preventDefault();
+        }
+        
+        // Dát panel do popředí
+        if (typeof bringToFront === 'function') bringToFront(elmnt);
+
+        // Získání aktuální pozice prvku
+        const rect = elmnt.getBoundingClientRect();
+        
+        // Reset transformace (CSS centering), pokud existuje, abychom přešli na absolutní pozicování
+        // Toto je klíčové pro mobilní telefony, kde CSS používá 'transform: translateX(-50%)'
+        if (window.getComputedStyle(elmnt).transform !== 'none') {
+            elmnt.style.transform = 'none';
+            // Musíme přepočítat left, aby panel neuskočil ke kraji
+            elmnt.style.left = rect.left + "px";
+            elmnt.style.top = rect.top + "px";
+        } else {
+            // Pokud už je absolutní, jen načteme hodnoty
+            elmnt.style.left = elmnt.offsetLeft + "px";
+            elmnt.style.top = elmnt.offsetTop + "px";
+        }
+
+        // Fix šířky, aby se nezměnila při změně pozicování
+        elmnt.style.width = rect.width + "px"; 
+        elmnt.style.right = 'auto';
+        elmnt.style.bottom = 'auto';
+        elmnt.style.margin = "0";
+
+        // Uložíme startovní souřadnice
+        startX = evt.clientX;
+        startY = evt.clientY;
+        initialLeft = parseInt(elmnt.style.left || 0);
+        initialTop = parseInt(elmnt.style.top || 0);
+
+        // Připojíme listenery na dokument (aby se dalo táhnout i rychle mimo hlavičku)
+        if (e.type === 'touchstart') {
+            document.ontouchend = closeDragElement;
+            document.ontouchmove = onTouchMove;
+        } else {
+            document.onmouseup = closeDragElement;
+            document.onmousemove = onMouseMove;
+        }
+    }
+
+    function onMouseMove(e) {
+        e.preventDefault();
+        performDrag(e.clientX, e.clientY);
+    }
+
+    function onTouchMove(e) {
+        // U dotyku musíme volat preventDefault, aby se nehýbala celá stránka
+        if (e.cancelable) e.preventDefault(); 
+        performDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }
+
+    function performDrag(clientX, clientY) {
+        if (rafId) cancelAnimationFrame(rafId);
+
+        rafId = requestAnimationFrame(() => {
+            // Výpočet rozdílu (delta)
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            // Výpočet nové pozice
+            let newLeft = initialLeft + deltaX;
+            let newTop = initialTop + deltaY;
+
+            // Ochrana proti zajetí pod hlavičku (Header height cca 60px)
+            const headerHeight = 60; 
+            if (newTop < headerHeight + 5) {
+                newTop = headerHeight + 5;
+            }
+            
+            // Ochrana proti vyjetí z obrazovky doleva/doprava
+            const maxLeft = window.innerWidth - elmnt.offsetWidth;
+            if (newLeft < 0) newLeft = 0;
+            if (newLeft > maxLeft) newLeft = maxLeft;
+
+            // Aplikace souřadnic
+            elmnt.style.top = newTop + "px";
+            elmnt.style.left = newLeft + "px";
+        });
+    }
+
+    function closeDragElement() {
+        // Zrušení listenerů
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+        
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+}
 
             // Pomocná funkce pro Z-Index (aby aktivní okno bylo nahoře)
             // Udržujeme globální proměnnou pro nejvyšší index
