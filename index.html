@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="UAP Mapa">
 <meta name="theme-color" content="#212121">
@@ -193,18 +194,30 @@
             .hamburger { display: block; }
             .nav-menu {
                 display: none; /* Skryto defaultně na mobilu */
-                position: absolute;
+                position: fixed;
                 top: 60px;
                 right: 0;
                 background-color: #212121;
-                width: 250px;
+                width: 280px;
                 flex-direction: column;
                 box-shadow: -2px 5px 10px rgba(0,0,0,0.5);
-                padding: 10px;
+                padding: 10px 0;
                 border-bottom-left-radius: 8px;
+                max-height: calc(100vh - 70px); /* Maximální výška odečte hlavičku */
+                overflow-y: auto !important; /* Povolí vertikální posuvník */
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y; /* Povolí vertikální posun prstem */
+                overscroll-behavior: contain;
+                z-index: 9999;
             }
             .nav-menu.active { display: flex; }
-            .nav-btn { width: 100%; text-align: left; border-bottom: 1px solid #333; }
+            .nav-btn {
+                width: 100%;
+                text-align: left;
+                border-bottom: 1px solid #333;
+                padding: 15px 20px;
+                font-size: 1.1em;
+            }
         }
         /* Mobilní optimalizace ovládacích prvků */
 @media (max-width: 768px) {
@@ -389,23 +402,35 @@
 
         /* Responzivita: Na mobilu chceme panely vycentrovat */
         @media (max-width: 768px) {
-            .sidebar-panel { 
+            .sidebar-panel, 
+            #news-panel, 
+            #archive-panel, 
+            #sources-panel,
+            #panel-famous,
+            #panel-time,
+            #panel-data,
+            #panel-view,
+            #panel-analysis,
+            #panel-spatial,
+            #panel-timeline,
+            #help-panel { 
                 left: 50% !important;
-                transform: translateX(-50%); 
                 top: 70px !important; 
+                transform: translateX(-50%) !important; 
                 width: 92% !important; /* Širší panel na mobilu pro lepší čitelnost */
                 max-width: 400px;
-                max-height: 75vh !important; /* Aby nepřetekl přes spodní lištu prohlížeče */
-                display: none; /* Výchozí stav */
-                flex-direction: column;
-                margin: 0 auto;
-                /* Zajištění, že panel bude nad vším kromě preloaderu */
+                max-height: 80vh !important; /* Aby nepřetekl přes spodní lištu prohlížeče */
+                margin: 0 !important;
+                right: auto !important;
+                bottom: auto !important;
                 z-index: 5000;
             }
-            /* Reset transformace při tažení, aby panel neuskočil */
             .sidebar-panel[style*="left"] {
                 transform: none !important;
             }
+            .panel-close-btn {
+                padding: 10px 15px;
+                }
         }
 
         /* === DRAG & DROP STYLY === */
@@ -904,6 +929,7 @@
 
         <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání:</label>
         <input type="text" id="comment-search" placeholder="Hledat text..." >
+        </div>
 
     <div id="panel-view" class="sidebar-panel">
         <button class="panel-close-btn" onclick="togglePanel('panel-view')">✕</button>
@@ -956,7 +982,6 @@
         </button>
 
         <p id="spatial-status" style="font-size: 0.8em; color: #aaa; margin-top: 5px;"></p>
-    </div>
     </div>
 
     <div id="sources-panel" class="sidebar-panel" style="top: 360px; right: 330px; width: 220px; height: auto; bottom: auto; background-color: rgba(33, 33, 33, 0.95); border: 2px solid #b0bec5;">
@@ -4333,42 +4358,74 @@ if (isMobile) {
 
                         let processedCount = 0;
 
+                       // Uvnitř funkce loadLiveData, nahraď celý cyklus 'for':
+                        
                         for (let i = 0; i < recentItems.length; i++) {
                             const item = recentItems[i];
 
-                            // === HEURISTIKA PRO ZÍSKÁNÍ MĚSTA ===
-                            let titlePart = item.title.split('-')[0];
+                            // === HEURISTIKA PRO ZÍSKÁNÍ MĚSTA (VERZE 4.0 - ULTRA ČISTÁ) ===
+                            let titlePart = item.title.split('-')[0]; 
 
                             let locationRaw = titlePart
-                                .replace(/UFO/gi, "")
+                                // 1. Odstranění klíčových slov a balastu
+                                .replace(/UFOs?/gi, "")
+                                .replace(/UAP/gi, "")
                                 .replace(/alien/gi, "")
                                 .replace(/sighting/gi, "")
                                 .replace(/video/gi, "")
+                                .replace(/footage/gi, "")
                                 .replace(/caught/gi, "")
+                                .replace(/report(ed)?/gi, "")
+                                .replace(/witness(es)?/gi, "")
                                 .replace(/mystery/gi, "")
                                 .replace(/lights/gi, "")
                                 .replace(/sky/gi, "")
-                                .replace(/report/gi, "")
-                                .replace(/over/gi, "")
-                                .replace(/near/gi, "")
-                                .replace(/in /gi, " ")
+                                // 2. Odstranění frází z logů (tohle způsobovalo chyby)
+                                .replace(/Experts calling new/gi, "")
+                                .replace(/Study shows likelihood/gi, "")
+                                .replace(/More than \d+/gi, "") 
+                                .replace(/Rocket fuel behind/gi, "")
+                                .replace(/clearest ever/gi, "")
+                                .replace(/Is something/gi, "")
+                                .replace(/powered off/gi, "")
+                                // 3. Odstranění spojek a předložek
+                                .replace(/\b(in|at|near|over|from|by|with|and|the|a|an|of|is|are)\b/gi, " ")
+                                // 4. Odstranění všech čísel
+                                .replace(/[0-9]+/g, "")
+                                // 5. Odstranění samostatných písmen (zbytků jako "s Maine")
+                                .replace(/\b[a-z]\b/gi, " ")
+                                // 6. Odstranění interpunkce
+                                .replace(/[?!.,:;]/g, "")
                                 .trim();
 
-                            if (locationRaw.length > 30) {
-                                locationRaw = locationRaw.split(' ').slice(0, 3).join(' ');
+                            // Redukce mezer
+                            locationRaw = locationRaw.replace(/\s+/g, " ");
+
+                            // Pokud je text příliš dlouhý, vezmeme jen první slovo (největší šance na stát/město)
+                            if (locationRaw.split(' ').length > 2) {
+                                locationRaw = locationRaw.split(' ')[0];
+                            }
+                            
+                            // Validace délky (méně než 3 znaky je podezřelé)
+                            if (locationRaw.length < 3) {
+                                console.log("Text neobsahuje validní lokaci, přeskakuji:", locationRaw);
+                                liveDataMarkersMap[i] = 'NOT_FOUND'; 
+                                addToArchive(item, { display_name: "Lokace nerozpoznána", lat: 0, lon: 0, address: { country_code: 'unknown' } });
+                                processedCount++;
+                                continue; 
                             }
 
                             if (newsStatusEl) {
-                                newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "${locationRaw}"</span>`;
+                                newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationRaw}</strong>"</span>`;
                             }
 
-                            // Zpoždění proti zablokování API
-                            await new Promise(r => setTimeout(r, 1200));
+                            // === ZPOMALENÍ NA 2.5 SEKUNDY ===
+                            // Nominatim vyžaduje max 1 req/sec. Dáváme 2.5s, abychom se dostali ze stavu blokace (425/429).
+                            await new Promise(r => setTimeout(r, 2500));
 
                             await geocodeAndAddToMap(locationRaw, item, i);
 
                             processedCount++;
-                            // Zde NEAKTUALIZUJEME hlavní statusEl, aby neblikal, řešíme to v panelu News
                         }
 
                         if (newsStatusEl) {
@@ -4397,17 +4454,16 @@ if (isMobile) {
             }
             // Robustní funkce pro přímé geokódování
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
-                // Použijeme přímo Nominatim API endpoint
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
 
                 try {
-                    const response = await fetch(url, {
-                        headers: {
-                            'User-Agent': 'UAP Map App Student Project'
-                        }
-                    });
+                    const response = await fetch(url);
 
-                    if (!response.ok) throw new Error("API error");
+                    if (!response.ok)
+                    if(response.status === 429 || response.status === 403) {
+                            console.warn("Nominatim API Rate Limit hit.");
+                        }
+                    throw new Error("API error");
 
                     const results = await response.json();
 
@@ -5220,22 +5276,29 @@ function makeElementDraggable(elementId) {
                 const el = document.getElementById(panelId);
                 if (!el) return;
 
-                // Rychlá kontrola bez náročného window.getComputedStyle()
-                // Pokud má element nastaveno 'block' nebo 'flex', je vidět -> skryjeme ho.
-                // Pokud je 'none' nebo prázdné (výchozí stav z CSS je display:none), zobrazíme ho.
-                
                 if (el.style.display === 'block' || el.style.display === 'flex') {
                     el.style.display = 'none';
                 } else {
-                    // Zobrazíme panel. Většina vašich panelů funguje dobře s 'block', 
-                    // ale pro zachování flexbox vlastností (pokud jsou definovány v CSS)
-                    // je bezpečnější nastavit 'flex' nebo 'block' podle typu.
-                    // Vzhledem k vašemu CSS (sidebar-panel má flex-direction) je 'flex' ideální.
+
                     el.style.display = 'flex';
-                    
-                    bringToFront(el); // Dáme ho do popředí
-                }
+                    bringToFront(el);
                 
+                 if (window.innerWidth <= 768) {
+                        // Resetujeme veškeré manuální pozice z Drag&Drop
+                        el.style.top = '';
+                        el.style.left = '';
+                        el.style.right = '';
+                        el.style.bottom = '';
+                        el.style.margin = '';
+                        // Vycentrování pomocí transformace
+                        el.style.transform = '';
+                        
+                        // Zajistíme, že šířka nepřeteče
+                        el.style.width = '95%';
+                        el.style.maxWidth = '400px';
+                        el.style.maxHeight = '80vh'; // Aby se vešel na výšku
+                    }
+                }
                 // Speciální logika pro mobilní menu (zavřít hamburger po kliknutí)
                 const nav = document.getElementById('main-nav');
                 if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
