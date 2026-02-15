@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="UAP Mapa">
 <meta name="theme-color" content="#212121">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="manifest" href="manifest.json">
     <title>Interaktivní mapa UAP/UFO pozorování - Jaroslav Svoboda</title>
 
@@ -2484,11 +2483,22 @@ function loadDataWithPapaParse() {
         skipEmptyLines: true,
         delimiter: ',',
         quoteChar: '"',
-        worker: true,
+        worker: false,
         fastMode: true,
+        error: function(err, file, inputElem, reason) {
+            console.error("Chyba PapaParse:", err, reason);
+            infoOutput.innerText = "Chyba při načítání CSV: " + err;
+        },
 
         complete: function (results) {
             infoOutput.innerText = translations[currentLanguage].infoLoadingPapaDone;
+            const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+            
+            // Nastavení filtrů před zpracováním dat pro úsporu RAM
+            if (isMobile) {
+                document.getElementById('year-min').value = 2015; // Na mobilu jen nejnovější
+                document.getElementById('year-min-val').innerText = 2015;
+            }
 
             const FIXED_COLUMNS = {
                 datetime: 0,
