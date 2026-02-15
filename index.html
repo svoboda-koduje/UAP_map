@@ -782,10 +782,40 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     border: 2px solid white !important;
     font-weight: 900 !important;
 }
+/* === GLOBÁLNÍ INDIKÁTOR ZPRACOVÁNÍ === */
+#processing-indicator {
+    display: none; /* Defaultně skryto */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(33, 33, 33, 0.95);
+    border: 2px solid var(--primary-color);
+    padding: 20px 40px;
+    border-radius: 12px;
+    z-index: 10000; /* Musí být nad vším */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    color: var(--text-light);
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Použijeme existující animaci .ai-loader, jen ji trochu zvětšíme pro tento účel */
+#processing-indicator .ai-loader {
+    width: 24px;
+    height: 24px;
+    border-width: 4px;
+    margin-right: 10px;
+}
     </style>
 </head>
 
 <body>
+    <div id="processing-indicator">
+    <span class="ai-loader"></span>
+    <span id="processing-text">Přepočítávám mapu...</span>
+</div>
     <div id="preloader">
         <img src="intro_animation.gif" alt="Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...">
         <span data-translate-key="preloaderText">Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...</span>
@@ -1110,6 +1140,46 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </span>
     </div>
     <script>
+        // === UNIVERZÁLNÍ FUNKCE PRO ZOBRAZENÍ NAČÍTÁNÍ (LOADER) ===
+// customAction: Funkce, která se má provést (např. resetFilters, updateMarkers...)
+// customText: Text, který se má zobrazit (volitelné)
+function updateMapWithLoader(customAction = null, customText = null) {
+    const loader = document.getElementById('processing-indicator');
+    const textEl = document.getElementById('processing-text');
+    
+    // 1. Nastavení textu (pokud není zadán, použije se výchozí podle jazyka)
+    if (textEl) {
+        if (customText) {
+            textEl.innerText = customText;
+        } else {
+            textEl.innerText = (typeof currentLanguage !== 'undefined' && currentLanguage === 'cs') 
+                ? "Přepočítávám mapu..." 
+                : "Updating map...";
+        }
+    }
+    
+    // 2. Zobrazit loader
+    if (loader) loader.style.display = 'block';
+
+    // 3. Použít setTimeout, aby prohlížeč stihl vykreslit černé okno před zásekem
+    setTimeout(() => {
+        try {
+            if (customAction) {
+                customAction(); // Spustí předanou funkci (např. reset filtrů)
+            } else {
+                // Pokud není akce specifikována, spustí standardní update
+                if (typeof updateMarkers === 'function' && typeof allData !== 'undefined') {
+                    updateMarkers(allData);
+                }
+            }
+        } catch (err) {
+            console.error("Chyba během procesu s loaderem:", err);
+        } finally {
+            // 4. Skrýt loader vždy (i když dojde k chybě)
+            if (loader) loader.style.display = 'none';
+        }
+    }, 50); // 50ms zpoždění pro překreslení UI
+}
         // =========================================================================
         // === PŘEKLADOVÝ SYSTÉM ===
         // =========================================================================
@@ -2935,26 +3005,55 @@ if (isMobile) {
                     yearMaxLabel.innerText = this.value;
                 });
 
-                // 2. Přepočet mapy až po puštění prstu/myši (Event 'change')
-                // Toto zabrání zasekávání při posunu posuvníku
-                yearMinInput.addEventListener('change', () => updateMarkers(allData));
-                yearMaxInput.addEventListener('change', () => updateMarkers(allData));
+                // === NOVÁ LOGIKA PRO POSUVNÍKY S INDIKACÍ PRÁCE ===
 
-                // Ostatní filtry (Selecty reagují na změnu rovnou)
-                document.getElementById('shape-filter').addEventListener('change', () => updateMarkers(allData));
-                document.getElementById('season-filter').addEventListener('change', () => updateMarkers(allData));
-                document.getElementById('timeofday-filter').addEventListener('change', () => updateMarkers(allData));
+// 1. Okamžitá vizuální odezva čísel při tažení (Event 'input') - Zůstává stejné
+yearMinInput.addEventListener('input', function () {
+    yearMinLabel.innerText = this.value;
+});
+yearMaxInput.addEventListener('input', function () {
+    yearMaxLabel.innerText = this.value;
+});
+
+// 2. Přepočet mapy s loaderem po puštění (Event 'change') - ZMĚNA ZDE
+yearMinInput.addEventListener('change', () => {
+    updateMapWithLoader(); 
+});
+
+yearMaxInput.addEventListener('change', () => {
+    updateMapWithLoader();
+});
+
+// Aplikovat loader i na tlačítko "Aplikovat manuální filtry"
+const applyBtnNew = document.getElementById('apply-filters'); // Pozn: Ve vašem kódu už jste ho klonovali
+if (applyBtnNew) {
+    // Odstraníme staré listenery (pro jistotu, pokud by tam byly) a dáme nový
+    const clone = applyBtnNew.cloneNode(true);
+    applyBtnNew.parentNode.replaceChild(clone, applyBtnNew);
+    
+    clone.addEventListener('click', function() {
+        isSearching = false;
+        updateMapWithLoader();
+    });
+}
+
+// Aplikovat loader i na výběr tvaru (Shape) a další selecty
+document.getElementById('shape-filter').addEventListener('change', () => updateMapWithLoader());
+document.getElementById('season-filter').addEventListener('change', () => updateMapWithLoader());
+document.getElementById('timeofday-filter').addEventListener('change', () => updateMapWithLoader());
 
                 // Přepínač zobrazení (Body/Heatmapa) s vizuální indikací práce
-                document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
-                    radio.addEventListener('change', () => {
-                        document.body.style.cursor = 'wait';
-                        setTimeout(() => {
-                            updateMarkers(allData);
-                            document.body.style.cursor = 'default';
-                        }, 10);
-                    });
-                });
+                // Přepínač zobrazení (Body/Heatmapa) s animací
+document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        // Změníme text podle toho, co uživatel vybral
+        const modeText = (radio.value === 'heatmap') ? "Generuji heatmapu..." : "Vykresluji body...";
+        
+        updateMapWithLoader(() => {
+            updateMarkers(allData);
+        }, modeText);
+    });
+});
 
                 // Vyhledávání v textu (ponecháno s Debounce funkcí)
                 let commentTimeout;
@@ -3512,6 +3611,10 @@ if (isMobile) {
                 const resetBtn = document.getElementById('reset-mountains-filter');
                 const filterBtn = document.getElementById('filter-mountains-btn');
                 const statusEl = document.getElementById('spatial-status');
+                const loader = document.getElementById('processing-indicator');
+    const textEl = document.getElementById('processing-text');
+    if(textEl) textEl.innerText = "Analyzuji terén (Turf.js)...";
+    if(loader) loader.style.display = 'block';
 
                 // 1. Základní kontroly
                 if (!window.currentlyFilteredData || !mountainsGeoJSON) {
@@ -3536,7 +3639,7 @@ if (isMobile) {
                 filterBtn.disabled = true;
 
                 // 3. KRÁTKÁ PAUZA (Trik pro vykreslení spinneru před zásekem CPU)
-                await new Promise(resolve => setTimeout(resolve, 50));
+                await new Promise(resolve => setTimeout(resolve, 100));
 
                 // 4. SAMOTNÝ VÝPOČET
                 try {
@@ -3584,9 +3687,9 @@ if (isMobile) {
                     updateMarkers(filteredByMountains, true);
 
                 } catch (error) {
-                    console.error("Chyba při analýze hor:", error);
-                    if (statusEl) statusEl.innerText = "Chyba při výpočtu.";
+                    console.error("Chyba:", error);
                 } finally {
+                    if(loader) loader.style.display = 'none';
                     // 6. ÚKLID (Vždy se provede)
                     document.body.style.cursor = 'default';
                     filterBtn.disabled = false;
@@ -4155,7 +4258,11 @@ if (isMobile) {
                 filterMountainsBtn.addEventListener('click', filterPointsByMountains);
             }
             const resetMtnBtn = document.getElementById('reset-mountains-filter');
-                if (resetMtnBtn) resetMtnBtn.addEventListener('click', resetSpatialFilter);
+if (resetMtnBtn) {
+    resetMtnBtn.addEventListener('click', () => {
+        updateMapWithLoader(() => resetSpatialFilter(), "Ruším filtr hor...");
+    });
+}
 
             // =========================================================
             // === NOVÁ FUNKCE: RESETOVÁNÍ FILTRŮ ===
@@ -4564,10 +4671,14 @@ if (isMobile) {
                         const marker = L.marker([lat, lon], { icon: liveIcon })
                             .bindPopup(popupContent);
 
-                        if (typeof markerClusterGroup !== 'undefined') {
+                        // OPRAVA: Kontrola, zda mapa nebo cluster existují
+                        if (typeof markerClusterGroup !== 'undefined' && markerClusterGroup) {
                             markerClusterGroup.addLayer(marker);
-                        } else {
+                        } else if (typeof map !== 'undefined' && map) {
                             marker.addTo(map);
+                        } else {
+                            // Mapa ještě není připravena, zprávu uložíme do paměti, ale nedáme na mapu
+                            console.log("Mapa zatím není inicializována, marker pro News odložen.");
                         }
 
                         liveDataMarkersMap[index] = marker;
@@ -4617,9 +4728,12 @@ if (isMobile) {
 
             // Aktivace tlačítka
             const resetBtn = document.getElementById('reset-filters');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', resetFilters);
-            }
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        // Voláme loader a řekneme mu, ať spustí funkci resetFilters
+        updateMapWithLoader(() => resetFilters(), "Resetuji filtry...");
+    });
+}
             const liveBtn = document.getElementById('load-live-data');
             if (liveBtn) {
                 liveBtn.addEventListener('click', () => {
