@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="UAP Mapa">
 <meta name="theme-color" content="#212121">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="manifest" href="manifest.json">
     <title>Interaktivní mapa UAP/UFO pozorování - Jaroslav Svoboda</title>
 
@@ -2483,7 +2484,8 @@ function loadDataWithPapaParse() {
         skipEmptyLines: true,
         delimiter: ',',
         quoteChar: '"',
-        worker: false,
+        worker: true,
+        fastMode: true,
 
         complete: function (results) {
             infoOutput.innerText = translations[currentLanguage].infoLoadingPapaDone;
@@ -3197,8 +3199,13 @@ function loadDataWithPapaParse() {
                     // Limit pro přepnutí na WebGL (zvyš výkon)
                     // Pokud je bodů více než 5000, použijeme GPU akceleraci
                     // Dynamický limit pro WebGL: Na mobilu přepínáme dříve kvůli slabému CPU
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-const USE_WEBGL_LIMIT = isMobile ? 1000 : 5000;
+                const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+    // Na mobilu nastavíme výchozí filtr na novější data, aby se ušetřila RAM
+    document.getElementById('year-min').value = 2010;
+    document.getElementById('year-min-val').innerText = 2010;
+}
+                const USE_WEBGL_LIMIT = isMobile ? 100 : 5000;
 
                     if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
                         // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
