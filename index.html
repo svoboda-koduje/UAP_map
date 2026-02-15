@@ -2477,6 +2477,17 @@ if (typeof updateRecordBtnUI === 'function' && typeof isRecording !== 'undefined
             }
 
 function loadDataWithPapaParse() {
+    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+
+// Nastavení filtrů před zpracováním dat pro úsporu RAM
+if (isMobile) {
+    // Na mobilu nastavíme filtry, ale nenačítáme méně dat natvrdo
+    const yearMinEl = document.getElementById('year-min');
+    if(yearMinEl) {
+        yearMinEl.value = 1980; 
+        document.getElementById('year-min-val').innerText = 2015;
+    }
+}
     const infoOutput = document.getElementById('info-output');
     infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
 
