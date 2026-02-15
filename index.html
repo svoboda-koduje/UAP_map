@@ -392,9 +392,11 @@
                 left: 50% !important;
                 transform: translateX(-50%); 
                 top: 70px !important; 
-        width: 95% !important; /* Širší panel na mobilu pro lepší čitelnost */
-        max-height: 85vh; /* Aby nepřetekl přes spodní lištu prohlížeče */
-        right: auto; /* Reset right property */
+                width: 95% !important; /* Širší panel na mobilu pro lepší čitelnost */
+                max-height: 80vh; /* Aby nepřetekl přes spodní lištu prohlížeče */
+                overflow-y: auto; /* Povolit posuvník uvnitř panelu */
+                display: none; /* Výchozí stav */
+                flex-direction: column;
             }
             /* Reset transformace při tažení, aby panel neuskočil */
             .sidebar-panel[style*="left"] {
@@ -863,7 +865,7 @@
         <h3 data-translate-key="timelineTitle" style="color: #ff9800;">🎬 Přehrávač historie</h3>
 
         <div style="text-align: center; margin-bottom: 15px;">
-            <div id="timeline-display-year" style="font-size: 4em; font-weight: bold; color: var(--primary-color); text-shadow: 0 0 10px rgba(0,188,212,0.3);">1947</div>
+            <div id="timeline-display-year" style="font-size: 4em; font-weight: bold; color: var(--primary-color); text-shadow: 0 0 10px rgba(0,188,212,0.3);">1940</div>
             <div id="timeline-stats" style="font-size: 0.9em; color: #aaa;">Připraveno</div>
         </div>
 
@@ -2485,7 +2487,7 @@ if (isMobile) {
     const yearMinEl = document.getElementById('year-min');
     if(yearMinEl) {
         yearMinEl.value = 1980; 
-        document.getElementById('year-min-val').innerText = 2015;
+        document.getElementById('year-min-val').innerText = 1980;
     }
 }
     const infoOutput = document.getElementById('info-output');
@@ -3572,32 +3574,6 @@ if (isMobile) {
                     document.body.style.cursor = 'default';
                     filterBtn.disabled = false;
                 }
-            }
-
-            // Funkce pro zrušení filtru a návrat do původního stavu
-            function resetSpatialFilter() {
-                isMountainsFilterActive = false;
-                
-                const filterBtn = document.getElementById('filter-mountains-btn');
-                const resetBtn = document.getElementById('reset-mountains-filter');
-                const statusEl = document.getElementById('spatial-status');
-
-                // Reset tlačítka do původní podoby (hnědá)
-                if (filterBtn) {
-                    filterBtn.style.backgroundColor = '#795548'; 
-                    // Vrátíme text i s atributem pro překlad
-                    filterBtn.innerHTML = '<span data-translate-key="spatialFilterBtn">Filtrovat pouze v horách</span>';
-                }
-                
-                // Skrytí reset tlačítka
-                if (resetBtn) resetBtn.style.display = 'none';
-                
-                // Vymazání stavového řádku
-                if (statusEl) statusEl.innerText = "";
-
-                // Obnovit mapu s kompletními daty (resp. aplikovat běžné filtry na všechna data)
-                // Zavoláme updateMarkers s 'allData' - funkce si sama znovu načte filtry z panelů
-                updateMarkers(allData); 
             }
 
             // === NOVÁ FUNKCE PRO RESET ===
@@ -5344,7 +5320,7 @@ function makeElementDraggable(elementId) {
             // =========================================================================
 
             let timelineInterval = null;
-            let timelineCurrentYear = 1947;
+            let timelineCurrentYear = 1940;
             let isPlaying = false;
 
             // Inicializace přehrávače (Listenery)
