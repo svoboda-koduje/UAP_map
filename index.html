@@ -2914,28 +2914,49 @@ if (isMobile) {
                 const applyButton = document.getElementById('apply-filters');
                 const newApplyButton = applyButton.cloneNode(true);
                 applyButton.parentNode.replaceChild(newApplyButton, applyButton);
+
                 newApplyButton.addEventListener('click', function () {
                     isSearching = false;
                     updateMarkers(allData);
                 });
 
-                document.getElementById('year-min').addEventListener('input', () => updateMarkers(allData));
+                // === OPTIMALIZACE PRO MOBILNÍ ZAŘÍZENÍ (FIX ZASEKÁVÁNÍ) ===
+                const yearMinInput = document.getElementById('year-min');
+                const yearMaxInput = document.getElementById('year-max');
+                const yearMinLabel = document.getElementById('year-min-val');
+                const yearMaxLabel = document.getElementById('year-max-val');
+
+                // 1. Okamžitá vizuální odezva při tažení (Event 'input')
+                // Toto je velmi rychlé, mění se jen text, mapa se nepřepočítává
+                yearMinInput.addEventListener('input', function () {
+                    yearMinLabel.innerText = this.value;
+                });
+                yearMaxInput.addEventListener('input', function () {
+                    yearMaxLabel.innerText = this.value;
+                });
+
+                // 2. Přepočet mapy až po puštění prstu/myši (Event 'change')
+                // Toto zabrání zasekávání při posunu posuvníku
+                yearMinInput.addEventListener('change', () => updateMarkers(allData));
+                yearMaxInput.addEventListener('change', () => updateMarkers(allData));
+
+                // Ostatní filtry (Selecty reagují na změnu rovnou)
                 document.getElementById('shape-filter').addEventListener('change', () => updateMarkers(allData));
                 document.getElementById('season-filter').addEventListener('change', () => updateMarkers(allData));
                 document.getElementById('timeofday-filter').addEventListener('change', () => updateMarkers(allData));
-                document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        // Okamžitá vizuální zpětná vazba - změna kurzoru
-        document.body.style.cursor = 'wait';
-        
-        // setTimeout uvolní hlavní vlákno, aby prohlížeč stihl vykreslit "zaškrtnutí" tlačítka
-        setTimeout(() => {
-            updateMarkers(allData);
-            document.body.style.cursor = 'default';
-        }, 10); 
-    });
-});
 
+                // Přepínač zobrazení (Body/Heatmapa) s vizuální indikací práce
+                document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        document.body.style.cursor = 'wait';
+                        setTimeout(() => {
+                            updateMarkers(allData);
+                            document.body.style.cursor = 'default';
+                        }, 10);
+                    });
+                });
+
+                // Vyhledávání v textu (ponecháno s Debounce funkcí)
                 let commentTimeout;
                 document.getElementById('comment-search').addEventListener('input', () => {
                     clearTimeout(commentTimeout);
@@ -3214,11 +3235,8 @@ if (isMobile) {
                     // Dynamický limit pro WebGL: Na mobilu přepínáme dříve kvůli slabému CPU
                 const isMobile = /Mobi|Android/i.test(navigator.userAgent);
                 if (isMobile) {
-    // Na mobilu nastavíme výchozí filtr na novější data, aby se ušetřila RAM
-    document.getElementById('year-min').value = 2010;
-    document.getElementById('year-min-val').innerText = 2010;
 }
-                const USE_WEBGL_LIMIT = isMobile ? 100 : 5000;
+                const USE_WEBGL_LIMIT = isMobile ? 1500 : 5000;
 
                     if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
                         // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
