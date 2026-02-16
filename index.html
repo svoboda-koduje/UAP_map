@@ -814,7 +814,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 <body>
     <div id="processing-indicator">
     <span class="ai-loader"></span>
-    <span id="processing-text">Přepočítávám mapu...</span>
+    <span id="processing-text" data-translate-key="processingText">Přepočítávám mapu...</span>
 </div>
     <div id="preloader">
         <img src="intro_animation.gif" alt="Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...">
@@ -985,7 +985,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
                 <span data-translate-key="viewHeatmap">Heatmapa</span>
             </label>
         </div>
-        <p style="font-size: 0.8em; margin-bottom:0; color:#aaa;">Pro hledání země použijte lupu vpravo nahoře.</p>
+        <p style="font-size: 0.8em; margin-bottom:0; color:#aaa;" data-translate-key="viewHint">Pro hledání země použijte lupu vpravo nahoře.</p>
     </div>
 
     <div id="panel-analysis" class="sidebar-panel">
@@ -1004,7 +1004,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </div>
 
         <div id="stats-output" style="max-height: 120px; overflow-y: auto; background: #333; border: 1px solid #555; padding: 5px; margin-top: 10px; font-size: 0.8em; display: none;"></div>
-        <button id="hide-stats" style="background-color: #607d8b; margin-top: 5px; font-size: 0.8em; padding: 5px;">Skrýt statistiky</button>
+        <button id="hide-stats" style="background-color: #607d8b; margin-top: 5px; font-size: 0.8em; padding: 5px;" data-translate-key="analysisHideStatsBtn">Skrýt statistiky</button>
     </div>
 
     <div id="panel-spatial" class="sidebar-panel">
@@ -1019,7 +1019,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </button>
         
         <button id="reset-mountains-filter" class="custom-button" style="background-color: #607d8b; margin-top: 5px; display: none;">
-            ❌ Zrušit filtr hor
+         <span data-translate-key="spatialResetBtn">❌ Zrušit filtr hor</span>
         </button>
 
         <p id="spatial-status" style="font-size: 0.8em; color: #aaa; margin-top: 5px;"></p>
@@ -1146,15 +1146,14 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 function updateMapWithLoader(customAction = null, customText = null) {
     const loader = document.getElementById('processing-indicator');
     const textEl = document.getElementById('processing-text');
+    const langData = translations[currentLanguage];
     
     // 1. Nastavení textu (pokud není zadán, použije se výchozí podle jazyka)
     if (textEl) {
         if (customText) {
             textEl.innerText = customText;
         } else {
-            textEl.innerText = (typeof currentLanguage !== 'undefined' && currentLanguage === 'cs') 
-                ? "Přepočítávám mapu..." 
-                : "Updating map...";
+            textEl.innerText = langData.processingText;
         }
     }
     
@@ -1455,6 +1454,13 @@ function updateMapWithLoader(customAction = null, customText = null) {
             archiveFileError: "Chyba při čtení souboru:",
             archiveSource: "Zdroj:",
             footerVisits: "Návštěvy:",
+            viewHint: "Pro hledání země použijte lupu vpravo nahoře.",
+processingText: "Přepočítávám mapu...",
+spatialResetBtn: "❌ Zrušit filtr hor",
+spatialFilterActive: "✅ Filtr aktivní",
+archiveFileLoadingStatus: "Načítám soubor...",
+archiveFileProcessingStatus: "Zpracovávám nahraný soubor...",
+newsSourceError: "Chyba zdroje dat (RSS).",
             },
             en: {
                 menuHelp: "❓ Help",
@@ -1725,6 +1731,13 @@ function updateMapWithLoader(customAction = null, customText = null) {
             archiveFileError: "Error reading file:",
             archiveSource: "Source:",
             footerVisits: "Visits:",
+            viewHint: "To search for a country, use the magnifying glass in the top right.",
+processingText: "Recalculating map...",
+spatialResetBtn: "❌ Cancel mountain filter",
+spatialFilterActive: "✅ Filter active",
+archiveFileLoadingStatus: "Loading file...",
+archiveFileProcessingStatus: "Processing uploaded file...",
+newsSourceError: "Data source error (RSS).",
             }
         };
 
@@ -3674,7 +3687,7 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                     // Změna tlačítka na "Aktivní"
                     filterBtn.style.backgroundColor = '#2a9f62'; // Zelená
                     // Uložíme si původní text, pokud chceme, nebo rovnou změníme:
-                    filterBtn.innerHTML = '<span data-translate-key="spatialFilterBtn">✅ Filtr aktivní</span>';
+                    filterBtn.innerHTML = `<span data-translate-key="spatialFilterActive">${translations[currentLanguage].spatialFilterActive}</span>`;
                     
                     if(resetBtn) resetBtn.style.display = 'block';
 
@@ -4188,13 +4201,24 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                 
 
                 // E) Inicializace jazyka
-                const langSwitcher = document.getElementById('lang-switcher');
-                if (langSwitcher) {
-                    langSwitcher.addEventListener('click', () => {
-                        const newLang = (currentLanguage === 'cs') ? 'en' : 'cs';
-                        if (typeof setLanguage === 'function') setLanguage(newLang);
-                    });
-                }
+const langSwitcher = document.getElementById('lang-switcher');
+if (langSwitcher) {
+    langSwitcher.addEventListener('click', () => {
+        // Zjistíme, jaký jazyk má následovat
+        const newLang = (currentLanguage === 'cs') ? 'en' : 'cs';
+        
+        if (typeof setLanguage === 'function') {
+            // Použijeme vypočtenou proměnnou newLang místo 'cs'
+            setLanguage(newLang); 
+            
+            // Aktualizujeme i text loaderu podle nového jazyka
+            const loaderText = document.getElementById('processing-text');
+            if(loaderText && translations[newLang]) {
+                loaderText.innerText = translations[newLang].processingText;
+            }
+        }
+    });
+}
                 // Výchozí jazyk
                 if (typeof setLanguage === 'function') setLanguage('cs');
 
@@ -4602,7 +4626,7 @@ if (resetMtnBtn) {
                         }
 
                     } else {
-                        newsListEl.innerHTML = '<div style="color:#f44336;">Chyba zdroje dat (RSS).</div>';
+                        newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsSourceError}</div>`;
                         // Pokud selže RSS, vrátíme původní text
                         if (typeof updateMarkers === 'function') updateMarkers(window.currentlyFilteredData || allData);
                     }
@@ -5054,12 +5078,9 @@ function populateArchiveYears() {
 
                     const statusText = document.getElementById('archive-status-text');
                     const resultsContainer = document.getElementById('archive-results');
-                    const langData = translations[currentLanguage];
-        statusText.innerText = langData.archiveFileLoading;
-        resultsContainer.innerHTML = `<div style='text-align:center;'>⏳ ${langData.archiveFileProcessing}</div>`;
-                    
-                    statusText.innerText = "Načítám soubor...";
-                    resultsContainer.innerHTML = "<div style='text-align:center;'>⏳ Zpracovávám nahraný soubor...</div>";
+                    const langData = translations[currentLanguage];                    
+                    statusText.innerText = langData.archiveFileLoadingStatus;
+                    resultsContainer.innerHTML = `<div style='text-align:center;'>⏳ ${langData.archiveFileProcessingStatus}</div>`;
 
                     const reader = new FileReader();
                     
