@@ -1125,11 +1125,12 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <input type="text" id="country-filter" placeholder="kód/název" style="margin-top: 5px; width: 60%;">
             <button id="generate-country-chart" style="background-color: #e91e63; margin-top: 5px; width: 40%; padding: 5px; font-size: 0.8em;">Graf</button>
         </div>
-        <button id="generate-geo-report" class="custom-button" style="background-color: #009688; margin-top: 10px;">
+        <div id="analysis-search-status" style="font-size: 0.8em; color: #aaa; margin-top: 5px; margin-bottom: 10px; font-style: italic; min-height: 1.2em;"></div>
+        <button id="generate-geo-report" class="custom-button" style="background-color: #009688; margin-top: 5px;">
             📄 Generovat podrobnou zprávu
         </button>
 
-        <div style="display: flex; gap: 5px; margin-top: 10px;">
+        <div style="display: flex; gap: 5px; margin-top: 15px;">
             <button id="generate-stats" style="background-color: #3f51b5; width: 50%; font-size: 0.85em;">Statistiky</button>
             <button id="export-csv" style="background-color: #0681c3; width: 50%; font-size: 0.85em;">Export CSV</button>
         </div>
@@ -4103,70 +4104,172 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                         console.error("Chyba při volání Nominatim API:", err);
                     });
             }
+            // =========================================================
+            // === NOVÁ LOGIKA VYHLEDÁVÁNÍ PRO ANALÝZU (S NOMINATIM API) ===
+            // =========================================================
 
-            function generateCountryChart() {
+            // Pomocná funkce: Zjistí přesnou polohu přes API
+            async function resolveLocation(query) {
+                const statusEl = document.getElementById('analysis-search-status');
+                
+                if (!query) return null;
+
+                if (statusEl) statusEl.innerHTML = '<span class="ai-loader"></span> 🔍 Ověřuji lokaci...';
+                
+                try {
+                    // Volání Nominatim API (stejné jako používá mapa)
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&accept-language=${currentLanguage}`;
+                    
+                    const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        const result = data[0];
+                        const address = result.address || {};
+                        const countryCode = address.country_code ? address.country_code.toLowerCase() : null;
+                        
+                        // Zjistíme, zda jde o konkrétní stát (např. Nevada) nebo celou zemi
+                        const stateName = address.state; 
+                        
+                        if (statusEl) {
+                            statusEl.innerHTML = `✅ Nalezeno: <strong>${result.display_name.split(',')[0]}</strong> (${address.country || countryCode})`;
+                            statusEl.style.color = "#4caf50";
+                        }
+                        
+                        return {
+                            type: stateName ? 'region' : 'country', // Pokud API vrátí 'state', hledáme v regionu
+                            code: countryCode, // Např. 'us'
+                            state: stateName ? stateName.toLowerCase() : null, // Např. 'nevada'
+                            name: result.display_name // Celý název pro zobrazení
+                        };
+                    }
+                } catch (e) {
+                    console.error("Chyba geokódování:", e);
+                }
+
+                if (statusEl) {
+                    statusEl.innerHTML = "❌ Lokace nenalezena, zkouším fulltext...";
+                    statusEl.style.color = "#ff9800";
+                }
+                // Fallback: Pokud API selže, zkusíme hledat textově
+                return { type: 'text', name: query };
+            }
+
+            // Funkce pro filtrování dat na základě výsledku z API
+            function filterDataByLocation(data, locationInfo) {
+                if (!locationInfo) return data; // Žádný filtr
+
+                return data.filter(item => {
+                    const itemRegion = item.region_code; // kód země v datech (us, cz, gb...)
+                    // Sloučíme město a komentář pro hledání názvu státu (protože v CSV datech je stát často součástí města)
+                    const locationString = (item.city || "").toLowerCase(); 
+                    
+                    // A) Pokud hledáme celou zemi (např. "USA", "France")
+                    if (locationInfo.type === 'country') {
+                        // Speciální logika pro US/CA/AU (mají prefixy us-xx v některých datech)
+                        if (locationInfo.code === 'us') return itemRegion === 'us' || (itemRegion && itemRegion.startsWith('us-'));
+                        if (locationInfo.code === 'ca') return itemRegion === 'ca' || (itemRegion && itemRegion.startsWith('ca-'));
+                        
+                        // Jinak musí sedět kód země přesně
+                        return itemRegion === locationInfo.code;
+                    }
+
+                    // B) Pokud hledáme region/stát (např. "Nevada", "Texas")
+                    if (locationInfo.type === 'region') {
+                        // 1. Musí sedět země (aby Nevada v USA nebyla zaměněna s Nevadou ve Španělsku)
+                        const countryMatch = !locationInfo.code || (itemRegion === locationInfo.code || (itemRegion && itemRegion.startsWith(locationInfo.code)));
+                        
+                        if (countryMatch) {
+                            // 2. A musí sedět název státu v textu města
+                            // (Naše data mají formát "Las Vegas, NV" nebo "Reno, Nevada")
+                            // Hledáme buď plný název "nevada" nebo to, co API vrátilo jako stát
+                            return locationString.includes(locationInfo.state) || 
+                                   locationString.includes(locationInfo.name.split(',')[0].toLowerCase());
+                        }
+                        return false;
+                    }
+
+                    // C) Fallback textové hledání (když API nic nevrátí)
+                    return locationString.includes(locationInfo.name.toLowerCase());
+                });
+            }
+
+            // === HLAVNÍ FUNKCE PRO TLAČÍTKA (PŘEPSANÉ) ===
+
+            async function generateCountryChart() {
                 const langData = translations[currentLanguage];
-                const userInput = document.getElementById('country-filter').value.toLowerCase().trim();
+                const userInput = document.getElementById('country-filter').value.trim();
 
                 if (!userInput) {
                     alert(langData.analysisCountryPlaceholder);
                     return;
                 }
 
-                runChartGeneration(userInput, userInput);
-            }
-
-            function runChartGeneration(inputCode, displayName) {
-                const langData = translations[currentLanguage];
-
-                const targetCodeInCSV = countryNameMap[inputCode.toLowerCase()] || inputCode.toLowerCase();
-
+                // 1. Zjistíme, co uživatel hledá přes API
+                const locInfo = await resolveLocation(userInput);
+                
+                // 2. Vyfiltrujeme data podle výsledku
                 const yearMin = parseInt(document.getElementById('year-min').value);
                 const yearMax = parseInt(document.getElementById('year-max').value);
 
-                const isGeneralUS = targetCodeInCSV === 'us';
-                const isGeneralCA = targetCodeInCSV === 'ca';
-                const isGeneralAU = targetCodeInCSV === 'au';
+                const filtered = filterDataByLocation(allData, locInfo).filter(item => 
+                    item.year >= yearMin && item.year <= yearMax
+                );
 
-                const countryData = allData.filter(item => {
-                    const yearMatch = item.year >= yearMin && item.year <= yearMax;
-                    if (!yearMatch) return false;
-
-                    const itemCode = item.region_code;
-                    if (!itemCode) return false;
-
-                    if (isGeneralUS) {
-                        return itemCode === 'us' || itemCode.startsWith('us-');
-                    } else if (isGeneralCA) {
-                        return itemCode === 'ca' || itemCode.startsWith('ca-');
-                    } else if (isGeneralAU) {
-                        return itemCode === 'au' || itemCode.startsWith('au-');
-                    } else {
-                        return itemCode === targetCodeInCSV;
-                    }
-                });
-
-                if (countryData.length === 0) {
-                    alert(langData.chartNoData(displayName));
+                if (filtered.length === 0) {
+                    alert(langData.chartNoData(userInput));
                     return;
                 }
 
+                // 3. Agregace pro graf
                 const statsByYear = {};
-                for (let y = yearMin; y <= yearMax; y++) {
-                    statsByYear[y] = 0;
-                }
+                for (let y = yearMin; y <= yearMax; y++) statsByYear[y] = 0;
 
-                countryData.forEach(item => {
-                    if (statsByYear.hasOwnProperty(item.year)) {
-                        statsByYear[item.year]++;
-                    }
+                filtered.forEach(item => {
+                    if (statsByYear.hasOwnProperty(item.year)) statsByYear[item.year]++;
                 });
 
                 const labels = Object.keys(statsByYear);
                 const dataPoints = Object.values(statsByYear);
 
-                displayChart(labels, dataPoints, displayName, yearMin, yearMax);
+                // Použijeme první část názvu z API (např. "Nevada") pro nadpis
+                const displayTitle = locInfo.name ? locInfo.name.split(',')[0] : userInput;
+                displayChart(labels, dataPoints, displayTitle, yearMin, yearMax);
             }
+
+            async function generateGeoReport() {
+                const langData = translations[currentLanguage];
+                const inputVal = document.getElementById('country-filter').value.trim();
+                
+                let targetData = [];
+                let locationName = "Celý svět / World";
+
+                if (inputVal) {
+                    // 1. Zjistíme lokaci přes API
+                    const locInfo = await resolveLocation(inputVal);
+                    locationName = locInfo.name || inputVal; // Celý hezký název z API
+                    
+                    // 2. Vyfiltrujeme
+                    targetData = filterDataByLocation(allData, locInfo);
+                } else {
+                     // Pokud je pole prázdné, bereme aktuální pohled
+                     if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0) {
+                        targetData = window.currentlyFilteredData;
+                        locationName = "Aktuální výběr / Current Selection";
+                    } else {
+                        targetData = allData; 
+                    }
+                }
+
+                if (targetData.length === 0) {
+                    alert(langData.chartNoData(locationName));
+                    return;
+                }
+
+                // 3. Výpočet a render
+                const stats = analyzeStatistics(targetData);
+                renderReport(stats, locationName, targetData);
+            }          
 
             function displayChart(labels, dataPoints, countryName, yMin, yMax) {
                 const langData = translations[currentLanguage];
@@ -4280,54 +4383,7 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
 
             let reportChart = null; // Instance grafu v reportu
 
-            function generateGeoReport() {
-                const langData = translations[currentLanguage];
-                const inputVal = document.getElementById('country-filter').value.trim();
-                
-                // 1. Získání dat (stejná logika jako u grafu)
-                let targetData = [];
-                let locationName = "Celý svět / World"; // Default
-
-                if (inputVal) {
-                    locationName = inputVal;
-                    const targetCode = countryNameMap[inputVal.toLowerCase()] || inputVal.toLowerCase();
-                    
-                    // Filtrace allData podle země
-                    const isGeneralUS = targetCode === 'us';
-                    const isGeneralCA = targetCode === 'ca';
-                    const isGeneralAU = targetCode === 'au';
-
-                    targetData = allData.filter(item => {
-                        const code = item.region_code;
-                        if (!code) return false;
-                        if (isGeneralUS) return code === 'us' || code.startsWith('us-');
-                        if (isGeneralCA) return code === 'ca' || code.startsWith('ca-');
-                        if (isGeneralAU) return code === 'au' || code.startsWith('au-');
-                        return code === targetCode;
-                    });
-                } else {
-                    // Pokud není zadáno nic, použijeme aktuálně vyfiltrovaná data z mapy (viewport/filtry)
-                    // Ale pro report je lepší brát explicitní výběr, nebo varovat.
-                    // Zde použijeme "aktuálně vyfiltrovaná data" pokud existují
-                    if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0) {
-                        targetData = window.currentlyFilteredData;
-                        locationName = "Aktuální výběr / Current Selection";
-                    } else {
-                        targetData = allData; // Fallback na vše
-                    }
-                }
-
-                if (targetData.length === 0) {
-                    alert(langData.chartNoData(locationName));
-                    return;
-                }
-
-                // 2. Výpočet statistik
-                const stats = analyzeStatistics(targetData);
-
-                // 3. Vykreslení reportu
-                renderReport(stats, locationName, targetData);
-            }
+          
 
             function analyzeStatistics(data) {
                 let minYear = 3000, maxYear = 0;
