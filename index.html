@@ -31,6 +31,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
     <script src="https://unpkg.com/leaflet.glify@3.2.0/dist/glify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* Styl pro rychlý náhled WebGL bodu při najetí myší */
@@ -466,7 +467,134 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             color: var(--primary-color); /* Vizuální odezva při najetí */
         }
 
-        
+        /* === REPORT MODAL (Styl pro generované zprávy) === */
+#report-modal {
+    display: none;
+    position: fixed;
+    z-index: 6000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    overflow: auto;
+    padding-top: 20px;
+}
+
+#report-paper {
+    background-color: #fdfdfd; /* Papírově bílá */
+    color: #212121; /* Tmavý text pro čitelnost */
+    margin: 2% auto;
+    padding: 40px;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-family: 'Georgia', 'Times New Roman', serif; /* Patkové písmo pro "dokumentový" vzhled */
+    line-height: 1.6;
+    position: relative;
+}
+
+/* Tmavý režim pro report, pokud by byl preferován, ale "papír" vypadá lépe světlý. 
+   Zde necháme světlý papír pro kontrast s tmavou aplikací. */
+
+#report-header {
+    border-bottom: 2px solid #212121;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#report-title {
+    font-size: 2em;
+    font-weight: bold;
+    color: #d32f2f; /* Červená pro důležitost */
+    margin: 0;
+}
+
+#report-meta {
+    font-size: 0.9em;
+    color: #666;
+    font-family: sans-serif;
+    text-align: right;
+}
+
+.report-actions {
+    display: flex;
+    justify-content: flex-end; /* Zarovnání doprava */
+    gap: 10px;                 /* Mezera mezi tlačítky */
+    margin-bottom: 20px;       /* Odstup od nadpisu reportu */
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+}
+.report-section {
+    margin-bottom: 25px;
+}
+
+.report-highlight {
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+.report-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    font-family: sans-serif;
+}
+
+.report-stat-card {
+    background: #f0f0f0;
+    padding: 15px;
+    border-left: 4px solid #00bcd4;
+    border-radius: 0 4px 4px 0;
+}
+
+.stat-label { font-size: 0.85em; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-size: 1.4em; font-weight: bold; color: #333; }
+
+#report-chart-container {
+    margin-top: 30px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+}
+
+#close-report-btn {
+    position: static;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-weight: bold;
+    border-radius: 4px;
+}
+#download-report-img-btn {
+    background: #009688;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 0.85em;
+    transition: background 0.2s;
+}
+#download-report-img-btn:hover { background: #00796b; }
+#close-report-btn:hover { background: #d32f2f; }
+
+@media (max-width: 768px) {
+    #report-paper { width: 95%; padding: 20px; }
+    #report-title { font-size: 1.5em; }
+    .report-stat-grid { grid-template-columns: 1fr; }
+}
         /* === UI PRVKY === */
         button, .custom-button, .translate-btn {
             background-color: var(--secondary-color);
@@ -997,6 +1125,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <input type="text" id="country-filter" placeholder="kód/název" style="margin-top: 5px; width: 60%;">
             <button id="generate-country-chart" style="background-color: #e91e63; margin-top: 5px; width: 40%; padding: 5px; font-size: 0.8em;">Graf</button>
         </div>
+        <button id="generate-geo-report" class="custom-button" style="background-color: #009688; margin-top: 10px;">
+            📄 Generovat podrobnou zprávu
+        </button>
 
         <div style="display: flex; gap: 5px; margin-top: 10px;">
             <button id="generate-stats" style="background-color: #3f51b5; width: 50%; font-size: 0.85em;">Statistiky</button>
@@ -1461,6 +1592,17 @@ spatialFilterActive: "✅ Filtr aktivní",
 archiveFileLoadingStatus: "Načítám soubor...",
 archiveFileProcessingStatus: "Zpracovávám nahraný soubor...",
 newsSourceError: "Chyba zdroje dat (RSS).",
+                reportBtn: "📄 Generovat podrobnou zprávu",
+                reportTitle: (loc) => `ANALÝZA UAP: ${loc.toUpperCase()}`,
+                reportIntro: (loc, start, end, count) => `Tento dokument představuje automatickou analýzu pozorování neidentifikovaných anomálních jevů (UAP) pro oblast <strong>${loc}</strong> v časovém rozmezí let <strong>${start} až ${end}</strong>. Celkem bylo v této oblasti a období zaznamenáno <strong>${count}</strong> validních hlášení.`,
+                reportPeak: (year, count) => `Významným bodem v časové ose je rok <strong>${year}</strong>, kdy došlo k nejvyšší koncentraci hlášení (${count} případů).`,
+                reportPeakNull: "Data neukazují výrazný výkyv v konkrétním roce.",
+                reportShapes: "Z hlediska morfologie objektů převažují následující tvary:",
+                reportTime: (day, night, unknown) => `Analýza denní doby ukazuje, že <strong>${night}</strong> pozorování proběhlo v noci (19:00–05:59), zatímco <strong>${day}</strong> případů bylo hlášeno během dne. U <strong>${unknown}</strong> případů není čas přesně určen.`,
+                statTotal: "Celkem pozorování",
+                statPeakYear: "Vrcholný rok",
+                statTopShape: "Nejčastější tvar",
+                statNightTime: "Podíl nočních jevů",
             },
             en: {
                 menuHelp: "❓ Help",
@@ -1738,6 +1880,17 @@ spatialFilterActive: "✅ Filter active",
 archiveFileLoadingStatus: "Loading file...",
 archiveFileProcessingStatus: "Processing uploaded file...",
 newsSourceError: "Data source error (RSS).",
+reportBtn: "📄 Generate Detailed Report",
+                reportTitle: (loc) => `UAP ANALYSIS: ${loc.toUpperCase()}`,
+                reportIntro: (loc, start, end, count) => `This document presents an automated analysis of Unidentified Anomalous Phenomena (UAP) sightings for <strong>${loc}</strong> within the timeframe of <strong>${start} to ${end}</strong>. A total of <strong>${count}</strong> valid reports were recorded in this area and period.`,
+                reportPeak: (year, count) => `A significant point in the timeline is the year <strong>${year}</strong>, which saw the highest concentration of reports (${count} cases).`,
+                reportPeakNull: "Data shows no significant spike in any specific year.",
+                reportShapes: "Regarding object morphology, the following shapes are predominant:",
+                reportTime: (day, night, unknown) => `Time of day analysis indicates that <strong>${night}</strong> sightings occurred at night (19:00–05:59), while <strong>${day}</strong> cases were reported during the day. For <strong>${unknown}</strong> cases, the time is not precisely determined.`,
+                statTotal: "Total Sightings",
+                statPeakYear: "Peak Year",
+                statTopShape: "Top Shape",
+                statNightTime: "Nighttime Ratio",
             }
         };
 
@@ -4121,9 +4274,229 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                     alert(translations[currentLanguage].errorCSV);
                 }
             }
+            // =========================================================
+            // === GENERÁTOR REPORTŮ A ZPRÁV (AI ANALYTIK) ===
+            // =========================================================
+
+            let reportChart = null; // Instance grafu v reportu
+
+            function generateGeoReport() {
+                const langData = translations[currentLanguage];
+                const inputVal = document.getElementById('country-filter').value.trim();
+                
+                // 1. Získání dat (stejná logika jako u grafu)
+                let targetData = [];
+                let locationName = "Celý svět / World"; // Default
+
+                if (inputVal) {
+                    locationName = inputVal;
+                    const targetCode = countryNameMap[inputVal.toLowerCase()] || inputVal.toLowerCase();
+                    
+                    // Filtrace allData podle země
+                    const isGeneralUS = targetCode === 'us';
+                    const isGeneralCA = targetCode === 'ca';
+                    const isGeneralAU = targetCode === 'au';
+
+                    targetData = allData.filter(item => {
+                        const code = item.region_code;
+                        if (!code) return false;
+                        if (isGeneralUS) return code === 'us' || code.startsWith('us-');
+                        if (isGeneralCA) return code === 'ca' || code.startsWith('ca-');
+                        if (isGeneralAU) return code === 'au' || code.startsWith('au-');
+                        return code === targetCode;
+                    });
+                } else {
+                    // Pokud není zadáno nic, použijeme aktuálně vyfiltrovaná data z mapy (viewport/filtry)
+                    // Ale pro report je lepší brát explicitní výběr, nebo varovat.
+                    // Zde použijeme "aktuálně vyfiltrovaná data" pokud existují
+                    if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0) {
+                        targetData = window.currentlyFilteredData;
+                        locationName = "Aktuální výběr / Current Selection";
+                    } else {
+                        targetData = allData; // Fallback na vše
+                    }
+                }
+
+                if (targetData.length === 0) {
+                    alert(langData.chartNoData(locationName));
+                    return;
+                }
+
+                // 2. Výpočet statistik
+                const stats = analyzeStatistics(targetData);
+
+                // 3. Vykreslení reportu
+                renderReport(stats, locationName, targetData);
+            }
+
+            function analyzeStatistics(data) {
+                let minYear = 3000, maxYear = 0;
+                let years = {};
+                let shapes = {};
+                let dayCount = 0, nightCount = 0, unknownTime = 0;
+
+                data.forEach(item => {
+                    // Roky
+                    if (item.year) {
+                        if (item.year < minYear) minYear = item.year;
+                        if (item.year > maxYear) maxYear = item.year;
+                        years[item.year] = (years[item.year] || 0) + 1;
+                    }
+                    
+                    // Tvary
+                    const sh = item.shape ? item.shape.toLowerCase() : "unknown";
+                    if (sh !== "unknown" && sh.length > 2) {
+                        shapes[sh] = (shapes[sh] || 0) + 1;
+                    }
+
+                    // Čas (Den: 6-18, Noc: 19-5)
+                    if (item.hour !== null) {
+                        if (item.hour >= 6 && item.hour < 19) dayCount++;
+                        else nightCount++;
+                    } else {
+                        unknownTime++;
+                    }
+                });
+
+                // Najít peak year
+                let peakYear = null;
+                let maxCount = 0;
+                for (const [y, c] of Object.entries(years)) {
+                    if (c > maxCount) {
+                        maxCount = c;
+                        peakYear = y;
+                    }
+                }
+
+                // Top 3 tvary
+                const sortedShapes = Object.entries(shapes)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
+
+                return {
+                    count: data.length,
+                    minYear: minYear === 3000 ? "N/A" : minYear,
+                    maxYear: maxYear === 0 ? "N/A" : maxYear,
+                    years: years,
+                    peakYear: peakYear,
+                    peakCount: maxCount,
+                    topShapes: sortedShapes,
+                    time: { day: dayCount, night: nightCount, unknown: unknownTime }
+                };
+            }
+
+            function renderReport(stats, locationName, rawData) {
+                const modal = document.getElementById('report-modal');
+                const content = document.getElementById('report-content-body');
+                const statGrid = document.getElementById('report-stats-grid');
+                const langData = translations[currentLanguage];
+
+                // A) Sestavení textu (Narrative)
+                const titleEl = document.getElementById('report-title');
+                titleEl.innerText = langData.reportTitle(locationName);
+                
+                // Datum generování
+                document.getElementById('report-date').innerText = new Date().toLocaleDateString();
+
+                // Úvod
+                let html = `<p class="report-section">${langData.reportIntro(locationName, stats.minYear, stats.maxYear, stats.count)}</p>`;
+
+                // Peak
+                if (stats.peakYear) {
+                    html += `<p class="report-section">${langData.reportPeak(stats.peakYear, stats.peakCount)}</p>`;
+                }
+
+                // Tvary
+                if (stats.topShapes.length > 0) {
+                    const shapeList = stats.topShapes.map(s => `<li><strong>${s[0].toUpperCase()}</strong> (${s[1]}x)</li>`).join('');
+                    html += `<p>${langData.reportShapes}</p><ul>${shapeList}</ul>`;
+                }
+
+                // Čas
+                html += `<p class="report-section">${langData.reportTime(stats.time.day, stats.time.night, stats.time.unknown)}</p>`;
+
+                content.innerHTML = html;
+
+                // B) Sestavení mřížky statistik (Dlaždice)
+                const nightRatio = Math.round((stats.time.night / (stats.time.day + stats.time.night || 1)) * 100);
+                const topShapeStr = stats.topShapes.length > 0 ? stats.topShapes[0][0].toUpperCase() : "N/A";
+
+                statGrid.innerHTML = `
+                    <div class="report-stat-card">
+                        <div class="stat-label">${langData.statTotal}</div>
+                        <div class="stat-value">${stats.count}</div>
+                    </div>
+                    <div class="report-stat-card">
+                        <div class="stat-label">${langData.statPeakYear}</div>
+                        <div class="stat-value">${stats.peakYear}</div>
+                    </div>
+                    <div class="report-stat-card">
+                        <div class="stat-label">${langData.statTopShape}</div>
+                        <div class="stat-value">${topShapeStr}</div>
+                    </div>
+                    <div class="report-stat-card">
+                        <div class="stat-label">${langData.statNightTime}</div>
+                        <div class="stat-value">${nightRatio}%</div>
+                    </div>
+                `;
+
+                // C) Vykreslení grafu (Timeline)
+                const ctx = document.getElementById('report-chart-canvas').getContext('2d');
+                if (reportChart) reportChart.destroy();
+
+                const sortedYears = Object.keys(stats.years).sort();
+                const dataPoints = sortedYears.map(y => stats.years[y]);
+
+                reportChart = new Chart(ctx, {
+                    type: 'line', // V reportu vypadá Line chart lépe než Bar
+                    data: {
+                        labels: sortedYears,
+                        datasets: [{
+                            label: langData.chartDatasetLabel,
+                            data: dataPoints,
+                            borderColor: '#d32f2f',
+                            backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 2,
+                            fill: true,
+                            tension: 0.3 // Hladká křivka
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Timeline of Activity' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                // Zobrazení modalu
+                modal.style.display = 'block';
+            }
+
+            // Listener pro tlačítko generování
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('generate-geo-report');
+                if (btn) btn.addEventListener('click', generateGeoReport);
+
+                const closeBtn = document.getElementById('close-report-btn');
+                if (closeBtn) closeBtn.addEventListener('click', () => {
+                    document.getElementById('report-modal').style.display = 'none';
+                });
+                
+                // Zavření klikem mimo papír
+                const modal = document.getElementById('report-modal');
+                window.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+            });
 
             // =========================================================================
-            // === 1. POČITADLO NÁVŠTĚV (NOVÁ SLUŽBA + ZÁLOŽNÍ ŘEŠENÍ) ===
+            // === POČITADLO NÁVŠTĚV (NOVÁ SLUŽBA + ZÁLOŽNÍ ŘEŠENÍ) ===
             // =========================================================================
             function initVisitorCounter() {
                 const counterElement = document.getElementById('visit-counter');
@@ -5772,6 +6145,84 @@ function updateRecordBtnUI(recording) {
         btn.style.backgroundColor = "#e91e63"; // Původní barva
     }
 }
+// Funkce pro stažení reportu jako obrázku (PNG)
+            function downloadReportAsImage() {
+                const reportElement = document.getElementById("report-paper");
+                const btn = document.getElementById("download-report-img-btn");
+                
+                // Změna textu tlačítka pro indikaci práce
+                const originalText = btn.innerText;
+                btn.innerText = "⏳ Generuji obrázek...";
+                btn.disabled = true;
+
+                // Použití html2canvas
+                html2canvas(reportElement, {
+                    scale: 2, // Vyšší rozlišení pro lepší čitelnost
+                    useCORS: true, // Povolit načítání externích obrázků (pokud by tam byly)
+                    backgroundColor: "#fdfdfd" // Barva pozadí 'papíru'
+                }).then(canvas => {
+                    // Vytvoření odkazu pro stažení
+                    const link = document.createElement('a');
+                    link.download = 'UAP_Analyza_Report_' + new Date().toISOString().slice(0,10) + '.png';
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+
+                    // Vrácení tlačítka do původního stavu
+                    btn.innerText = "✅ Staženo";
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }, 2000);
+                }).catch(err => {
+                    console.error("Chyba při generování reportu:", err);
+                    alert("Nepodařilo se vytvořit obrázek reportu.");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+            }
+
+            // Registrace listeneru (vložte toto do DOMContentLoaded bloku nebo spusťte hned, pokud je element v DOM)
+            document.addEventListener('DOMContentLoaded', () => {
+                const downloadBtn = document.getElementById('download-report-img-btn');
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', downloadReportAsImage);
+                }
+            });
 </script>
+<div id="report-modal">
+        <div id="report-paper">
+            <div class="report-actions" data-html2canvas-ignore="true">
+                <button id="download-report-img-btn">💾 Stáhnout jako obrázek</button>
+                <button id="close-report-btn">ZAVŘÍT / CLOSE</button>
+            </div>
+            
+            <div id="report-header">
+                <div>
+                    <h2 id="report-title">ANALÝZA UAP AKTIVITY</h2>
+                    <div style="color: #555; margin-top: 5px; font-style: italic;">
+                        Generated by UAP Interactive Map
+                    </div>
+                </div>
+                <div id="report-meta">
+                    <div id="report-date">Datum: ...</div>
+                    <div id="report-ref">REF: AUTO-GEN-001</div>
+                </div>
+            </div>
+
+            <div id="report-content-body">
+                </div>
+
+            <div class="report-stat-grid" id="report-stats-grid">
+                </div>
+
+            <div id="report-chart-container">
+                <canvas id="report-chart-canvas"></canvas>
+            </div>
+            
+            <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 0.8em; color: #888; text-align: center;">
+                Tento dokument je automaticky generovaný na základě dostupných historických dat. Nemusí reflektovat kompletní realitu všech pozorování. Zdroje dat: NUFORC, GEIPAN, Záře.
+            </div>
+        </div>
+    </div>
 </body>
 </html>
