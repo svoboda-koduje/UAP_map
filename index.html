@@ -684,12 +684,13 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         #chart-modal {
             display: none;
             position: fixed;
-            z-index: 2000;
+            z-index: 9000;
             left: 0; top: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            padding-top: 50px;
+            background-color: rgba(0,0,0,0.85);
+            padding-top: 100px;
             overflow: auto;
+            backdrop-filter: blur(3px);
         }
         #chart-container {
             background-color: #fefefe;
@@ -4196,14 +4197,21 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
 
             // === HLAVNÍ FUNKCE PRO TLAČÍTKA (PŘEPSANÉ) ===
 
-            async function generateCountryChart() {
-                const langData = translations[currentLanguage];
-                const userInput = document.getElementById('country-filter').value.trim();
+           async function generateCountryChart() {
+    const langData = translations[currentLanguage];
+    const userInput = document.getElementById('country-filter').value.trim();
+    const btn = document.getElementById('generate-country-chart'); // Reference na tlačítko
 
-                if (!userInput) {
-                    alert(langData.analysisCountryPlaceholder);
-                    return;
-                }
+    if (!userInput) {
+        alert(langData.analysisCountryPlaceholder);
+        return;
+    }
+                const originalBtnText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "⏳..."; 
+    btn.style.opacity = "0.7";
+
+    try {
 
                 // 1. Zjistíme, co uživatel hledá přes API
                 const locInfo = await resolveLocation(userInput);
@@ -4235,7 +4243,16 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                 // Použijeme první část názvu z API (např. "Nevada") pro nadpis
                 const displayTitle = locInfo.name ? locInfo.name.split(',')[0] : userInput;
                 displayChart(labels, dataPoints, displayTitle, yearMin, yearMax);
-            }
+            } catch (error) {
+        console.error("Chyba při generování grafu:", error);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = originalBtnText;
+            btn.style.opacity = "1";
+        }
+    }
+}
 
             async function generateGeoReport() {
                 const langData = translations[currentLanguage];
@@ -4657,18 +4674,83 @@ if (langSwitcher) {
     if (typeof loadDataWithPapaParse === 'function') loadDataWithPapaParse();
 }, 1500);
 
-                // G) Listenery pro tlačítka v panelech
+                // --- NOVÉ OVLÁDÁNÍ ANALYTICKÉHO PANELU ---
+                
+                // 1. Export CSV (beze změny)
                 const exportBtn = document.getElementById('export-csv');
                 if (exportBtn) exportBtn.addEventListener('click', exportFilteredToCSV);
 
+                // 2. Statistiky (beze změny)
                 const statsBtn = document.getElementById('generate-stats');
                 if (statsBtn) statsBtn.addEventListener('click', generateStatistics);
 
                 const hideStatsBtn = document.getElementById('hide-stats');
                 if (hideStatsBtn) hideStatsBtn.addEventListener('click', hideStatistics);
 
+                // 3. VYHLEDÁVACÍ POLE (Zoom na Enter)
+                const countryInput = document.getElementById('country-filter');
+                if (countryInput) {
+                    // Odstraníme staré listenery (klonováním)
+                    const newInput = countryInput.cloneNode(true);
+                    countryInput.parentNode.replaceChild(newInput, countryInput);
+                    
+                    newInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); 
+        const query = this.value.trim();
+        
+        if (query) {
+            // Použijeme osvědčenou logiku tlačítka:
+            // 1. Najít lokaci a zazoomovat tam
+            searchLocationAndZoom(query).then(() => {
+                // 2. Počkat chvilku na dokončení animace mapy (500ms)
+                // 3. Vygenerovat graf z toho, co je aktuálně vidět na mapě
+                setTimeout(generateChartFromView, 500); 
+            });
+        }
+    }
+});
+                }
+
+                // 4. TLAČÍTKO GRAF (Použije data z mapy)
                 const generateChartBtn = document.getElementById('generate-country-chart');
-                if (generateChartBtn) generateChartBtn.addEventListener('click', generateCountryChart);
+                if (generateChartBtn) {
+                    const newChartBtn = generateChartBtn.cloneNode(true);
+                    generateChartBtn.parentNode.replaceChild(newChartBtn, generateChartBtn);
+
+                    newChartBtn.addEventListener('click', () => {
+                        // Pokud je v poli text, zkusíme nejprve zazoomovat, pak graf
+                        const query = document.getElementById('country-filter').value.trim();
+                        // Pokud uživatel zadal nový text a ještě nedal Enter
+                        if (query && window.currentAnalysisName !== query.split(',')[0]) {
+                             searchLocationAndZoom(query).then(() => {
+                                 // Počkáme na dokončení zoomu a pak graf
+                                 setTimeout(generateChartFromView, 500); 
+                             });
+                        } else {
+                            // Jinak graf rovnou z toho, co vidíme
+                            generateChartFromView();
+                        }
+                    });
+                }
+
+                // 5. TLAČÍTKO REPORT (Použije data z mapy)
+                const reportBtn = document.getElementById('generate-geo-report');
+                if (reportBtn) {
+                    const newReportBtn = reportBtn.cloneNode(true);
+                    reportBtn.parentNode.replaceChild(newReportBtn, reportBtn);
+
+                    newReportBtn.addEventListener('click', () => {
+                        const query = document.getElementById('country-filter').value.trim();
+                        if (query && window.currentAnalysisName !== query.split(',')[0]) {
+                             searchLocationAndZoom(query).then(() => {
+                                 setTimeout(generateReportFromView, 500);
+                             });
+                        } else {
+                            generateReportFromView();
+                        }
+                    });
+                }
 
                 const closeModalBtn = document.getElementById('chart-modal-close');
                 if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
@@ -6200,6 +6282,115 @@ function updateRecordBtnUI(recording) {
         btn.innerHTML = langData.timelineRecord || "🔴 REC";
         btn.style.backgroundColor = "#e91e63"; // Původní barva
     }
+}
+// =========================================================================
+// === NOVÁ LOGIKA ANALÝZY: ZOOM & VIEWPORT (NOMINATIM) ===
+// =========================================================================
+
+// Globální proměnná pro uložení názvu vyhledané oblasti
+window.currentAnalysisName = "";
+
+// 1. Funkce: Najde oblast přes Nominatim a zazoomuje mapu (FitBounds)
+async function searchLocationAndZoom(query) {
+    const statusEl = document.getElementById('analysis-search-status');
+    if (!query) return;
+
+    if (statusEl) {
+        statusEl.innerHTML = '<span class="ai-loader"></span> 🔍 Hledám oblast a zaměřuji mapu...';
+        statusEl.style.color = '#ffeb3b';
+    }
+
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=${currentLanguage}`;
+        const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const result = data[0];
+            
+            // Nominatim vrací [minLat, maxLat, minLon, maxLon]
+            const bbox = result.boundingbox;
+            const southWest = [parseFloat(bbox[0]), parseFloat(bbox[2])];
+            const northEast = [parseFloat(bbox[1]), parseFloat(bbox[3])];
+            const bounds = [southWest, northEast];
+
+            // AKCE: Zazoomovat mapu na oblast
+            map.fitBounds(bounds);
+
+            if (statusEl) {
+                statusEl.innerHTML = `✅ Oblast nalezena: <strong>${result.display_name.split(',')[0]}</strong>`;
+                statusEl.style.color = "#4caf50";
+            }
+            
+            // Uložíme název pro graf/report
+            window.currentAnalysisName = result.display_name.split(',')[0]; 
+
+        } else {
+            if (statusEl) {
+                statusEl.innerHTML = "❌ Oblast nenalezena. Zkuste jiný název.";
+                statusEl.style.color = "#f44336";
+            }
+        }
+    } catch (e) {
+        console.error("Chyba zoomování:", e);
+        if (statusEl) statusEl.innerHTML = "❌ Chyba spojení.";
+    }
+}
+
+// 2. Funkce: Získá data POUZE z toho, co je vidět na mapě
+function getDataInCurrentView() {
+    // Získáme aktuální hranice mapy
+    const bounds = map.getBounds();
+    
+    // Vezmeme data (respektujeme časový filtr, pokud existuje)
+    const sourceData = window.currentlyFilteredData || allData;
+
+    // Vyfiltrujeme jen body uvnitř obrazovky
+    const visibleData = sourceData.filter(item => {
+        if (!item.lat || !item.lon) return false;
+        return bounds.contains([item.lat, item.lon]);
+    });
+
+    console.log(`Analýza viewportu: Nalezeno ${visibleData.length} bodů.`);
+    return visibleData;
+}
+
+// 3. Wrapper pro generování Grafu z pohledu
+function generateChartFromView() {
+    const data = getDataInCurrentView();
+    const langData = translations[currentLanguage];
+    
+    if (data.length === 0) {
+        alert("V aktuálním výřezu mapy nejsou žádná data pro graf.");
+        return;
+    }
+
+    const yearMin = document.getElementById('year-min').value;
+    const yearMax = document.getElementById('year-max').value;
+    const titleName = window.currentAnalysisName || "Aktuální oblast mapy";
+
+    // Agregace
+    const statsByYear = {};
+    for (let y = parseInt(yearMin); y <= parseInt(yearMax); y++) statsByYear[y] = 0;
+
+    data.forEach(item => {
+        if (statsByYear.hasOwnProperty(item.year)) statsByYear[item.year]++;
+    });
+
+    displayChart(Object.keys(statsByYear), Object.values(statsByYear), titleName, yearMin, yearMax);
+}
+
+// 4. Wrapper pro generování Reportu z pohledu
+function generateReportFromView() {
+    const data = getDataInCurrentView();
+    if (data.length === 0) {
+        alert("V aktuálním výřezu mapy nejsou žádná data pro report.");
+        return;
+    }
+    
+    const titleName = window.currentAnalysisName || "Aktuální oblast mapy";
+    const stats = analyzeStatistics(data);
+    renderReport(stats, titleName, data);
 }
 // Funkce pro stažení reportu jako obrázku (PNG)
             function downloadReportAsImage() {
