@@ -2708,16 +2708,10 @@ if (typeof updateRecordBtnUI === 'function' && typeof isRecording !== 'undefined
 
 function loadDataWithPapaParse() {
     const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
-
-// Nastavení filtrů před zpracováním dat pro úsporu RAM
-if (isMobile) {
-    // Na mobilu nastavíme filtry, ale nenačítáme méně dat natvrdo
-    const yearMinEl = document.getElementById('year-min');
-    if(yearMinEl) {
-        yearMinEl.value = 1980; 
-        document.getElementById('year-min-val').innerText = 1980;
+    if (isMobile) {
+        const yearMinEl = document.getElementById('year-min');
+        if (yearMinEl) { yearMinEl.value = 1980; document.getElementById('year-min-val').innerText = 1980; }
     }
-}
     const infoOutput = document.getElementById('info-output');
     infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
 
@@ -2728,126 +2722,113 @@ if (isMobile) {
         delimiter: ',',
         quoteChar: '"',
         worker: false,
-
         complete: function (results) {
             infoOutput.innerText = translations[currentLanguage].infoLoadingPapaDone;
 
-            const FIXED_COLUMNS = {
-                datetime: 0,
-                city: 1,
-                state: 2,
-                country: 3,
-                shape: 4
-            };
+            const FIXED_COLUMNS = { datetime: 0, city: 1, state: 2, country: 3, shape: 4 };
+            const usStates = new Set(['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy', 'dc', 'pr']);
 
-            // Oprava pro Polsko
-            if (!countryNameMap['polska']) {
-                countryNameMap['polska'] = 'pl';
-            }
+            // Rozšířená mapa pro čištění dat
+            if (typeof countryNameMap === 'undefined') window.countryNameMap = {};
+            const cleaningMap = {
+                'new zealand': 'nz', 'nz': 'nz', 'zealand': 'nz', // Fix pro NZ
+                'poland': 'pl', 'polska': 'pl',
+                'germany': 'de', 'deutschland': 'de', 
+                'great britain': 'gb', 'uk': 'gb', 'england': 'gb', 'uk/england': 'gb', 'united kingdom': 'gb',
+                'czech republic': 'cz', 'ceska republika': 'cz', 'czechia': 'cz',
+                'france': 'fr', 'italy': 'it', 'spain': 'es', 
+                'australia': 'au', 'russia': 'ru', 'china': 'cn', 'japan': 'jp', 'brazil': 'br', 
+                'argentina': 'ar', 'mexico': 'mx', 'canada': 'ca', 'india': 'in',
+                'south africa': 'za', 'puerto rico': 'pr', 'netherlands': 'nl',
+                'belgium': 'be', 'switzerland': 'ch', 'austria': 'at', 'usa': 'us', 'united states': 'us'
+            };
+            Object.assign(countryNameMap, cleaningMap);
 
             const dataRows = results.data.slice(1);
 
             let processedData = dataRows.map(columns => {
-                // Musíme mít alespoň 11 sloupců (do indexu 10)
                 if (!columns || columns.length < 11) return null;
 
-                // --- KLÍČOVÁ OPRAVA: PEVNÉ INDEXY ---
-                // Teď už nehádáme konec řádku, ale jdeme na jisto:
                 let lat = parseFloat(columns[9]);
                 let lon = parseFloat(columns[10]);
-                // Archive ID je vždy v 12. sloupci (index 11)
                 let archive_id = columns[11] ? columns[11].trim() : "";
 
-                // Speciální logika pro dělení souřadnic stem (pokud jsou ve formátu např. 5012 / 1412)
-                if (Math.abs(lat) > 90 && Math.abs(lon) > 180) {
-                    lat = lat / 100;
-                    lon = lon / 100;
-                }
+                if (Math.abs(lat) > 90 && Math.abs(lon) > 180) { lat = lat / 100; lon = lon / 100; }
+                if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
 
-                // Validace souřadnic (pokud nejsou validní, bod ignorujeme)
-                if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
-                    return null;
-                }
-
-                // --- ZPRACOVÁNÍ KOMENTÁŘE ---
-                // Komentář je na indexu 7. Pokud by se náhodou v CSV rozdělil do více polí, 
-                // spojíme vše od indexu 7 až do indexu 9 (kde začíná latitude).
-                const comment = (columns[7] || "").trim();
-
-                // --- ROBUSTNÍ PARSOVÁNÍ DATUMU (Pro filtry Období/Čas) ---
                 let datetimeStr = (columns[FIXED_COLUMNS.datetime] || 'Neznámé').replace(/"/g, '').trim();
                 let year = null, month = null, hour = null;
-                
+
                 try {
                     const parts = datetimeStr.split('/');
                     if (parts.length >= 3) {
                         month = parseInt(parts[0]);
                         const yearAndTime = parts[2].split(' ');
                         year = parseInt(yearAndTime[0]);
-
-                        if (yearAndTime.length > 1 && yearAndTime[1].includes(':')) {
-                            const timeParts = yearAndTime[1].split(':');
-                            hour = parseInt(timeParts[0]);
-                        }
-                        
-                        // Validace roku
+                        if (yearAndTime.length > 1 && yearAndTime[1].includes(':')) hour = parseInt(yearAndTime[1].split(':')[0]);
                         if (isNaN(year) || year <= 1900 || year > 2026) return null;
-                    } else {
-                        return null;
-                    }
+                    } else return null;
                 } catch (e) { return null; }
 
-                // --- LOGIKA PRO TVARY A MĚSTA ---
                 const shape = (columns[FIXED_COLUMNS.shape] || 'unknown').trim().toLowerCase();
                 const city_part = (columns[FIXED_COLUMNS.city] || '').trim();
                 const raw_state = (columns[FIXED_COLUMNS.state] || '').trim().toLowerCase();
-                const raw_country = (columns[FIXED_COLUMNS.country] || '').trim().toLowerCase();
-                const raw_city_part_lc = city_part.toLowerCase();
+                let raw_country = (columns[FIXED_COLUMNS.country] || '').trim().toLowerCase();
+                const comment = (columns[7] || "").trim().replace(/&#44;/g, ',').replace(/&amp;/g, '&');
 
-                // --- POKROČILÉ MAPOVÁNÍ ZEMĚ (Včetně hledání v závorkách) ---
-                let canonicalCode = countryNameMap[raw_state] || countryNameMap[raw_country];
+                // === OPRAVA: Extrakce země z textu ===
+                let extractedCountry = raw_country;
 
-                if (!canonicalCode && raw_city_part_lc.includes('(')) {
-                    const match = raw_city_part_lc.match(/\(([^)]+)\)/);
-                    if (match && match[1]) {
-                        const parts = match[1].split('/');
-                        for (const part of parts) {
-                            if (countryNameMap[part.trim()]) {
-                                canonicalCode = countryNameMap[part.trim()];
-                                break;
-                            }
-                        }
+                if (!extractedCountry || extractedCountry === '') {
+                    const lowerCity = city_part.toLowerCase();
+                    
+                    // 1. Hledáme v závorce: "City (Country)"
+                    const matchParens = city_part.match(/\(([^)]+)\)$/);
+                    if (matchParens && matchParens[1]) {
+                        const candidate = matchParens[1].toLowerCase().trim();
+                        if (cleaningMap[candidate]) extractedCountry = cleaningMap[candidate];
+                        else if (candidate.includes('poland')) extractedCountry = 'pl';
+                        else if (candidate.includes('zealand')) extractedCountry = 'nz';
+                    } 
+                    
+                    // 2. Hledáme na konci textu (pro případy "Auckland New Zealand" bez závorek)
+                    if (!extractedCountry) {
+                         for (const [name, code] of Object.entries(cleaningMap)) {
+                             if (lowerCity.endsWith(name) || lowerCity.includes(name)) {
+                                 extractedCountry = code;
+                                 break;
+                             }
+                         }
                     }
                 }
 
-                if (!canonicalCode && raw_country) {
-                    canonicalCode = raw_country;
-                }
+                // Normalizace na kód
+                let finalCountryCode = cleaningMap[extractedCountry] || extractedCountry;
 
-                // --- VRÁCENÍ KOMPLETNÍHO OBJEKTU ---
+                // Fallback pro USA státy
+                if ((!finalCountryCode || finalCountryCode === '') && usStates.has(raw_state)) {
+                    finalCountryCode = 'us';
+                }
+                
+                // Záchranná brzda pro USA
+                if (finalCountryCode === 'usa' || finalCountryCode === 'united states') finalCountryCode = 'us';
+
                 const dataObject = {
                     dt: datetimeStr,
                     lat: lat,
                     lon: lon,
                     shape: shape,
                     city: [city_part, raw_state, raw_country].filter(Boolean).join(', '),
-                    comment: comment.replace(/&#44;/g, ',').replace(/&amp;/g, '&'),
-                    region_code: canonicalCode || '',
+                    comment: comment,
+                    country: finalCountryCode, // Zde teď bude správně 'nz', 'pl' atd.
+                    state: raw_state,
                     year: year,
                     month: month,
                     hour: hour,
                     archive_id: archive_id
                 };
 
-                // === NOVÉ: Pokud má řádek archive_id, uložíme si jeho souřadnice do indexu ===
-                if (archive_id) {
-                    archiveIdLookup[archive_id] = {
-                        lat: lat,
-                        lon: lon,
-                        city: dataObject.city // Uložíme i název města z CSV
-                    };
-                }
-                // =============================================================================
+                if (archive_id) archiveIdLookup[archive_id] = { lat: lat, lon: lon, city: dataObject.city };
 
                 return dataObject;
 
@@ -2862,7 +2843,7 @@ if (isMobile) {
 
             infoOutput.innerText = translations[currentLanguage].infoLoadingPapaSuccess(allData.length);
             initializeMap();
-            
+
             const preloader = document.getElementById('preloader');
             if (preloader) {
                 preloader.style.opacity = '0';
@@ -4109,184 +4090,216 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
             // === NOVÁ LOGIKA VYHLEDÁVÁNÍ PRO ANALÝZU (S NOMINATIM API) ===
             // =========================================================
 
-            // Pomocná funkce: Zjistí přesnou polohu přes API
-            async function resolveLocation(query) {
-                const statusEl = document.getElementById('analysis-search-status');
-                
-                if (!query) return null;
+            // === POMOCNÉ FUNKCE PRO HLEDÁNÍ (ZOOM a DATA) ===
 
-                if (statusEl) statusEl.innerHTML = '<span class="ai-loader"></span> 🔍 Ověřuji lokaci...';
-                
-                try {
-                    // Volání Nominatim API (stejné jako používá mapa)
-                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&accept-language=${currentLanguage}`;
-                    
-                    const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
-                    const data = await response.json();
-
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        const address = result.address || {};
-                        const countryCode = address.country_code ? address.country_code.toLowerCase() : null;
-                        
-                        // Zjistíme, zda jde o konkrétní stát (např. Nevada) nebo celou zemi
-                        const stateName = address.state; 
-                        
-                        if (statusEl) {
-                            statusEl.innerHTML = `✅ Nalezeno: <strong>${result.display_name.split(',')[0]}</strong> (${address.country || countryCode})`;
-                            statusEl.style.color = "#4caf50";
-                        }
-                        
-                        return {
-                            type: stateName ? 'region' : 'country', // Pokud API vrátí 'state', hledáme v regionu
-                            code: countryCode, // Např. 'us'
-                            state: stateName ? stateName.toLowerCase() : null, // Např. 'nevada'
-                            name: result.display_name // Celý název pro zobrazení
-                        };
-                    }
-                } catch (e) {
-                    console.error("Chyba geokódování:", e);
-                }
-
-                if (statusEl) {
-                    statusEl.innerHTML = "❌ Lokace nenalezena, zkouším fulltext...";
-                    statusEl.style.color = "#ff9800";
-                }
-                // Fallback: Pokud API selže, zkusíme hledat textově
-                return { type: 'text', name: query };
-            }
-
-            // Funkce pro filtrování dat na základě výsledku z API
-            function filterDataByLocation(data, locationInfo) {
-                if (!locationInfo) return data; // Žádný filtr
-
-                return data.filter(item => {
-                    const itemRegion = item.region_code; // kód země v datech (us, cz, gb...)
-                    // Sloučíme město a komentář pro hledání názvu státu (protože v CSV datech je stát často součástí města)
-                    const locationString = (item.city || "").toLowerCase(); 
-                    
-                    // A) Pokud hledáme celou zemi (např. "USA", "France")
-                    if (locationInfo.type === 'country') {
-                        // Speciální logika pro US/CA/AU (mají prefixy us-xx v některých datech)
-                        if (locationInfo.code === 'us') return itemRegion === 'us' || (itemRegion && itemRegion.startsWith('us-'));
-                        if (locationInfo.code === 'ca') return itemRegion === 'ca' || (itemRegion && itemRegion.startsWith('ca-'));
-                        
-                        // Jinak musí sedět kód země přesně
-                        return itemRegion === locationInfo.code;
-                    }
-
-                    // B) Pokud hledáme region/stát (např. "Nevada", "Texas")
-                    if (locationInfo.type === 'region') {
-                        // 1. Musí sedět země (aby Nevada v USA nebyla zaměněna s Nevadou ve Španělsku)
-                        const countryMatch = !locationInfo.code || (itemRegion === locationInfo.code || (itemRegion && itemRegion.startsWith(locationInfo.code)));
-                        
-                        if (countryMatch) {
-                            // 2. A musí sedět název státu v textu města
-                            // (Naše data mají formát "Las Vegas, NV" nebo "Reno, Nevada")
-                            // Hledáme buď plný název "nevada" nebo to, co API vrátilo jako stát
-                            return locationString.includes(locationInfo.state) || 
-                                   locationString.includes(locationInfo.name.split(',')[0].toLowerCase());
-                        }
-                        return false;
-                    }
-
-                    // C) Fallback textové hledání (když API nic nevrátí)
-                    return locationString.includes(locationInfo.name.toLowerCase());
-                });
-            }
-
-            // === HLAVNÍ FUNKCE PRO TLAČÍTKA (PŘEPSANÉ) ===
-
-           async function generateCountryChart() {
-    const langData = translations[currentLanguage];
-    const userInput = document.getElementById('country-filter').value.trim();
-    const btn = document.getElementById('generate-country-chart'); // Reference na tlačítko
-
-    if (!userInput) {
-        alert(langData.analysisCountryPlaceholder);
-        return;
+// A) Zjistí lokaci a stáhne PŘESNÉ HRANICE (GeoJSON)
+async function resolveLocation(query) {
+    const statusEl = document.getElementById('analysis-search-status');
+    if (!query) return null;
+    if (statusEl) { 
+        statusEl.innerHTML = '<span class="ai-loader"></span> ⏳ Stahuji hranice území...'; 
+        statusEl.style.color = '#ffeb3b'; 
     }
-                const originalBtnText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = "⏳..."; 
-    btn.style.opacity = "0.7";
-
+    
     try {
+        // ZMĚNA: Přidáno &polygon_geojson=1 a polygon_threshold=0.01 (pro zjednodušení příliš složitých hranic)
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&polygon_geojson=1&polygon_threshold=0.005&accept-language=${currentLanguage}`;
+        
+        const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
+        const data = await response.json();
 
-                // 1. Zjistíme, co uživatel hledá přes API
-                const locInfo = await resolveLocation(userInput);
-                
-                // 2. Vyfiltrujeme data podle výsledku
-                const yearMin = parseInt(document.getElementById('year-min').value);
-                const yearMax = parseInt(document.getElementById('year-max').value);
+        if (data && data.length > 0) {
+            const result = data[0];
+            const countryCode = result.address && result.address.country_code ? result.address.country_code.toLowerCase() : null;
+            // Nominatim vrací bbox jako stringy, převedeme na čísla
+            const bbox = result.boundingbox ? result.boundingbox.map(parseFloat) : null;
+            
+            // Získáme GeoJSON (přesné hranice)
+            const geojson = result.geojson;
 
-                const filtered = filterDataByLocation(allData, locInfo).filter(item => 
-                    item.year >= yearMin && item.year <= yearMax
-                );
-
-                if (filtered.length === 0) {
-                    alert(langData.chartNoData(userInput));
-                    return;
-                }
-
-                // 3. Agregace pro graf
-                const statsByYear = {};
-                for (let y = yearMin; y <= yearMax; y++) statsByYear[y] = 0;
-
-                filtered.forEach(item => {
-                    if (statsByYear.hasOwnProperty(item.year)) statsByYear[item.year]++;
-                });
-
-                const labels = Object.keys(statsByYear);
-                const dataPoints = Object.values(statsByYear);
-
-                // Použijeme první část názvu z API (např. "Nevada") pro nadpis
-                const displayTitle = locInfo.name ? locInfo.name.split(',')[0] : userInput;
-                displayChart(labels, dataPoints, displayTitle, yearMin, yearMax);
-            } catch (error) {
-        console.error("Chyba při generování grafu:", error);
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerText = originalBtnText;
-            btn.style.opacity = "1";
+            if (statusEl) {
+                statusEl.innerHTML = `✅ Zaměřeno: <strong>${result.display_name.split(',')[0]}</strong>`;
+                statusEl.style.color = "#4caf50";
+            }
+            return { found: true, code: countryCode, name: result.display_name, bbox: bbox, geojson: geojson };
         }
+    } catch (e) { console.error(e); }
+
+    if (statusEl) { statusEl.innerHTML = "❌ Území nenalezeno."; statusEl.style.color = "#ff9800"; }
+    return { found: false, name: query };
+}
+
+// B) Pouze zazoomuje mapu (Volá se při ENTER)
+async function searchLocationAndZoom(query) {
+    const locInfo = await resolveLocation(query);
+    if (locInfo && locInfo.found && locInfo.bbox && map) {
+        // Nominatim vrací [minLat, maxLat, minLon, maxLon] -> Leaflet chce [SouthWest, NorthEast]
+        const southWest = [locInfo.bbox[0], locInfo.bbox[2]];
+        const northEast = [locInfo.bbox[1], locInfo.bbox[3]];
+        map.fitBounds([southWest, northEast], { padding: [20, 20], maxZoom: 8 });
     }
 }
 
-            async function generateGeoReport() {
-                const langData = translations[currentLanguage];
-                const inputVal = document.getElementById('country-filter').value.trim();
+// C) Připraví vyfiltrovaná data pro Graf/Report (Volá se při kliknutí na tlačítka)
+// === PROFESIONÁLNÍ GEOPROSTOROVÝ FILTR (POINT IN POLYGON) ===
+async function getFilteredDataForAnalysis(query) {
+    // 1. Získáme informace o lokaci včetně přesných hranic (GeoJSON)
+    const locInfo = await resolveLocation(query);
+    
+    const bbox = (locInfo && locInfo.found && locInfo.bbox) ? locInfo.bbox : null;
+    const geoShape = (locInfo && locInfo.found && locInfo.geojson) ? locInfo.geojson : null;
+    const fallbackText = query.toLowerCase();
+
+    // Načteme nastavení filtrů (čas, rok)
+    const yearMin = parseInt(document.getElementById('year-min').value);
+    const yearMax = parseInt(document.getElementById('year-max').value);
+
+    // Pokud nemáme ani obdélník, musíme spoléhat na text (fallback)
+    if (!bbox) {
+        const textFiltered = allData.filter(item => {
+             if (item.year < yearMin || item.year > yearMax) return false;
+             return (item.city || "").toLowerCase().includes(fallbackText);
+        });
+        return { data: textFiltered, name: query };
+    }
+
+    // === KROK A: RYCHLÁ ELIMINACE (BOUNDING BOX) ===
+    // Nejprve vybereme body, které jsou v "obdélníku" kolem státu.
+    // To zredukuje 300 000 bodů na např. 5 000, což už lze zpracovat detailně.
+    // bbox z Nominatim je: [minLat, maxLat, minLon, maxLon]
+    const [minLat, maxLat, minLon, maxLon] = bbox;
+
+    let candidates = allData.filter(item => {
+        // Filtr času
+        if (item.year < yearMin || item.year > yearMax) return false;
+        // Filtr souřadnic (hrubý obdélník)
+        if (item.lat && item.lon) {
+            return (item.lat >= minLat && item.lat <= maxLat &&
+                    item.lon >= minLon && item.lon <= maxLon);
+        }
+        return false;
+    });
+
+    console.log(`Krok A (Obdélník): Nalezeno ${candidates.length} kandidátů.`);
+
+    // === KROK B: PŘESNÁ ANALÝZA (POINT IN POLYGON) ===
+    // Pokud máme přesný tvar (GeoJSON) a máme knihovnu Turf, provedeme detailní řez.
+    let finalData = [];
+    
+    if (geoShape && typeof turf !== 'undefined') {
+        // Převedeme shape na Turf Feature
+        // Nominatim vrací geometrii, Turf potřebuje Feature
+        const searchPolygon = {
+            type: "Feature",
+            properties: {},
+            geometry: geoShape
+        };
+
+        // Projdeme kandidáty a zjistíme, zda leží přesně uvnitř hranic
+        finalData = candidates.filter(item => {
+            // Turf očekává [lon, lat] !!!
+            const pt = turf.point([item.lon, item.lat]);
+            
+            // Funkce booleanPointInPolygon vrací true/false
+            // Zvládá i MultiPolygon (ostrovy, jako má NZ)
+            return turf.booleanPointInPolygon(pt, searchPolygon);
+        });
+        
+        console.log(`Krok B (Přesné hranice): Nalezeno ${finalData.length} bodů.`);
+    } else {
+        // Pokud nemáme přesný tvar (nebo chybí Turf), vrátíme alespoň ten obdélník
+        finalData = candidates;
+    }
+
+    // Aktualizace UI - pokud jsme našli hodně bodů, zazoomujeme mapu
+    if (map && bbox) {
+         // Leaflet chce [SouthWest, NorthEast] -> [minLat, minLon], [maxLat, maxLon]
+         map.fitBounds([[minLat, minLon], [maxLat, maxLon]]);
+    }
+
+    return { 
+        data: finalData, 
+        name: (locInfo && locInfo.name) ? locInfo.name.split(',')[0] : query 
+    };
+}
+            
+
+            // === HLAVNÍ FUNKCE PRO TLAČÍTKA (PŘEPSANÉ) ===
+
+// === 3. FUNKCE PRO GRAF A REPORT ===
+
+async function generateCountryChart() {
+    const userInput = document.getElementById('country-filter').value.trim();
+    const btn = document.getElementById('generate-country-chart');
+    if (!userInput) { alert(translations[currentLanguage].analysisCountryPlaceholder); return; }
+
+    btn.disabled = true; btn.innerText = "⏳..."; 
+
+    try {
+        const result = await getFilteredDataForAnalysis(userInput); // Získá data
+        
+        if (result.data.length === 0) {
+            alert(translations[currentLanguage].chartNoData(userInput));
+            return;
+        }
+
+        // Uložíme si výsledek pro případ, že uživatel pak klikne na Report
+        window.currentAnalysisName = result.name;
+        window.currentlyFilteredData = result.data;
+
+        // Generujeme graf
+        const statsByYear = {};
+        const yMin = parseInt(document.getElementById('year-min').value);
+        const yMax = parseInt(document.getElementById('year-max').value);
+        for (let y = yMin; y <= yMax; y++) statsByYear[y] = 0;
+
+        result.data.forEach(item => {
+            if (statsByYear.hasOwnProperty(item.year)) statsByYear[item.year]++;
+        });
+
+        displayChart(Object.keys(statsByYear), Object.values(statsByYear), result.name, yMin, yMax);
+
+    } catch (err) { console.error(err); } 
+    finally { btn.disabled = false; btn.innerText = "Graf"; }
+}
+
+async function generateGeoReport() {
+    const userInput = document.getElementById('country-filter').value.trim();
+    
+    let targetData = [];
+    let locationName = "";
+
+    // Pokud uživatel nic nezadal, ale máme data z mapy/předchozího grafu
+    if (!userInput && window.currentlyFilteredData && window.currentlyFilteredData.length > 0) {
+         targetData = window.currentlyFilteredData;
+         locationName = window.currentAnalysisName || "Výběr";
+    } 
+    // Pokud uživatel zadal text
+    else if (userInput) {
+        // Pokud je text stejný jako minule, použijeme cache
+        if (window.currentAnalysisName && window.currentAnalysisName.toLowerCase().includes(userInput.toLowerCase())) {
+             targetData = window.currentlyFilteredData;
+             locationName = window.currentAnalysisName;
+        } else {
+             // Jinak načteme nová data
+             const result = await getFilteredDataForAnalysis(userInput);
+             targetData = result.data;
+             locationName = result.name;
+        }
+    } else {
+        alert("Zadejte zemi pro analýzu nebo vygenerujte graf.");
+        return;
+    }
+
+    if (targetData.length === 0) {
+        alert("Žádná data pro report.");
+        return;
+    }
+
+    const stats = analyzeStatistics(targetData);
+    renderReport(stats, locationName, targetData);
+}
                 
-                let targetData = [];
-                let locationName = "Celý svět / World";
-
-                if (inputVal) {
-                    // 1. Zjistíme lokaci přes API
-                    const locInfo = await resolveLocation(inputVal);
-                    locationName = locInfo.name || inputVal; // Celý hezký název z API
-                    
-                    // 2. Vyfiltrujeme
-                    targetData = filterDataByLocation(allData, locInfo);
-                } else {
-                     // Pokud je pole prázdné, bereme aktuální pohled
-                     if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0) {
-                        targetData = window.currentlyFilteredData;
-                        locationName = "Aktuální výběr / Current Selection";
-                    } else {
-                        targetData = allData; 
-                    }
-                }
-
-                if (targetData.length === 0) {
-                    alert(langData.chartNoData(locationName));
-                    return;
-                }
-
-                // 3. Výpočet a render
-                const stats = analyzeStatistics(targetData);
-                renderReport(stats, locationName, targetData);
-            }          
 
             function displayChart(labels, dataPoints, countryName, yMin, yMax) {
                 const langData = translations[currentLanguage];
@@ -4688,69 +4701,37 @@ if (langSwitcher) {
                 if (hideStatsBtn) hideStatsBtn.addEventListener('click', hideStatistics);
 
                 // 3. VYHLEDÁVACÍ POLE (Zoom na Enter)
-                const countryInput = document.getElementById('country-filter');
-                if (countryInput) {
-                    // Odstraníme staré listenery (klonováním)
-                    const newInput = countryInput.cloneNode(true);
-                    countryInput.parentNode.replaceChild(newInput, countryInput);
-                    
-                    newInput.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); 
-        const query = this.value.trim();
-        
-        if (query) {
-            // Použijeme osvědčenou logiku tlačítka:
-            // 1. Najít lokaci a zazoomovat tam
-            searchLocationAndZoom(query).then(() => {
-                // 2. Počkat chvilku na dokončení animace mapy (500ms)
-                // 3. Vygenerovat graf z toho, co je aktuálně vidět na mapě
-                setTimeout(generateChartFromView, 500); 
-            });
-        }
-    }
-});
-                }
+                // --- OPRAVENÉ OVLÁDÁNÍ (Enter = Zoom, Tlačítka = Akce) ---
 
-                // 4. TLAČÍTKO GRAF (Použije data z mapy)
-                const generateChartBtn = document.getElementById('generate-country-chart');
-                if (generateChartBtn) {
-                    const newChartBtn = generateChartBtn.cloneNode(true);
-                    generateChartBtn.parentNode.replaceChild(newChartBtn, generateChartBtn);
+            // 1. Input: Enter pouze zoomuje mapu
+            const countryInput = document.getElementById('country-filter');
+            if (countryInput) {
+                const newInput = countryInput.cloneNode(true);
+                countryInput.parentNode.replaceChild(newInput, countryInput);
+                newInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        const query = this.value.trim();
+                        if (query) searchLocationAndZoom(query);
+                    }
+                });
+            }
 
-                    newChartBtn.addEventListener('click', () => {
-                        // Pokud je v poli text, zkusíme nejprve zazoomovat, pak graf
-                        const query = document.getElementById('country-filter').value.trim();
-                        // Pokud uživatel zadal nový text a ještě nedal Enter
-                        if (query && window.currentAnalysisName !== query.split(',')[0]) {
-                             searchLocationAndZoom(query).then(() => {
-                                 // Počkáme na dokončení zoomu a pak graf
-                                 setTimeout(generateChartFromView, 500); 
-                             });
-                        } else {
-                            // Jinak graf rovnou z toho, co vidíme
-                            generateChartFromView();
-                        }
-                    });
-                }
+            // 2. Tlačítko Graf: Generuje graf a statistiky
+            const chartBtn = document.getElementById('generate-country-chart');
+            if (chartBtn) {
+                const newBtn = chartBtn.cloneNode(true);
+                chartBtn.parentNode.replaceChild(newBtn, chartBtn);
+                newBtn.addEventListener('click', generateCountryChart);
+            }
 
-                // 5. TLAČÍTKO REPORT (Použije data z mapy)
-                const reportBtn = document.getElementById('generate-geo-report');
-                if (reportBtn) {
-                    const newReportBtn = reportBtn.cloneNode(true);
-                    reportBtn.parentNode.replaceChild(newReportBtn, reportBtn);
-
-                    newReportBtn.addEventListener('click', () => {
-                        const query = document.getElementById('country-filter').value.trim();
-                        if (query && window.currentAnalysisName !== query.split(',')[0]) {
-                             searchLocationAndZoom(query).then(() => {
-                                 setTimeout(generateReportFromView, 500);
-                             });
-                        } else {
-                            generateReportFromView();
-                        }
-                    });
-                }
+            // 3. Tlačítko Report: Generuje report (ne graf)
+            const reportBtnEl = document.getElementById('generate-geo-report');
+            if (reportBtnEl) {
+                const newRepBtn = reportBtnEl.cloneNode(true);
+                reportBtnEl.parentNode.replaceChild(newRepBtn, reportBtnEl);
+                newRepBtn.addEventListener('click', generateGeoReport);
+            }                
 
                 const closeModalBtn = document.getElementById('chart-modal-close');
                 if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
@@ -6292,8 +6273,13 @@ window.currentAnalysisName = "";
 
 // 1. Funkce: Najde oblast přes Nominatim a zazoomuje mapu (FitBounds)
 async function searchLocationAndZoom(query) {
-    const statusEl = document.getElementById('analysis-search-status');
-    if (!query) return;
+    const locInfo = await resolveLocation(query);
+    if (locInfo && locInfo.found && locInfo.bbox && map) {
+        const southWest = [locInfo.bbox[0], locInfo.bbox[2]];
+        const northEast = [locInfo.bbox[1], locInfo.bbox[3]];
+        map.fitBounds([southWest, northEast], { padding: [20, 20], maxZoom: 8 });
+    }
+
 
     if (statusEl) {
         statusEl.innerHTML = '<span class="ai-loader"></span> 🔍 Hledám oblast a zaměřuji mapu...';
