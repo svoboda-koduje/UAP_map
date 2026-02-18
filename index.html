@@ -101,10 +101,11 @@
             background-color: #212121;
             box-shadow: 0 2px 10px var(--shadow-color);
             display: flex;
-            align-items: center;
-            justify-content: space-between;
             flex-wrap: wrap;
-            padding: 5px 30px 5px 15px;
+            align-items: center;
+            align-content: center;
+            justify-content: flex-start;
+            padding: 5px 10px;
             color: var(--text-light);
         }
 
@@ -131,6 +132,11 @@
         .header-brand {
             display: flex;
             align-items: center;
+            margin-right: 10px; /* Odstup od prvního tlačítka */
+            padding-top: 5px;   /* Aby logo lícovalo s textem tlačítek */
+            padding-bottom: 5px;
+            flex-shrink: 0;
+            height: 50px;
         }
 
         /* Navigační menu */
@@ -140,16 +146,67 @@
             list-style: none;
             margin: 0;
             padding: 0;
+            align-items: center;
         }
+       /* Pouze pro desktop/tablet (širší než mobil) */
+        @media (min-width: 901px) {
+            .nav-menu {
+                /* === HLAVNÍ ZMĚNA DESIGNU: DISPLAY CONTENTS === */
+                /* Toto způsobí, že UL kontejner "zmizí" z layoutu a tlačítka (LI) 
+                   se stanou přímými "dětmi" #headeru. Díky tomu se mohou řadit 
+                   hned za logo a zalomovat se pod něj. */
+                display: contents; 
+            }
+
+            /* Jemnější styl tlačítek pro hustší zobrazení */
+            .nav-btn {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid #444;
+                padding: 6px 12px;      /* Optimalizovaný padding */
+                font-size: 0.85em;      
+                white-space: nowrap;    
+                flex-grow: 0;           
+                height: 34px;           /* Fixní výška pro zarovnání */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .nav-btn:hover {
+                background-color: #333;
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
+
+            /* Zajistíme, aby LI prvky měly správné chování v "contents" režimu */
+            .nav-menu li {
+                display: block; 
+                margin: 4px 3px; /* Malý odstup pro případ zalomení řádků */
+            }
+
+            /* Přepínač jazyka (poslední v seznamu) */
+            #lang-switcher {
+                margin-left: auto; /* Pokud je místo, odtlačí se doprava, jinak se zařadí */
+                background-color: var(--primary-color);
+                color: #212121;
+                border: none;
+                height: 34px; 
+            }
+            
+            /* Třída pro JS posouvání již není potřeba pro tento typ layoutu, 
+               protože tlačítka se zalomí a jsou všechna vidět. */
+        }
+          
 
         .nav-menu li {
             position: relative;
         }
 
         .nav-btn {
-            background: transparent;
+            /* Změna: Jemné pozadí a rámeček pro vzhled "tlačítka" */
+            background-color: rgba(255, 255, 255, 0.05); 
+            border: 1px solid #444; 
             color: #ccc;
-            border: 1px solid transparent;
             padding: 8px 12px;
             cursor: pointer;
             font-size: 0.9em;
@@ -157,12 +214,15 @@
             transition: all 0.2s;
             text-decoration: none;
             display: block;
+            white-space: nowrap; /* Text tlačítka se nebude lámat */
         }
-
+        
+        /* Styl při najetí myší nebo aktivaci */
         .nav-btn:hover, .nav-btn.active {
             background-color: #333;
             color: var(--primary-color);
-            border-color: #444;
+            border-color: var(--primary-color); /* Zvýraznění rámečku barvou */
+            box-shadow: 0 0 5px rgba(0, 188, 212, 0.3); /* Jemná záře */
         }
 
         /* Dropdown (pokud by byl potřeba, zatím inline) */
@@ -948,6 +1008,14 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     border-width: 4px;
     margin-right: 10px;
 }
+@keyframes panelFadeIn {
+            from { opacity: 0; margin-top: -10px; }
+            to { opacity: 1; margin-top: 0; }
+        }
+
+        .panel-opening {
+            animation: panelFadeIn 0.2s ease-out forwards;
+        }
     </style>
 </head>
 
@@ -1133,12 +1201,28 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <button class="panel-close-btn" onclick="togglePanel('panel-analysis')">✕</button>
         <h3 data-translate-key="analysisTitle" style="color: #03a9f4;">📊 Analýza a export</h3>
         
-        <label for="country-filter" style="font-size: 0.85em;" data-translate-key="analysisCountryLabel">Země:</label>
+        <label style="font-size: 0.85em; color: #aaa;">Rychlý výběr oblasti:</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 10px;">
+             <button onclick="filterByArea('world')" style="width: 100%; font-size: 0.85em; background: #607d8b; padding: 6px;">🌍 Celý svět</button>
+            
+            <button onclick="filterByArea('na')" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🌎 S. Amerika</button>
+            <button onclick="filterByArea('eu')" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">Evropa</button>
+            
+            <button onclick="filterByArea('sa')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🌎 J. Amerika</button>
+            <button onclick="filterByArea('as')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🏯 Asie</button>
+            <button onclick="filterByArea('au')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🦘 Austrálie/Oceánie</button>
+
+            <button onclick="filterByArea('af')" style="flex: 1 0 48%; font-size: 0.8em; background: #333; padding: 5px;">🐘 Afrika</button>
+            <button onclick="filterByArea('an')" style="flex: 1 0 48%; font-size: 0.8em; background: #333; padding: 5px;">❄️ Antarktida</button>
+        </div>
+        <label for="country-filter" style="font-size: 0.85em;" data-translate-key="analysisCountryLabel">Země (nebo konkrétní místo):</label>
         <div style="display: flex; gap: 5px;">
-            <input type="text" id="country-filter" placeholder="kód/název" style="margin-top: 5px; width: 60%;">
+            <input type="text" id="country-filter" placeholder="kód/název (např. cz, Poland)" style="margin-top: 5px; width: 60%;">
             <button id="generate-country-chart" style="background-color: #e91e63; margin-top: 5px; width: 40%; padding: 5px; font-size: 0.8em;">Graf</button>
         </div>
+        
         <div id="analysis-search-status" style="font-size: 0.8em; color: #aaa; margin-top: 5px; margin-bottom: 10px; font-style: italic; min-height: 1.2em;"></div>
+        
         <button id="generate-geo-report" class="custom-button" style="background-color: #009688; margin-top: 5px;">
             📄 Generovat podrobnou zprávu
         </button>
@@ -2564,8 +2648,96 @@ if (typeof updateRecordBtnUI === 'function' && typeof isRecording !== 'undefined
             "wi": "wi", "wv": "wv", "wy": "wy", "yakutsk": "yakutsk", "yaroslavl": "yaroslavl", "yk": "yk",
             "zabailkal'ye": "zabailkal'ye", "zaporizhia": "zaporizhia"
         };
+        // === DEFINICE KONTINENTŮ PRO RYCHLÝ FILTR ===
+            window.continentMap = {
+                // Evropa
+                'eu': ['cz', 'sk', 'pl', 'de', 'at', 'hu', 'fr', 'gb', 'it', 'es', 'pt', 'be', 'nl', 'dk', 'no', 'se', 'fi', 'ie', 'ch', 'gr', 'ro', 'bg', 'hr', 'si', 'rs', 'ba', 'mk', 'al', 'ua', 'by', 'lt', 'lv', 'ee', 'is', 'mt', 'cy', 'ru'], // Rusko řadíme často k Evropě v kontextu UAP dat
+                
+                // Severní Amerika (včetně Střední Ameriky pro zjednodušení)
+                'na': ['us', 'ca', 'mx', 'gt', 'bz', 'sv', 'hn', 'ni', 'cr', 'pa', 'cu', 'do', 'ht', 'jm', 'bs', 'pr', 
+                       // + Všechny kódy států USA a provincií Kanady (pro jistotu)
+                       'us-ak', 'us-al', 'us-ar', 'us-az', 'us-ca', 'us-co', 'us-ct', 'us-dc', 'us-de', 'us-fl', 'us-ga', 'us-hi', 'us-ia', 'us-id', 'us-il', 'us-in', 'us-ks', 'us-ky', 'us-la', 'us-ma', 'us-md', 'us-me', 'us-mi', 'us-mn', 'us-mo', 'us-ms', 'us-mt', 'us-nc', 'us-nd', 'us-ne', 'us-nh', 'us-nj', 'us-nm', 'us-nv', 'us-ny', 'us-oh', 'us-ok', 'us-or', 'us-pa', 'us-ri', 'us-sc', 'us-sd', 'us-tn', 'us-tx', 'us-ut', 'us-va', 'us-vt', 'us-wa', 'us-wi', 'us-wv', 'us-wy', 
+                       'ca-ab', 'ca-bc', 'ca-mb', 'ca-nb', 'ca-nl', 'ca-ns', 'ca-nt', 'ca-nu', 'ca-on', 'ca-pe', 'ca-qc', 'ca-sk', 'ca-yt'],
+                
+                // Jižní Amerika
+                'sa': ['br', 'ar', 'cl', 'co', 'pe', 've', 'ec', 'bo', 'py', 'uy', 'gy', 'sr', 'gf'],
+                
+                // Asie (Včetně Blízkého východu a části Ruska, pokud by data měla geo souřadnice v Asii)
+                'as': ['cn', 'jp', 'in', 'kr', 'id', 'th', 'vn', 'ph', 'my', 'sg', 'tw', 'hk', 'pk', 'bd', 'lk', 'np', 'bt', 'mn', 'kz', 'uz', 'tm', 'kg', 'tj', 'af', 'ir', 'iq', 'sa', 'ae', 'qa', 'kw', 'om', 'ye', 'sy', 'lb', 'jo', 'il', 'tr', 'ru'], 
+                
+                // Austrálie a Oceánie
+                'au': ['au', 'nz', 'pg', 'fj', 'sb', 'vu', 'nc', 'pf', 'gu', 
+                       // + Australské státy
+                       'au-nsw', 'au-vic', 'au-qld', 'au-wa', 'au-sa', 'au-tas', 'au-nt', 'au-act'],
+                
+                // Afrika
+                'af': ['za', 'eg', 'ng', 'ke', 'et', 'tz', 'gh', 'ma', 'dz', 'tn', 'ly', 'sd', 'ug', 'zw', 'mz', 'ao', 'na', 'bw', 'zm', 'sn', 'ci', 'cm', 'mg'],
+                
+                // Antarktida (velmi vzácné, ale pro úplnost)
+                'an': ['aq']
+            };
+
+           window.filterByArea = function(areaCode) {
+                // 1. Vymazání ručního vyhledávání (aby nerušilo filtr kontinentu)
+                const countryInput = document.getElementById('country-filter');
+                if (countryInput) {
+                    countryInput.value = ""; 
+                }
+
+                // 2. Nastavíme globální filtr regionu
+                window.currentRegionFilter = areaCode;
+                
+                // 3. Nastavíme popisek pro analýzu
+                let label = "Celý svět";
+                if (areaCode !== 'world') {
+                    const labels = {
+                        'eu': "Evropa", 'na': "Severní Amerika", 'sa': "Jižní Amerika",
+                        'as': "Asie", 'au': "Austrálie a Oceánie", 'af': "Afrika", 'an': "Antarktida"
+                    };
+                    label = labels[areaCode] || "Vybraná oblast";
+                }
+                window.currentAnalysisName = label;
+
+                // 4. Aktualizujeme UI status
+                const statusEl = document.getElementById('analysis-search-status');
+                if(statusEl) {
+                    statusEl.innerHTML = `<span class="ai-loader"></span> Přepínám na: <strong>${label}</strong>...`;
+                }
+
+                // 5. Spustíme proces s loaderem
+                updateMapWithLoader(() => {
+                    // === HLAVNÍ OPRAVA ZDE ===
+                    // Musíme explicitně přefiltrovat a překreslit body!
+                    // Tím se aktualizuje i proměnná window.currentlyFilteredData
+                    if (typeof updateMarkers === 'function') {
+                        updateMarkers(allData); 
+                    }
+                    // =========================
+
+                    // Nyní aktualizujeme text statusu (už máme správná data)
+                    if(statusEl) {
+                        const count = window.currentlyFilteredData ? window.currentlyFilteredData.length : 0;
+                        statusEl.innerHTML = `✅ Filtr aktivní: <strong>${label}</strong> (${count} záznamů)`;
+                        statusEl.style.color = "#4caf50";
+                    }
+                    
+                    // A nakonec provedeme zoom na nově vyfiltrovaná data
+                    if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0 && areaCode !== 'world' && map) {
+                         const latLngs = window.currentlyFilteredData.map(p => [p.lat, p.lon]);
+                         // Vezmeme vzorek pro rychlý výpočet hranic (optimalizace)
+                         const sample = latLngs.filter((_, i) => i % 10 === 0); 
+                         const boundsData = sample.length > 0 ? sample : latLngs;
+                         
+                         // Jemný zoom na oblast
+                         map.fitBounds(L.latLngBounds(boundsData), { padding: [50, 50], maxZoom: 8 });
+                    } else if (areaCode === 'world') {
+                        map.setView([20, 0], 2);
+                    }
+                });
+            };
 
         let allData = [];
+        window.currentRegionFilter = 'world'; // Globální stav pro vybraný region
         let lastRenderedArchiveEvents = [];
         let map;
         let markerClusterGroup;
@@ -3212,20 +3384,67 @@ function loadDataWithPapaParse() {
                     }
                 });
 
-                map.eachLayer(layer => {
-                    if (layer instanceof L.Control.Geocoder) { map.removeControl(layer); }
-                });
-                const geocoder = L.Control.Geocoder.nominatim();
+              // === OPRAVA: Robustní definice lupy (začátek) ===
+// Odstraníme případné staré instance
+map.eachLayer(layer => {
+    if (layer instanceof L.Control.Geocoder) { map.removeControl(layer); }
+});
 
-                geocoderControl = L.Control.geocoder({
-                    position: 'topright',
-                    collapsed: true,
-                    placeholder: translations[currentLanguage].geocoderPlaceholder,
-                    geocoder: geocoder,
-                    defaultMarkGeocode: false
-                });
-                geocoderControl.addTo(map);
-                map.zoomControl.setPosition('topright');
+// 1. Nastavení Nominatim s použitím CORS Proxy pro localhost
+const geocoder = L.Control.Geocoder.nominatim({
+    // Trik: serviceUrl nasměrujeme přes proxy
+    serviceUrl: 'https://corsproxy.io/?https://nominatim.openstreetmap.org/',
+    geocodingQueryParams: {
+        limit: 5,
+        addressdetails: 1,
+        'accept-language': currentLanguage,
+        'email': 'demo@uapmap.com'
+    }
+});
+
+// 2. Vytvoření ovládacího prvku
+geocoderControl = L.Control.geocoder({
+    position: 'topright',
+    collapsed: true,
+    placeholder: translations[currentLanguage].geocoderPlaceholder,
+    geocoder: geocoder,
+    defaultMarkGeocode: false,
+    errorMessage: 'Nic nenalezeno / Nothing found',
+    suggestMinLength: 3, 
+    suggestTimeout: 300,  
+    queryMinLength: 1     
+});
+geocoderControl.addTo(map);
+
+if(map.zoomControl) map.zoomControl.setPosition('topright');
+
+// 3. Ruční obsluha výsledku
+geocoderControl.on('markgeocode', function (e) {
+    try {
+        const bbox = e.geocode.bbox;
+        const center = e.geocode.center;
+
+        if (this._input) { this._input.blur(); }
+
+        if (bbox) {
+            map.fitBounds(bbox, { padding: [50, 50], maxZoom: 10 });
+        } else {
+            map.setView(center, 10);
+        }
+        
+        setTimeout(() => {
+            L.popup()
+             .setLatLng(center)
+             .setContent(`<b>${e.geocode.name}</b>`)
+             .openOn(map);
+        }, 800);
+
+    } catch (err) {
+        console.error("Chyba geocoderu:", err);
+    }
+});
+// === OPRAVA: Robustní definice lupy (konec) ===
+
                 // === AUTOMATICKÝ POSUN OVLÁDACÍCH PRVKŮ A PANELŮ ===
                 setTimeout(() => {
                     const headerEl = document.getElementById('header');
@@ -3270,10 +3489,7 @@ function loadDataWithPapaParse() {
                 populateShapeFilter(allData);
                 buildIconCache();
 
-                geocoderControl.off('markgeocode').on('markgeocode', function (e) {
-                    map.fitBounds(e.geocode.bbox);
-                    if (this._input) { this._input.blur(); }
-                });
+              
 
                 map.on('click', handleMapClick);
 
@@ -3577,10 +3793,26 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                     const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
                     const selectedSeason = document.getElementById('season-filter').value;
                     const selectedTimeOfDay = document.getElementById('timeofday-filter').value;
+                    // === NOVÁ LOGIKA: Příprava filtru regionu ===
+        let regionCodes = null;
+        // Pokud je nastaven filtr regionu a máme mapu kontinentů
+        if (window.currentRegionFilter && window.currentRegionFilter !== 'world' && window.continentMap) {
+            if (window.continentMap[window.currentRegionFilter]) {
+                regionCodes = new Set(window.continentMap[window.currentRegionFilter]);
+            }
+        }
+        // ===========================================
 
                     const seasons = { spring: [3, 4, 5], summer: [6, 7, 8], autumn: [9, 10, 11], winter: [12, 1, 2] };
 
                     filteredData = data.filter(item => {
+                        // 1. Prioritní filtr Regionu
+            if (regionCodes) {
+                // Pokud bod nemá zemi/stát v seznamu povolených kódů, zahodíme ho
+                if (!regionCodes.has(item.country) && !regionCodes.has(item.state)) {
+                    return false;
+                }
+            }
                         if (!item || !item.lat || !item.lon) return false;
                         if (item.year < yearMin || item.year > yearMax) return false;
                         if (selectedShape !== 'all' && (item.shape || '').toLowerCase() !== selectedShape) return false;
@@ -4011,25 +4243,51 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
             // === STATISTIKY A EXPORT ===
             // =========================================================================
 
-            function generateStatistics() {
+            async function generateStatistics() {
                 const outputEl = document.getElementById('stats-output');
                 const hideBtn = document.getElementById('hide-stats');
+                const userInput = document.getElementById('country-filter').value.trim();
                 const langData = translations[currentLanguage];
 
-                if (!window.currentlyFilteredData || window.currentlyFilteredData.length === 0) {
+                outputEl.style.display = 'block';
+                outputEl.innerText = "⏳ Připravuji data...";
+                hideBtn.style.display = 'none';
+
+                // 1. ZJISTIT DATA (Buď z inputu, nebo z aktuálního filtru)
+                let dataToAnalyze = window.currentlyFilteredData;
+
+                // Pokud uživatel něco napsal do pole, má to přednost -> musíme data stáhnout/vyfiltrovat
+                if (userInput.length > 0) {
+                    // Pokud se text liší od toho, co jsme naposledy hledali, provedeme nové hledání
+                    if (!window.currentAnalysisName || !window.currentAnalysisName.toLowerCase().includes(userInput.toLowerCase())) {
+                        outputEl.innerText = "⏳ Hledám a filtruji data pro: " + userInput;
+                        try {
+                            const result = await getFilteredDataForAnalysis(userInput);
+                            dataToAnalyze = result.data;
+                            // Aktualizujeme globální proměnné, aby mapa seděla s exportem
+                            window.currentlyFilteredData = dataToAnalyze;
+                            window.currentAnalysisName = result.name;
+                            // Volitelné: Aktualizovat i mapu, aby uživatel viděl, co exportuje
+                            // updateMarkers(dataToAnalyze, true); 
+                        } catch (e) {
+                            outputEl.innerText = "Chyba při hledání lokace.";
+                            return;
+                        }
+                    }
+                }
+
+                if (!dataToAnalyze || dataToAnalyze.length === 0) {
                     outputEl.innerText = langData.statsNoData;
-                    outputEl.style.display = 'block';
                     hideBtn.style.display = 'block';
                     return;
                 }
 
+                // 2. GENEROVÁNÍ STATISTIK
                 outputEl.innerText = langData.statsGenerating;
-                outputEl.style.display = 'block';
-                hideBtn.style.display = 'none';
 
                 setTimeout(() => {
                     const statsByYear = {};
-                    for (const item of window.currentlyFilteredData) {
+                    for (const item of dataToAnalyze) {
                         let year = item.year;
                         if (!year) year = langData.yearUnknown;
 
@@ -4040,7 +4298,9 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
                         }
                     }
 
-                    let outputText = langData.statsHeader(window.currentlyFilteredData.length);
+                    let outputText = langData.statsHeader(dataToAnalyze.length);
+                    if (userInput) outputText = `OBLAST: ${userInput.toUpperCase()}\n` + outputText;
+                    
                     outputText += "--------------------------------------\n";
 
                     const sortedYears = Object.keys(statsByYear).sort((a, b) => a.localeCompare(b));
@@ -4239,29 +4499,36 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
 
             // === POMOCNÉ FUNKCE PRO HLEDÁNÍ (ZOOM a DATA) ===
 
-// A) Zjistí lokaci a stáhne PŘESNÉ HRANICE (GeoJSON)
+// A) Zjistí lokaci a stáhne PŘESNÉ HRANICE (GeoJSON) - OPRAVENO PRO CORS
 async function resolveLocation(query) {
     const statusEl = document.getElementById('analysis-search-status');
     if (!query) return null;
+    
     if (statusEl) { 
+        statusEl.style.display = 'block';
         statusEl.innerHTML = '<span class="ai-loader"></span> ⏳ Stahuji hranice území...'; 
         statusEl.style.color = '#ffeb3b'; 
     }
     
     try {
-        // ZMĚNA: Přidáno &polygon_geojson=1 a polygon_threshold=0.01 (pro zjednodušení příliš složitých hranic)
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&polygon_geojson=1&polygon_threshold=0.005&accept-language=${currentLanguage}`;
+        // 1. Odstraněna hlavička User-Agent (zakázáno v prohlížeči)
+        // 2. Přidána CORS Proxy (corsproxy.io)
+        const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&polygon_geojson=1&polygon_threshold=0.005&accept-language=${currentLanguage}&email=demo@uapmap.com`;
         
-        const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
+        // Obalíme URL do proxy
+        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+        
+        // DŮLEŽITÉ: Odstraněn parametr headers s User-Agent!
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
         const data = await response.json();
 
         if (data && data.length > 0) {
             const result = data[0];
             const countryCode = result.address && result.address.country_code ? result.address.country_code.toLowerCase() : null;
-            // Nominatim vrací bbox jako stringy, převedeme na čísla
             const bbox = result.boundingbox ? result.boundingbox.map(parseFloat) : null;
-            
-            // Získáme GeoJSON (přesné hranice)
             const geojson = result.geojson;
 
             if (statusEl) {
@@ -4270,12 +4537,13 @@ async function resolveLocation(query) {
             }
             return { found: true, code: countryCode, name: result.display_name, bbox: bbox, geojson: geojson };
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Chyba při hledání lokace:", e); 
+    }
 
-    if (statusEl) { statusEl.innerHTML = "❌ Území nenalezeno."; statusEl.style.color = "#ff9800"; }
+    if (statusEl) { statusEl.innerHTML = "❌ Území nenalezeno (zkuste anglický název)."; statusEl.style.color = "#ff9800"; }
     return { found: false, name: query };
 }
-
 // B) Pouze zazoomuje mapu (Volá se při ENTER)
 async function searchLocationAndZoom(query) {
     const locInfo = await resolveLocation(query);
@@ -4383,7 +4651,7 @@ async function generateCountryChart() {
     btn.disabled = true; btn.innerText = "⏳..."; 
 
     try {
-        const result = await getFilteredDataForAnalysis(userInput); // Získá data
+        const result = await getFilteredDataForAnalysis(userInput); // Získá data (Point in Polygon nebo Box)
         
         if (result.data.length === 0) {
             alert(translations[currentLanguage].chartNoData(userInput));
@@ -4393,6 +4661,20 @@ async function generateCountryChart() {
         // Uložíme si výsledek pro případ, že uživatel pak klikne na Report
         window.currentAnalysisName = result.name;
         window.currentlyFilteredData = result.data;
+
+        // --- HLAVNÍ OPRAVA ZDE ---
+        // Musíme říct mapě, aby zobrazila TATO nově nalezená data
+        // Parametr 'true' říká "ignoruj posuvníky let/tvarů a prostě ukaž to, co jsme našli pro tuto zemi"
+        updateMarkers(result.data, true); 
+
+        // Pokud funkce getFilteredDataForAnalysis nezazoomovala (např. fallback), 
+        // můžeme to pojistit, ale searchLocationAndZoom by to měl pokrýt.
+        // Pro jistotu fitBounds na nalezená data:
+        if (result.data.length > 0) {
+             const latLngs = result.data.map(p => [p.lat, p.lon]);
+             map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50], maxZoom: 9 });
+        }
+        // -------------------------
 
         // Generujeme graf
         const statsByYear = {};
@@ -4502,35 +4784,68 @@ async function generateGeoReport() {
                 link.download = `graf_ufo_${country.replace(/ /g, '_')}_${yMin}-${yMax}.png`;
                 link.click();
             }
+async function exportFilteredToCSV() {
+                const userInput = document.getElementById('country-filter').value.trim();
+                const langData = translations[currentLanguage];
 
-            function exportFilteredToCSV() {
-                if (!window.currentlyFilteredData || window.currentlyFilteredData.length === 0) {
+                // 1. ZJISTIT DATA (Stejná logika jako u statistik)
+                let dataToExport = window.currentlyFilteredData;
+
+                if (userInput.length > 0) {
+                    // Indikace práce (změna kurzoru)
+                    document.body.style.cursor = 'wait';
+                    
+                    // Pokud uživatel zadal text, který neodpovídá aktuálně načteným datům, musíme hledat
+                    if (!window.currentAnalysisName || !window.currentAnalysisName.toLowerCase().includes(userInput.toLowerCase())) {
+                        try {
+                            const result = await getFilteredDataForAnalysis(userInput);
+                            dataToExport = result.data;
+                            // Synchronizace
+                            window.currentlyFilteredData = dataToExport;
+                            window.currentAnalysisName = result.name;
+                        } catch (e) {
+                            alert("Chyba při přípravě dat pro export: " + e.message);
+                            document.body.style.cursor = 'default';
+                            return;
+                        }
+                    }
+                }
+
+                document.body.style.cursor = 'default';
+
+                if (!dataToExport || dataToExport.length === 0) {
                     alert(translations[currentLanguage].exportNoData);
                     return;
                 }
 
-                console.log(`Exportuji ${window.currentlyFilteredData.length} záznamů do CSV...`);
+                console.log(`Exportuji ${dataToExport.length} záznamů do CSV...`);
 
                 try {
                     const headers = {
                         datum_cas: currentLanguage === 'cs' ? 'datum_cas' : 'datetime',
                         misto: currentLanguage === 'cs' ? 'misto' : 'location',
+                        stat: currentLanguage === 'cs' ? 'stat' : 'state',
+                        zeme: currentLanguage === 'cs' ? 'zeme' : 'country',
                         tvar: currentLanguage === 'cs' ? 'tvar' : 'shape',
                         komentar: currentLanguage === 'cs' ? 'komentar' : 'comment',
+                        rok: 'year',
                         lat: 'lat',
                         lon: 'lon'
                     };
 
-                    const dataToExport = window.currentlyFilteredData.map(item => ({
+                    const exportArray = dataToExport.map(item => ({
                         [headers.datum_cas]: item.dt,
                         [headers.misto]: item.city,
+                        [headers.stat]: item.state || "",
+                        [headers.zeme]: item.country || "",
                         [headers.tvar]: item.shape,
-                        [headers.komentar]: item.comment,
+                        [headers.komentar]: item.comment ? item.comment.replace(/(\r\n|\n|\r)/gm, " ") : "",
+                        [headers.rok]: item.year,
                         [headers.lat]: item.lat,
                         [headers.lon]: item.lon
                     }));
 
-                    const csv = Papa.unparse(dataToExport, {
+                    const csv = Papa.unparse(exportArray, {
                         delimiter: ";",
                         header: true
                     });
@@ -4540,7 +4855,12 @@ async function generateGeoReport() {
                     const link = document.createElement("a");
                     const url = URL.createObjectURL(blob);
 
-                    const fileName = currentLanguage === 'cs' ? 'export_ufo_data_filtrovano.csv' : 'export_ufo_data_filtered.csv';
+                    // Dynamický název souboru
+                    let fileNameSlug = userInput ? userInput.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'global';
+                    if (window.currentAnalysisName) fileNameSlug = window.currentAnalysisName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    
+                    const fileName = `uap_export_${fileNameSlug}_${dataToExport.length}.csv`;
+                    
                     link.setAttribute("href", url);
                     link.setAttribute("download", fileName);
                     link.style.visibility = 'hidden';
@@ -4847,19 +5167,36 @@ if (langSwitcher) {
                 const hideStatsBtn = document.getElementById('hide-stats');
                 if (hideStatsBtn) hideStatsBtn.addEventListener('click', hideStatistics);
 
-                // 3. VYHLEDÁVACÍ POLE (Zoom na Enter)
-                // --- OPRAVENÉ OVLÁDÁNÍ (Enter = Zoom, Tlačítka = Akce) ---
+                // 3. VYHLEDÁVACÍ POLE (Zoom na Enter - OPRAVA DVOJÍHO STISKU)
+            // --- OPRAVENÉ OVLÁDÁNÍ (Enter = Zoom, Tlačítka = Akce) ---
 
-            // 1. Input: Enter pouze zoomuje mapu
             const countryInput = document.getElementById('country-filter');
             if (countryInput) {
+                // Odstraníme starý element a vytvoříme čistý klon bez starých listenerů
                 const newInput = countryInput.cloneNode(true);
                 countryInput.parentNode.replaceChild(newInput, countryInput);
-                newInput.addEventListener('keydown', function(event) {
+                
+                // Použijeme 'keyup' místo 'keydown' - to zaručí, že hodnota je již propsána v inputu
+                newInput.addEventListener('keyup', function(event) {
                     if (event.key === 'Enter') {
-                        event.preventDefault(); 
+                        event.preventDefault();
+                        event.stopPropagation(); // Zabrání probublání do mapy
+                        
                         const query = this.value.trim();
-                        if (query) searchLocationAndZoom(query);
+                        if (query) {
+                            // Okamžitá vizuální odezva, aby uživatel neklikal znovu
+                            const statusEl = document.getElementById('analysis-search-status');
+                            if(statusEl) {
+                                statusEl.innerHTML = '<span class="ai-loader"></span> Hledám...';
+                                statusEl.style.display = 'block';
+                            }
+                            
+                            // Zavoláme vyhledávání
+                            searchLocationAndZoom(query);
+                            
+                            // Zavřeme klávesnici na mobilu
+                            this.blur();
+                        }
                     }
                 });
             }
@@ -4931,6 +5268,9 @@ if (resetMtnBtn) {
             // === NOVÁ FUNKCE: RESETOVÁNÍ FILTRŮ ===
             // =========================================================
             function resetFilters() {
+                window.currentRegionFilter = 'world'; // Vynulovat region
+    const analysisStatus = document.getElementById('analysis-search-status');
+    if(analysisStatus) analysisStatus.innerHTML = ""; // Vymazat text o vybrané oblasti
                 // 1. Resetovat výběrová pole (Selects)
                 document.getElementById('famous-case-select').value = "";
                 document.getElementById('season-filter').value = "all";
@@ -6106,14 +6446,15 @@ function makeElementDraggable(elementId) {
             makeElementDraggable("sources-panel");
             makeElementDraggable("help-panel");
             
-            // === OVLÁDÁNÍ PANELŮ S VIZUÁLNÍM NAČÍTÁNÍM ===
+            // === UPRAVENÁ FUNKCE OVLÁDÁNÍ PANELŮ (S VYNUCENÝM LOADEREM) ===
             window.togglePanel = function(panelId) {
                 const el = document.getElementById(panelId);
                 if (!el) return;
 
-                // Pokud chceme panel ZAVŘÍT, uděláme to hned (to je obvykle rychlé)
+                // 1. POKUD ZAVÍRÁME (Je to rychlé, loader není třeba)
                 if (el.style.display === 'block' || el.style.display === 'flex') {
                     el.style.display = 'none';
+                    el.classList.remove('panel-opening'); // Odstranit animační třídu
                     
                     // Speciální logika pro mobilní menu
                     const nav = document.getElementById('main-nav');
@@ -6123,57 +6464,59 @@ function makeElementDraggable(elementId) {
                     return;
                 }
 
-                // Pokud chceme panel OTEVŘÍT, použijeme Loader, aby UI nezamrzlo bez odezvy
+                // 2. POKUD OTEVÍRÁME (Může být náročné -> zapneme loader)
                 const loader = document.getElementById('processing-indicator');
                 const loaderText = document.getElementById('processing-text');
                 
-                // 1. Zobrazit loader
+                // A) Okamžitá vizuální odezva (kurzor + loader)
+                document.body.style.cursor = 'wait';
                 if (loader) {
                     loader.style.display = 'block';
-                    if (loaderText) loaderText.innerText = "Otevírám panel...";
+                    if (loaderText) loaderText.innerText = "Načítám panel..."; // Nebo použijte překlad
                 }
 
-                // 2. Počkat 50ms, aby prohlížeč stihl vykreslit loader, pak provést těžkou práci
+                // B) Zpoždění 100ms zajistí, že prohlížeč STIHNE vykreslit loader
+                // předtím, než se vlákno zasekne výpočtem layoutu panelu.
                 setTimeout(() => {
-                    try {
-                        el.style.display = 'flex';
-                        
-                        // Zvednout panel do popředí
-                        if (typeof bringToFront === 'function') {
-                            bringToFront(el);
-                        }
-                    
-                        // Responzivní logika (pro mobily)
-                        if (window.innerWidth <= 768) {
-                            el.style.top = '';
-                            el.style.left = '';
-                            el.style.right = '';
-                            el.style.bottom = '';
-                            el.style.margin = '';
-                            el.style.transform = '';
-                            el.style.width = '95%';
-                            el.style.maxWidth = '400px';
-                            el.style.maxHeight = '80vh';
+                    requestAnimationFrame(() => {
+                        try {
+                            // Zobrazit panel
+                            el.style.display = 'flex';
                             
-                            // Vycentrování na střed obrazovky
-                            el.style.left = '50%';
-                            el.style.top = '100px';
-                            el.style.transform = 'translateX(-50%)';
-                        }
+                            // Přidat animační třídu (fade in efekt)
+                            el.classList.add('panel-opening');
+                            
+                            // Zvednout panel do popředí (Z-index)
+                            if (typeof bringToFront === 'function') {
+                                bringToFront(el);
+                            }
+                        
+                            // Responzivní logika (pro mobily - centrování)
+                            if (window.innerWidth <= 768) {
+                                el.style.top = '100px';
+                                el.style.left = '50%';
+                                el.style.transform = 'translateX(-50%)';
+                                el.style.width = '95%';
+                                el.style.maxWidth = '400px';
+                                el.style.maxHeight = '80vh';
+                                el.style.margin = '0';
+                            }
 
-                        // Speciální logika pro mobilní menu (zavření)
-                        const nav = document.getElementById('main-nav');
-                        if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
-                            nav.classList.remove('active');
-                        }
+                            // Zavřít mobilní menu, pokud je otevřené
+                            const nav = document.getElementById('main-nav');
+                            if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
+                                nav.classList.remove('active');
+                            }
 
-                    } catch (err) {
-                        console.error("Chyba při otevírání panelu:", err);
-                    } finally {
-                        // 3. Skrýt loader (vždy, i když dojde k chybě)
-                        if (loader) loader.style.display = 'none';
-                    }
-                }, 50); // Krátká pauza pro překreslení UI
+                        } catch (err) {
+                            console.error("Chyba při otevírání panelu:", err);
+                        } finally {
+                            // C) Skrýt loader a vrátit kurzor (vždy, i při chybě)
+                            if (loader) loader.style.display = 'none';
+                            document.body.style.cursor = 'default';
+                        }
+                    });
+                }, 100); // 100ms je bezpečný čas pro UI repaint
             };
             
             window.togglePanel = togglePanel;
@@ -6448,120 +6791,7 @@ function updateRecordBtnUI(recording) {
         btn.style.backgroundColor = "#e91e63"; // Původní barva
     }
 }
-// =========================================================================
-// === NOVÁ LOGIKA ANALÝZY: ZOOM & VIEWPORT (NOMINATIM) ===
-// =========================================================================
 
-// Globální proměnná pro uložení názvu vyhledané oblasti
-window.currentAnalysisName = "";
-
-// 1. Funkce: Najde oblast přes Nominatim a zazoomuje mapu (FitBounds)
-async function searchLocationAndZoom(query) {
-    const locInfo = await resolveLocation(query);
-    if (locInfo && locInfo.found && locInfo.bbox && map) {
-        const southWest = [locInfo.bbox[0], locInfo.bbox[2]];
-        const northEast = [locInfo.bbox[1], locInfo.bbox[3]];
-        map.fitBounds([southWest, northEast], { padding: [20, 20], maxZoom: 8 });
-    }
-
-
-    if (statusEl) {
-        statusEl.innerHTML = '<span class="ai-loader"></span> 🔍 Hledám oblast a zaměřuji mapu...';
-        statusEl.style.color = '#ffeb3b';
-    }
-
-    try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=${currentLanguage}`;
-        const response = await fetch(url, { headers: { 'User-Agent': 'UAP Map Analyzer' } });
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-            const result = data[0];
-            
-            // Nominatim vrací [minLat, maxLat, minLon, maxLon]
-            const bbox = result.boundingbox;
-            const southWest = [parseFloat(bbox[0]), parseFloat(bbox[2])];
-            const northEast = [parseFloat(bbox[1]), parseFloat(bbox[3])];
-            const bounds = [southWest, northEast];
-
-            // AKCE: Zazoomovat mapu na oblast
-            map.fitBounds(bounds);
-
-            if (statusEl) {
-                statusEl.innerHTML = `✅ Oblast nalezena: <strong>${result.display_name.split(',')[0]}</strong>`;
-                statusEl.style.color = "#4caf50";
-            }
-            
-            // Uložíme název pro graf/report
-            window.currentAnalysisName = result.display_name.split(',')[0]; 
-
-        } else {
-            if (statusEl) {
-                statusEl.innerHTML = "❌ Oblast nenalezena. Zkuste jiný název.";
-                statusEl.style.color = "#f44336";
-            }
-        }
-    } catch (e) {
-        console.error("Chyba zoomování:", e);
-        if (statusEl) statusEl.innerHTML = "❌ Chyba spojení.";
-    }
-}
-
-// 2. Funkce: Získá data POUZE z toho, co je vidět na mapě
-function getDataInCurrentView() {
-    // Získáme aktuální hranice mapy
-    const bounds = map.getBounds();
-    
-    // Vezmeme data (respektujeme časový filtr, pokud existuje)
-    const sourceData = window.currentlyFilteredData || allData;
-
-    // Vyfiltrujeme jen body uvnitř obrazovky
-    const visibleData = sourceData.filter(item => {
-        if (!item.lat || !item.lon) return false;
-        return bounds.contains([item.lat, item.lon]);
-    });
-
-    console.log(`Analýza viewportu: Nalezeno ${visibleData.length} bodů.`);
-    return visibleData;
-}
-
-// 3. Wrapper pro generování Grafu z pohledu
-function generateChartFromView() {
-    const data = getDataInCurrentView();
-    const langData = translations[currentLanguage];
-    
-    if (data.length === 0) {
-        alert("V aktuálním výřezu mapy nejsou žádná data pro graf.");
-        return;
-    }
-
-    const yearMin = document.getElementById('year-min').value;
-    const yearMax = document.getElementById('year-max').value;
-    const titleName = window.currentAnalysisName || "Aktuální oblast mapy";
-
-    // Agregace
-    const statsByYear = {};
-    for (let y = parseInt(yearMin); y <= parseInt(yearMax); y++) statsByYear[y] = 0;
-
-    data.forEach(item => {
-        if (statsByYear.hasOwnProperty(item.year)) statsByYear[item.year]++;
-    });
-
-    displayChart(Object.keys(statsByYear), Object.values(statsByYear), titleName, yearMin, yearMax);
-}
-
-// 4. Wrapper pro generování Reportu z pohledu
-function generateReportFromView() {
-    const data = getDataInCurrentView();
-    if (data.length === 0) {
-        alert("V aktuálním výřezu mapy nejsou žádná data pro report.");
-        return;
-    }
-    
-    const titleName = window.currentAnalysisName || "Aktuální oblast mapy";
-    const stats = analyzeStatistics(data);
-    renderReport(stats, titleName, data);
-}
 // Funkce pro stažení reportu jako obrázku (PNG)
             function downloadReportAsImage() {
                 const reportElement = document.getElementById("report-paper");
@@ -6598,11 +6828,51 @@ function generateReportFromView() {
                 });
             }
 
-            // Registrace listeneru (vložte toto do DOMContentLoaded bloku nebo spusťte hned, pokud je element v DOM)
+            // === FINÁLNÍ INICIALIZACE (Report tlačítko + Posuvné menu) ===
             document.addEventListener('DOMContentLoaded', () => {
+                // 1. Logika pro stažení reportu
                 const downloadBtn = document.getElementById('download-report-img-btn');
                 if (downloadBtn) {
                     downloadBtn.addEventListener('click', downloadReportAsImage);
+                }
+
+                // 2. NOVÁ FUNKCE: Drag & Scroll pro horní menu
+                const nav = document.getElementById('main-nav');
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                if (nav) {
+                    nav.addEventListener('mousedown', (e) => {
+                        // Funguje jen na desktopu (kdy menu není v hamburgeru)
+                        if(window.innerWidth <= 900) return;
+
+                        isDown = true;
+                        nav.classList.add('active-drag');
+                        // Vypočítáme pozici myši uvnitř menu
+                        startX = e.pageX - nav.offsetLeft;
+                        scrollLeft = nav.scrollLeft;
+                    });
+
+                    nav.addEventListener('mouseleave', () => {
+                        isDown = false;
+                        nav.classList.remove('active-drag');
+                    });
+
+                    nav.addEventListener('mouseup', () => {
+                        isDown = false;
+                        nav.classList.remove('active-drag');
+                    });
+
+                    nav.addEventListener('mousemove', (e) => {
+                        if (!isDown) return;
+                        e.preventDefault(); // Zabrání výběru textu
+                        
+                        const x = e.pageX - nav.offsetLeft;
+                        // "walk" určuje rychlost posuvu (x3 je rychlejší než x1)
+                        const walk = (x - startX) * 2; 
+                        nav.scrollLeft = scrollLeft - walk;
+                    });
                 }
             });
 </script>
