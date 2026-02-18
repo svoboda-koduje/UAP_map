@@ -286,6 +286,8 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             gap: 10px;
             max-height: 80vh;
             box-sizing: border-box;
+            will-change: transform, left, top; 
+            transform: translateZ(0);
         }
 
         .panel-close-btn {
@@ -823,15 +825,24 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         .popup-icon-wrapper svg { width: 60px; height: 60px; stroke-width: 1; stroke: #fff; }
         /* === ANIMACE NAČÍTÁNÍ (SPINNER) === */
         .ai-loader {
-            border: 3px solid #333; /* Šedé pozadí kruhu */
-            border-top: 3px solid #ffeb3b; /* Žlutá točící se část */
+            border: 3px solid rgba(255, 255, 255, 0.1); /* Jemnější pozadí kruhu */
+            border-top: 3px solid var(--primary-color); /* Azurová barva */
             border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite; /* Zrychleno pro dynamičtější pocit */
             display: inline-block;
             vertical-align: middle;
             margin-right: 8px;
+        }
+
+        /* Nová třída pro velký loader v úvodu */
+        .big-loader {
+            width: 50px;
+            height: 50px;
+            border-width: 5px;
+            margin: 20px 0; /* Odstup od obrázku a textu */
+            border-top-color: #ffeb3b; /* Žlutá pro kontrast v intru */
         }
 
         @keyframes spin {
@@ -946,8 +957,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     <span id="processing-text" data-translate-key="processingText">Přepočítávám mapu...</span>
 </div>
     <div id="preloader">
-        <img src="intro_animation.gif" alt="Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...">
-        <span data-translate-key="preloaderText">Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...</span>
+        <img src="intro_animation.gif" alt="Intro">
+        <div class="ai-loader big-loader"></div>
+        <span id="preloader-text" data-translate-key="preloaderText">Načítám data mapy, čekejte několik sekund... / Loading map data, please wait a few seconds...</span>
     </div>
 
     <div id="header">
@@ -2712,148 +2724,283 @@ function loadDataWithPapaParse() {
         const yearMinEl = document.getElementById('year-min');
         if (yearMinEl) { yearMinEl.value = 1980; document.getElementById('year-min-val').innerText = 1980; }
     }
+    
+    // UI prvky pro zobrazení stavu
     const infoOutput = document.getElementById('info-output');
-    infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
+    const preloaderText = document.getElementById('preloader-text') || document.querySelector('#preloader span');
+    
+    // 1. FÁZE: Informujeme uživatele o stahování
+    if(infoOutput) infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
+    if(preloaderText) preloaderText.innerText = "Stahuji databázi (300 000+ záznamů)... / Downloading database...";
 
-    Papa.parse('data_FINAL_SLOUCENO.csv', {
-        download: true,
-        header: false,
-        skipEmptyLines: true,
-        delimiter: ',',
-        quoteChar: '"',
-        worker: false,
-        complete: function (results) {
-            infoOutput.innerText = translations[currentLanguage].infoLoadingPapaDone;
+    // Krátká pauza, aby se vykreslil text a roztočil spinner
+    setTimeout(() => {
+        Papa.parse('data_FINAL_SLOUCENO.csv', {
+            download: true,
+            header: false,
+            skipEmptyLines: true,
+            delimiter: ',',
+            quoteChar: '"',
+            worker: false, // Worker false blokuje UI, proto musíme text změnit PŘEDTÍM pomocí setTimeout
+            
+            complete: function (results) {
+                // 2. FÁZE: Data jsou stažena, začíná zpracování
+                if(infoOutput) infoOutput.innerText = translations[currentLanguage].infoLoadingPapaDone;
+                if(preloaderText) preloaderText.innerText = "Zpracovávám data a souřadnice... / Processing map data...";
 
-            const FIXED_COLUMNS = { datetime: 0, city: 1, state: 2, country: 3, shape: 4 };
-            const usStates = new Set(['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy', 'dc', 'pr']);
+                // Další setTimeout, aby prohlížeč stihl vykreslit změnu textu před těžkou smyčkou
+                setTimeout(() => {
+                    const FIXED_COLUMNS = { datetime: 0, city: 1, state: 2, country: 3, shape: 4 };
+                    const usStates = new Set(['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy', 'dc', 'pr']);
 
-            // Rozšířená mapa pro čištění dat
-            if (typeof countryNameMap === 'undefined') window.countryNameMap = {};
-            const cleaningMap = {
-                'new zealand': 'nz', 'nz': 'nz', 'zealand': 'nz', // Fix pro NZ
-                'poland': 'pl', 'polska': 'pl',
-                'germany': 'de', 'deutschland': 'de', 
-                'great britain': 'gb', 'uk': 'gb', 'england': 'gb', 'uk/england': 'gb', 'united kingdom': 'gb',
-                'czech republic': 'cz', 'ceska republika': 'cz', 'czechia': 'cz',
-                'france': 'fr', 'italy': 'it', 'spain': 'es', 
-                'australia': 'au', 'russia': 'ru', 'china': 'cn', 'japan': 'jp', 'brazil': 'br', 
-                'argentina': 'ar', 'mexico': 'mx', 'canada': 'ca', 'india': 'in',
-                'south africa': 'za', 'puerto rico': 'pr', 'netherlands': 'nl',
-                'belgium': 'be', 'switzerland': 'ch', 'austria': 'at', 'usa': 'us', 'united states': 'us'
-            };
-            Object.assign(countryNameMap, cleaningMap);
-
-            const dataRows = results.data.slice(1);
-
-            let processedData = dataRows.map(columns => {
-                if (!columns || columns.length < 11) return null;
-
-                let lat = parseFloat(columns[9]);
-                let lon = parseFloat(columns[10]);
-                let archive_id = columns[11] ? columns[11].trim() : "";
-
-                if (Math.abs(lat) > 90 && Math.abs(lon) > 180) { lat = lat / 100; lon = lon / 100; }
-                if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
-
-                let datetimeStr = (columns[FIXED_COLUMNS.datetime] || 'Neznámé').replace(/"/g, '').trim();
-                let year = null, month = null, hour = null;
-
-                try {
-                    const parts = datetimeStr.split('/');
-                    if (parts.length >= 3) {
-                        month = parseInt(parts[0]);
-                        const yearAndTime = parts[2].split(' ');
-                        year = parseInt(yearAndTime[0]);
-                        if (yearAndTime.length > 1 && yearAndTime[1].includes(':')) hour = parseInt(yearAndTime[1].split(':')[0]);
-                        if (isNaN(year) || year <= 1900 || year > 2026) return null;
-                    } else return null;
-                } catch (e) { return null; }
-
-                const shape = (columns[FIXED_COLUMNS.shape] || 'unknown').trim().toLowerCase();
-                const city_part = (columns[FIXED_COLUMNS.city] || '').trim();
-                const raw_state = (columns[FIXED_COLUMNS.state] || '').trim().toLowerCase();
-                let raw_country = (columns[FIXED_COLUMNS.country] || '').trim().toLowerCase();
-                const comment = (columns[7] || "").trim().replace(/&#44;/g, ',').replace(/&amp;/g, '&');
-
-                // === OPRAVA: Extrakce země z textu ===
-                let extractedCountry = raw_country;
-
-                if (!extractedCountry || extractedCountry === '') {
-                    const lowerCity = city_part.toLowerCase();
+                    // === ZDE VRACÍME KOMPLETNÍ MAPU ZEMÍ Z PŮVODNÍHO KÓDU ===
+                    if (typeof countryNameMap === 'undefined') window.countryNameMap = {};
                     
-                    // 1. Hledáme v závorce: "City (Country)"
-                    const matchParens = city_part.match(/\(([^)]+)\)$/);
-                    if (matchParens && matchParens[1]) {
-                        const candidate = matchParens[1].toLowerCase().trim();
-                        if (cleaningMap[candidate]) extractedCountry = cleaningMap[candidate];
-                        else if (candidate.includes('poland')) extractedCountry = 'pl';
-                        else if (candidate.includes('zealand')) extractedCountry = 'nz';
-                    } 
+                    const cleaningMap = {
+                        'us': 'us', 'usa': 'us', 'spojené státy': 'us', 'spojené státy americké': 'us', 'united states': 'us', 'america': 'us',
+                        'ca': 'ca', 'kanada': 'ca', 'canada': 'ca',
+                        'mx': 'mx', 'mexiko': 'mx', 'mexico': 'mx',
+                        'gb': 'gb', 'uk': 'gb', 'velká británie': 'gb', 'velka britanie': 'gb', 'spojené království': 'gb', 'spojene kralovstvi': 'gb', 'united kingdom': 'gb', 'britain': 'gb',
+                        'england': 'gb', 'anglie': 'gb',
+                        'scotland': 'gb', 'skotsko': 'gb',
+                        'wales': 'gb',
+                        'northern ireland': 'gb', 'severní irsko': 'gb',
+
+                        'de': 'de', 'německo': 'de', 'nemecko': 'de', 'germany': 'de',
+                        'fr': 'fr', 'francie': 'fr', 'france': 'fr',
+                        'cz': 'cz', 'cs': 'cz', 'česká republika': 'cz', 'ceska republika': 'cz', 'česko': 'cz', 'cesko': 'cz', 'czech republic': 'cz', 'czechia': 'cz',
+                        'es': 'es', 'španělsko': 'es', 'spanelsko': 'es', 'spain': 'es',
+                        'it': 'it', 'itálie': 'it', 'italie': 'it', 'italy': 'it',
+                        'pl': 'pl', 'polsko': 'pl', 'poland': 'pl',
+                        'sk': 'sk', 'slovensko': 'sk', 'slovakia': 'sk',
+                        'at': 'at', 'rakousko': 'at', 'austria': 'at',
+                        'be': 'be', 'belgie': 'be', 'belgium': 'be',
+                        'nl': 'nl', 'nizozemsko': 'nl', 'nizozemí': 'nl', 'netherlands': 'nl', 'holandsko': 'nl',
+                        'ie': 'ie', 'irsko': 'ie', 'ireland': 'ie',
+                        'ch': 'ch', 'švýcarsko': 'ch', 'svycarsko': 'ch', 'switzerland': 'ch',
+                        'se': 'se', 'švédsko': 'se', 'svedsko': 'se', 'sweden': 'se',
+                        'no': 'no', 'norsko': 'no', 'norway': 'no',
+                        'fi': 'fi', 'finsko': 'fi', 'finland': 'fi',
+                        'dk': 'dk', 'dánsko': 'dk', 'dansko': 'dk', 'denmark': 'dk',
+                        'pt': 'pt', 'portugalsko': 'pt', 'portugal': 'pt',
+                        'gr': 'gr', 'řecko': 'gr', 'recko': 'gr', 'greece': 'gr',
+                        'ua': 'ua', 'ukrajina': 'ua', 'ukraine': 'ua',
+                        'ro': 'ro', 'rumunsko': 'ro', 'romania': 'ro',
+                        'hu': 'hu', 'maďarsko': 'hu', 'madarsko': 'hu', 'hungary': 'hu',
+
+                        'au': 'au', 'austrálie': 'au', 'australie': 'au', 'australia': 'au',
+                        'china': 'china', 'cn': 'china', 'čína': 'china', 'cina': 'china',
+                        'jp': 'jp', 'japonsko': 'jp', 'japan': 'jp',
+                        'in': 'in', 'indie': 'in', 'india': 'in',
+                        'nz': 'nz', 'nový zéland': 'nz', 'novy zeland': 'nz', 'new zealand': 'nz',
+                        'ru': 'ru', 'rusko': 'ru', 'ruská federace': 'ru', 'russia': 'ru',
+                        'kr': 'kr', 'jižní korea': 'kr', 'jizni korea': 'kr', 'south korea': 'kr', 'republic of korea': 'kr',
+                        'id': 'id', 'indonésie': 'id', 'indonesie': 'id', 'indonesia': 'id',
+                        'th': 'th', 'thajsko': 'th', 'thailand': 'th',
+                        'vn': 'vn', 'vietnam': 'vn', 'viet nam': 'vn',
+                        'ph': 'ph', 'filipíny': 'ph', 'filipiny': 'ph', 'philippines': 'ph',
+                        'mm': 'mm', 'myanmar': 'mm', 'burma': 'mm', 'barma': 'mm', 'unie myanmar': 'mm',
+
+                        'br': 'br', 'brazílie': 'br', 'brazilie': 'br', 'brazil': 'br',
+                        'ar': 'ar', 'argentina': 'ar',
+                        'cl': 'cl', 'chile': 'cl',
+                        'pe': 'pe', 'peru': 'pe',
+                        'co': 'co', 'kolumbie': 'co', 'colombia': 'co',
+                        've': 've', 'venezuela': 've',
+
+                        'iq': 'iq', 'irák': 'iq', 'irak': 'iq', 'iraq': 'iq',
+                        'ir': 'ir', 'írán': 'ir', 'iran': 'ir',
+                        'tr': 'tr', 'turecko': 'tr', 'turkey': 'tr',
+                        'za': 'za', 'jižní afrika': 'za', 'jizni afrika': 'za', 'south africa': 'za',
+                        'eg': 'eg', 'egypt': 'eg',
+                        'sa': 'sa', 'saúdská arábie': 'sa', 'saudi arabia': 'sa',
+
+                        'alabama': 'us-al', 'alaska': 'us-ak', 'aljaška': 'us-ak', 'arizona': 'us-az', 'arkansas': 'us-ar',
+                        'california': 'us-ca', 'kalifornie': 'us-ca', 'colorado': 'us-co', 'connecticut': 'us-ct',
+                        'delaware': 'us-de', 'florida': 'us-fl', 'georgia': 'us-ga', 'hawaii': 'us-hi', 'havaj': 'us-hi',
+                        'idaho': 'us-id', 'illinois': 'us-il', 'indiana': 'us-in', 'iowa': 'us-ia', 'kansas': 'us-ks',
+                        'kentucky': 'us-ky', 'louisiana': 'us-la', 'maine': 'us-me', 'maryland': 'us-md', 'massachusetts': 'us-ma',
+                        'michigan': 'us-mi', 'minnesota': 'us-mn', 'mississippi': 'us-ms', 'missouri': 'us-mo', 'montana': 'us-mt',
+                        'nebraska': 'us-ne', 'nevada': 'us-nv', 'new hampshire': 'us-nh', 'new jersey': 'us-nj',
+                        'new mexico': 'us-nm', 'nové mexiko': 'us-nm', 'new york': 'us-ny', 'nový york': 'us-ny',
+                        'north carolina': 'us-nc', 'severní karolína': 'us-nc', 'north dakota': 'us-nd', 'severní dakota': 'us-nd',
+                        'ohio': 'us-oh', 'oklahoma': 'us-ok', 'oregon': 'us-or', 'pennsylvania': 'us-pa', 'pensylvánie': 'us-pa',
+                        'rhode island': 'us-ri', 'south carolina': 'us-sc', 'jižní karolína': 'us-sc',
+                        'south dakota': 'us-sd', 'jižní dakota': 'us-sd', 'tennessee': 'us-tn', 'texas': 'us-tx',
+                        'utah': 'us-ut', 'vermont': 'us-vt', 'virginia': 'us-va', 'washington': 'us-wa',
+                        'west virginia': 'us-wv', 'západní virginie': 'us-wv', 'wisconsin': 'us-wi', 'wyoming': 'us-wy',
+                        'district of columbia': 'us-dc', 'puerto rico': 'us-pr',
+
+                        'alberta': 'ca-ab', 'british columbia': 'ca-bc', 'britská kolumbie': 'ca-bc', 'manitoba': 'ca-mb',
+                        'new brunswick': 'ca-nb', 'nový brunšvik': 'ca-nb', 'newfoundland and labrador': 'ca-nl',
+                        'nova scotia': 'ca-ns', 'nové skotsko': 'ca-ns', 'ontario': 'ca-on',
+                        'prince edward island': 'ca-pe', 'ostrov prince edwarda': 'ca-pe', 'quebec': 'ca-qc', 'québec': 'ca-qc',
+                        'saskatchewan': 'ca-sk', 'northwest territories': 'ca-nt', 'nunavut': 'ca-nu', 'yukon': 'ca-yt',
+
+                        'new south wales': 'au-nsw', 'nový jižní wales': 'au-nsw', 'victoria': 'au-vic', 'queensland': 'au-qld',
+                        'western australia': 'au-wa', 'south australia': 'au-sa', 'jižní austrálie': 'au-sa',
+                        'tasmania': 'au-tas', 'tasmánie': 'au-tas', 'northern territory': 'au-nt', 'australian capital territory': 'au-act',
+                        
+                         // Přidání těch "ošklivých" kódů z původního zdroje pro jistotu
+                        "ab": "ab", "act": "act", "ak": "ak", "al": "al", "almaty": "almaty", "altai krai": "altai krai",
+                        "amur": "amur", "antrim": "antrim", "arg": "arg", "astrakan": "astrakan", "az": "az",
+                        "barnaul": "barnaul", "bc": "bc", "belgorod": "belgorod", "biryat": "biryat", "blz": "blz",
+                        "botany bay": "botany bay", "bs": "bs", "buenos aires": "buenos aires", "buryatiya": "buryatiya",
+                        "bystrinsky": "bystrinsky", "catamarca": "catamarca", "cay": "cay", "chabut": "chabut", "chaco": "chaco",
+                        "chelyabinsk": "chelyabinsk", "chita": "chita", "chubut": "chubut", "colfax": "colfax", "cordoba": "cordoba",
+                        "corrientes": "corrientes", "crc": "crc", "crimea": "crimea", "ct": "ct", "cub": "cub", "dagestan": "dagestan",
+                        "dc": "dc", "dist federal": "dist federal", "dnepropetrov": "dnepropetrov", "dom": "dom", "donetsk": "donetsk",
+                        "down": "down", "dzh": "dzh", "ec": "ec", "entre rios": "entre rios", "esa": "esa", "evenki": "evenki",
+                        "f-94": "f-94", "fl": "fl", "ga": "ga", "gbr": "gbr", "gdl": "gdl", "gm": "gm", "gorno-altay": "gorno-altay",
+                        "gua": "gua", "hi": "hi", "ia": "ia", "il": "il", "irkutsk": "irkutsk", "isv": "isv", "jam": "jam",
+                        "kabardino-ba": "kabardino-ba", "kaluga": "kaluga", "kamchatka": "kamchatka", "karabakh": "karabakh",
+                        "karbadino": "karbadino", "karbardino-b": "karbardino-b", "karelia": "karelia", "kaz": "kaz",
+                        "kemerovo": "kemerovo", "kerch": "kerch", "khabarovsk": "khabarovsk", "khakassia": "khakassia",
+                        "kharkiv": "kharkiv", "khmelnitskyi": "khmelnitskyi", "kiev": "kiev", "kirov": "kirov", "kostanay": "kostanay",
+                        "kostroma": "kostroma", "krasnodar": "krasnodar", "krasnodar kr": "krasnodar kr", "ks": "ks", "ky": "ky",
+                        "kyiv": "kyiv", "kyyivs'ka": "kyyivs'ka", "l-4": "l-4", "l-6": "l-6", "la": "la", "la pampa": "la pampa",
+                        "lab": "lab", "leningrad": "leningrad", "londonderry": "londonderry", "looking nw": "looking nw",
+                        "luhansk": "luhansk", "ma": "ma", "maui": "maui", "mb": "mb", "md": "md", "me": "me", "mendoza": "mendoza",
+                        "mex": "mex", "mi": "mi", "minas gerais": "minas gerais", "mm32": "mm32", "mn": "mn", "mo": "mo",
+                        "mongolia": "mongolia", "moscow": "moscow", "moskva": "moskva", "ms": "ms", "mt": "mt", "murmansk": "murmansk",
+                        "nan": "nan", "nb": "nb", "nc": "nc", "nca": "nca", "nd": "nd", "ne": "ne", "necochea": "necochea",
+                        "nenets": "nenets", "nf": "nf", "nh": "nh", "ni": "ni", "nizhniynovgo": "nizhniynovgo",
+                        "nizhny novgo": "nizhny novgo", "nj": "nj", "nm": "nm", "north down": "north down", "nov": "nov",
+                        "novosibirsk": "novosibirsk", "ns": "ns", "nsw": "nsw", "nt": "nt", "nv": "nv", "nwt": "nwt", "ny": "ny",
+                        "nzl": "nzl", "odessa": "odessa", "ogden areas": "ogden areas", "oh": "oh", "ok": "ok", "on": "on",
+                        "or": "or", "pa": "pa", "pan": "pan", "paranăˇ": "paranăˇ", "pei": "pei", "penza": "penza", "perm": "perm",
+                        "perm krai": "perm krai", "pimorskiykra": "pimorskiykra", "png": "png", "poltava": "poltava", "pr": "pr",
+                        "primorsky kr": "primorsky kr", "qld": "qld", "que": "que", "ri": "ri", "rio negro": "rio negro",
+                        "rostov": "rostov", "rovno": "rovno", "rus": "rus", "ryazan": "ryazan", "sakha": "sakha", "salta": "salta",
+                        "samara": "samara", "san juan": "san juan", "san luis": "san luis", "santa cruz": "santa cruz",
+                        "santa fe": "santa fe", "santiago est": "santiago est", "sao paolo": "sao paolo", "saratov": "saratov",
+                        "sau": "sau", "sc": "sc", "sd": "sd", "siberia": "siberia", "skn": "skn", "sol": "sol",
+                        "st petersbur": "st petersbur", "stavropol": "stavropol", "stk": "stk", "stl": "stl", "sverdlovsk": "sverdlovsk",
+                        "tambov": "tambov", "tartarstan": "tartarstan", "tartu": "tartu", "tas": "tas", "tn": "tn", "tucuman": "tucuman",
+                        "tulskaya": "tulskaya", "tumen": "tumen", "tver": "tver", "tx": "tx", "tyrone": "tyrone", "tyva": "tyva",
+                        "ukr": "ukr", "ut": "ut", "va": "va", "vic": "vic", "vinnytsia": "vinnytsia", "vladimir": "vladimir",
+                        "vladivostok": "vladivostok", "volgograd": "volgograd", "vologda": "vologda", "volvograd": "volvograd",
+                        "voronezh": "voronezh", "voroshilovgr": "voroshilovgr", "vt": "vt", "vyatka": "vyatka", "wa": "wa", "wau": "wau",
+                        "wi": "wi", "wv": "wv", "wy": "wy", "yakutsk": "yakutsk", "yaroslavl": "yaroslavl", "yk": "yk",
+                        "zabailkal'ye": "zabailkal'ye", "zaporizhia": "zaporizhia"
+                    };
                     
-                    // 2. Hledáme na konci textu (pro případy "Auckland New Zealand" bez závorek)
-                    if (!extractedCountry) {
-                         for (const [name, code] of Object.entries(cleaningMap)) {
-                             if (lowerCity.endsWith(name) || lowerCity.includes(name)) {
-                                 extractedCountry = code;
-                                 break;
-                             }
-                         }
+                    Object.assign(countryNameMap, cleaningMap); // Sloučení do hlavní mapy
+
+                    const dataRows = results.data.slice(1);
+
+                    let processedData = dataRows.map(columns => {
+                        if (!columns || columns.length < 11) return null;
+
+                        let lat = parseFloat(columns[9]);
+                        let lon = parseFloat(columns[10]);
+                        let archive_id = columns[11] ? columns[11].trim() : "";
+
+                        if (Math.abs(lat) > 90 && Math.abs(lon) > 180) { lat = lat / 100; lon = lon / 100; }
+                        if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+
+                        let datetimeStr = (columns[FIXED_COLUMNS.datetime] || 'Neznámé').replace(/"/g, '').trim();
+                        let year = null, month = null, hour = null;
+
+                        try {
+                            const parts = datetimeStr.split('/');
+                            if (parts.length >= 3) {
+                                month = parseInt(parts[0]);
+                                const yearAndTime = parts[2].split(' ');
+                                year = parseInt(yearAndTime[0]);
+                                if (yearAndTime.length > 1 && yearAndTime[1].includes(':')) hour = parseInt(yearAndTime[1].split(':')[0]);
+                                if (isNaN(year) || year <= 1900 || year > 2026) return null;
+                            } else return null;
+                        } catch (e) { return null; }
+
+                        const shape = (columns[FIXED_COLUMNS.shape] || 'unknown').trim().toLowerCase();
+                        const city_part = (columns[FIXED_COLUMNS.city] || '').trim();
+                        const raw_state = (columns[FIXED_COLUMNS.state] || '').trim().toLowerCase();
+                        let raw_country = (columns[FIXED_COLUMNS.country] || '').trim().toLowerCase();
+                        const comment = (columns[7] || "").trim().replace(/&#44;/g, ',').replace(/&amp;/g, '&');
+
+                        // === OPRAVA: Extrakce země z textu ===
+                        let extractedCountry = raw_country;
+
+                        if (!extractedCountry || extractedCountry === '') {
+                            const lowerCity = city_part.toLowerCase();
+                            
+                            // 1. Hledáme v závorce: "City (Country)"
+                            const matchParens = city_part.match(/\(([^)]+)\)$/);
+                            if (matchParens && matchParens[1]) {
+                                const candidate = matchParens[1].toLowerCase().trim();
+                                if (cleaningMap[candidate]) extractedCountry = cleaningMap[candidate];
+                                else if (candidate.includes('poland')) extractedCountry = 'pl';
+                                else if (candidate.includes('zealand')) extractedCountry = 'nz';
+                            } 
+                            
+                            // 2. Hledáme na konci textu (pro případy "Auckland New Zealand" bez závorek)
+                            if (!extractedCountry) {
+                                 for (const [name, code] of Object.entries(cleaningMap)) {
+                                     if (lowerCity.endsWith(name) || lowerCity.includes(name)) {
+                                         extractedCountry = code;
+                                         break;
+                                     }
+                                 }
+                            }
+                        }
+
+                        // Normalizace na kód
+                        let finalCountryCode = cleaningMap[extractedCountry] || extractedCountry;
+
+                        // Fallback pro USA státy
+                        if ((!finalCountryCode || finalCountryCode === '') && usStates.has(raw_state)) {
+                            finalCountryCode = 'us';
+                        }
+                        
+                        // Záchranná brzda pro USA
+                        if (finalCountryCode === 'usa' || finalCountryCode === 'united states') finalCountryCode = 'us';
+
+                        const dataObject = {
+                            dt: datetimeStr,
+                            lat: lat,
+                            lon: lon,
+                            shape: shape,
+                            city: [city_part, raw_state, raw_country].filter(Boolean).join(', '),
+                            comment: comment,
+                            country: finalCountryCode, // Zde teď bude správně 'nz', 'pl' atd.
+                            state: raw_state,
+                            year: year,
+                            month: month,
+                            hour: hour,
+                            archive_id: archive_id
+                        };
+
+                        if (archive_id) archiveIdLookup[archive_id] = { lat: lat, lon: lon, city: dataObject.city };
+
+                        return dataObject;
+
+                    }).filter(s => s !== null);
+
+                    allData = processedData;
+
+                    if (allData.length === 0) {
+                        if(infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaError;
+                        return;
                     }
-                }
 
-                // Normalizace na kód
-                let finalCountryCode = cleaningMap[extractedCountry] || extractedCountry;
+                    // 3. FÁZE: Hotovo, předáváme data mapě
+                    if(infoOutput) infoOutput.innerText = translations[currentLanguage].infoLoadingPapaSuccess(allData.length);
+                    initializeMap();
 
-                // Fallback pro USA státy
-                if ((!finalCountryCode || finalCountryCode === '') && usStates.has(raw_state)) {
-                    finalCountryCode = 'us';
-                }
-                
-                // Záchranná brzda pro USA
-                if (finalCountryCode === 'usa' || finalCountryCode === 'united states') finalCountryCode = 'us';
-
-                const dataObject = {
-                    dt: datetimeStr,
-                    lat: lat,
-                    lon: lon,
-                    shape: shape,
-                    city: [city_part, raw_state, raw_country].filter(Boolean).join(', '),
-                    comment: comment,
-                    country: finalCountryCode, // Zde teď bude správně 'nz', 'pl' atd.
-                    state: raw_state,
-                    year: year,
-                    month: month,
-                    hour: hour,
-                    archive_id: archive_id
-                };
-
-                if (archive_id) archiveIdLookup[archive_id] = { lat: lat, lon: lon, city: dataObject.city };
-
-                return dataObject;
-
-            }).filter(s => s !== null);
-
-            allData = processedData;
-
-            if (allData.length === 0) {
-                infoOutput.textContent = translations[currentLanguage].infoLoadingPapaError;
-                return;
+                    const preloader = document.getElementById('preloader');
+                    if (preloader) {
+                        preloader.style.opacity = '0';
+                        setTimeout(() => { preloader.style.display = 'none'; }, 500);
+                    }
+                }, 50); // Timeout pro refresh UI před mapováním
+            },
+            error: function (error) {
+                if(infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(error.message);
+                if(preloaderText) preloaderText.innerText = "Chyba načítání / Error loading";
             }
-
-            infoOutput.innerText = translations[currentLanguage].infoLoadingPapaSuccess(allData.length);
-            initializeMap();
-
-            const preloader = document.getElementById('preloader');
-            if (preloader) {
-                preloader.style.opacity = '0';
-                setTimeout(() => { preloader.style.display = 'none'; }, 500);
-            }
-        },
-        error: function (error) {
-            infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(error.message);
-        }
-    });
+        });
+    }, 100); // Úvodní timeout pro zobrazení spinneru
 }
         // =========================================================================
         // 2. MAPA A INICIALIZACE
@@ -5837,6 +5984,7 @@ function makeElementDraggable(elementId) {
             e.target.tagName === 'SUMMARY') { 
             return; 
         }
+        document.body.style.cursor = 'grabbing';
 
         const evt = e.type === 'touchstart' ? e.touches[0] : e;
         
@@ -5924,6 +6072,7 @@ function makeElementDraggable(elementId) {
         document.onmousemove = null;
         document.ontouchend = null;
         document.ontouchmove = null;
+        document.body.style.cursor = 'default';
         
         if (rafId) {
             cancelAnimationFrame(rafId);
@@ -5957,40 +6106,75 @@ function makeElementDraggable(elementId) {
             makeElementDraggable("sources-panel");
             makeElementDraggable("help-panel");
             
-            // === OVLÁDÁNÍ PANELŮ (RYCHLÉ - BEZ LAGŮ) ===
+            // === OVLÁDÁNÍ PANELŮ S VIZUÁLNÍM NAČÍTÁNÍM ===
             window.togglePanel = function(panelId) {
                 const el = document.getElementById(panelId);
                 if (!el) return;
 
+                // Pokud chceme panel ZAVŘÍT, uděláme to hned (to je obvykle rychlé)
                 if (el.style.display === 'block' || el.style.display === 'flex') {
                     el.style.display = 'none';
-                } else {
-
-                    el.style.display = 'flex';
-                    bringToFront(el);
-                
-                 if (window.innerWidth <= 768) {
-                        // Resetujeme veškeré manuální pozice z Drag&Drop
-                        el.style.top = '';
-                        el.style.left = '';
-                        el.style.right = '';
-                        el.style.bottom = '';
-                        el.style.margin = '';
-                        // Vycentrování pomocí transformace
-                        el.style.transform = '';
-                        
-                        // Zajistíme, že šířka nepřeteče
-                        el.style.width = '95%';
-                        el.style.maxWidth = '400px';
-                        el.style.maxHeight = '80vh'; // Aby se vešel na výšku
+                    
+                    // Speciální logika pro mobilní menu
+                    const nav = document.getElementById('main-nav');
+                    if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
+                        nav.classList.remove('active');
                     }
+                    return;
                 }
-                // Speciální logika pro mobilní menu (zavřít hamburger po kliknutí)
-                const nav = document.getElementById('main-nav');
-                if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
-                    nav.classList.remove('active');
+
+                // Pokud chceme panel OTEVŘÍT, použijeme Loader, aby UI nezamrzlo bez odezvy
+                const loader = document.getElementById('processing-indicator');
+                const loaderText = document.getElementById('processing-text');
+                
+                // 1. Zobrazit loader
+                if (loader) {
+                    loader.style.display = 'block';
+                    if (loaderText) loaderText.innerText = "Otevírám panel...";
                 }
-            }
+
+                // 2. Počkat 50ms, aby prohlížeč stihl vykreslit loader, pak provést těžkou práci
+                setTimeout(() => {
+                    try {
+                        el.style.display = 'flex';
+                        
+                        // Zvednout panel do popředí
+                        if (typeof bringToFront === 'function') {
+                            bringToFront(el);
+                        }
+                    
+                        // Responzivní logika (pro mobily)
+                        if (window.innerWidth <= 768) {
+                            el.style.top = '';
+                            el.style.left = '';
+                            el.style.right = '';
+                            el.style.bottom = '';
+                            el.style.margin = '';
+                            el.style.transform = '';
+                            el.style.width = '95%';
+                            el.style.maxWidth = '400px';
+                            el.style.maxHeight = '80vh';
+                            
+                            // Vycentrování na střed obrazovky
+                            el.style.left = '50%';
+                            el.style.top = '100px';
+                            el.style.transform = 'translateX(-50%)';
+                        }
+
+                        // Speciální logika pro mobilní menu (zavření)
+                        const nav = document.getElementById('main-nav');
+                        if (nav && window.innerWidth < 900 && panelId !== 'main-nav') {
+                            nav.classList.remove('active');
+                        }
+
+                    } catch (err) {
+                        console.error("Chyba při otevírání panelu:", err);
+                    } finally {
+                        // 3. Skrýt loader (vždy, i když dojde k chybě)
+                        if (loader) loader.style.display = 'none';
+                    }
+                }, 50); // Krátká pauza pro překreslení UI
+            };
             
             window.togglePanel = togglePanel;
 
