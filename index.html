@@ -3384,66 +3384,37 @@ function loadDataWithPapaParse() {
                     }
                 });
 
-              // === OPRAVA: Robustní definice lupy (začátek) ===
-// Odstraníme případné staré instance
-map.eachLayer(layer => {
-    if (layer instanceof L.Control.Geocoder) { map.removeControl(layer); }
-});
+              map.eachLayer(layer => {
+                    if (layer instanceof L.Control.Geocoder) { map.removeControl(layer); }
+                });
+                const geocoder = L.Control.Geocoder.nominatim();
 
-// 1. Nastavení Nominatim s použitím CORS Proxy pro localhost
-const geocoder = L.Control.Geocoder.nominatim({
-    // Trik: serviceUrl nasměrujeme přes proxy
-    serviceUrl: 'https://corsproxy.io/?https://nominatim.openstreetmap.org/',
-    geocodingQueryParams: {
-        limit: 5,
-        addressdetails: 1,
-        'accept-language': currentLanguage,
-        'email': 'demo@uapmap.com'
-    }
-});
-
-// 2. Vytvoření ovládacího prvku
-geocoderControl = L.Control.geocoder({
-    position: 'topright',
-    collapsed: true,
-    placeholder: translations[currentLanguage].geocoderPlaceholder,
-    geocoder: geocoder,
-    defaultMarkGeocode: false,
-    errorMessage: 'Nic nenalezeno / Nothing found',
-    suggestMinLength: 3, 
-    suggestTimeout: 300,  
-    queryMinLength: 1     
-});
-geocoderControl.addTo(map);
-
-if(map.zoomControl) map.zoomControl.setPosition('topright');
-
-// 3. Ruční obsluha výsledku
-geocoderControl.on('markgeocode', function (e) {
-    try {
-        const bbox = e.geocode.bbox;
-        const center = e.geocode.center;
-
-        if (this._input) { this._input.blur(); }
-
-        if (bbox) {
-            map.fitBounds(bbox, { padding: [50, 50], maxZoom: 10 });
-        } else {
-            map.setView(center, 10);
-        }
-        
-        setTimeout(() => {
-            L.popup()
-             .setLatLng(center)
-             .setContent(`<b>${e.geocode.name}</b>`)
-             .openOn(map);
-        }, 800);
-
-    } catch (err) {
-        console.error("Chyba geocoderu:", err);
-    }
-});
-// === OPRAVA: Robustní definice lupy (konec) ===
+                geocoderControl = L.Control.geocoder({
+                    position: 'topright',
+                    collapsed: true,
+                    placeholder: translations[currentLanguage].geocoderPlaceholder,
+                    geocoder: geocoder,
+                    defaultMarkGeocode: false
+                });
+                geocoderControl.addTo(map);
+                geocoderControl.on('markgeocode', function(e) {
+                    var bbox = e.geocode.bbox;
+                    // Vytvoříme obdélník z nalezených souřadnic a zazoomujeme na něj
+                    var poly = L.polygon([
+                        bbox.getSouthEast(),
+                        bbox.getNorthEast(),
+                        bbox.getNorthWest(),
+                        bbox.getSouthWest()
+                    ]);
+                    map.fitBounds(poly.getBounds(), { padding: [20, 20] });
+                    
+                    // Volitelně: Můžeme uživateli říct, že body musí po přesunu aktualizovat
+                    const statusEl = document.getElementById('info-output');
+                    if (statusEl) {
+                        statusEl.innerHTML = translations[currentLanguage].geocoderSearching || "Lokalita nalezena. Pohněte mapou pro načtení bodů.";
+                    }
+                });
+                map.zoomControl.setPosition('topright');
 
                 // === AUTOMATICKÝ POSUN OVLÁDACÍCH PRVKŮ A PANELŮ ===
                 setTimeout(() => {
