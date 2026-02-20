@@ -266,18 +266,38 @@
                 border-bottom-left-radius: 8px;
                 max-height: calc(100vh - 70px); /* Maximální výška odečte hlavičku */
                 overflow-y: auto !important; /* Povolí vertikální posuvník */
+                overflow-x: hidden;
                 -webkit-overflow-scrolling: touch;
                 touch-action: pan-y; /* Povolí vertikální posun prstem */
                 overscroll-behavior: contain;
                 z-index: 9999;
+                box-sizing: border-box;
             }
             .nav-menu.active { display: flex; }
+            .nav-menu li {
+                width: 100%;
+                box-sizing: border-box;
+            }
             .nav-btn {
                 width: 100%;
                 text-align: left;
                 border-bottom: 1px solid #333;
-                padding: 15px 20px;
-                font-size: 1.1em;
+                border-top: none;
+                border-left: none;
+                border-right: none;
+                border-radius: 0; /* Kulaté rohy nejsou v bočním menu žádané */
+                padding: 12px 15px; /* Mírně upravené odsazení */
+                font-size: 1.05em;
+                line-height: 1.4; /* Lepší čitelnost víceřádkového textu */
+                white-space: normal; /* OPRAVA: Povolí zalamování dlouhého textu pod sebe */
+                box-sizing: border-box; /* OPRAVA: Tlačítka už nebudou vyjíždět ze sloupce */
+            }
+            #lang-switcher {
+                margin: 15px auto;
+                display: block;
+                width: calc(100% - 30px);
+                text-align: center;
+                box-sizing: border-box;
             }
         }
         /* Mobilní optimalizace ovládacích prvků */
@@ -1016,6 +1036,16 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         .panel-opening {
             animation: panelFadeIn 0.2s ease-out forwards;
         }
+        /* Zajištění čitelnosti odkazů v Podmínkách užití */
+        #terms-page a {
+            color: #00bcd4; /* Tvá hlavní světle modrá/azurová barva */
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        #terms-page a:hover {
+            color: #ffffff; /* Při najetí myší odkaz zbělá */
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -1201,35 +1231,35 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <button class="panel-close-btn" onclick="togglePanel('panel-analysis')">✕</button>
         <h3 data-translate-key="analysisTitle" style="color: #03a9f4;">📊 Analýza a export</h3>
         
-        <label style="font-size: 0.85em; color: #aaa;">Rychlý výběr oblasti:</label>
+        <label style="font-size: 0.85em; color: #aaa;" data-translate-key="analysisQuickArea">Rychlý výběr oblasti:</label>
         <div style="display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 10px;">
-             <button onclick="filterByArea('world')" style="width: 100%; font-size: 0.85em; background: #607d8b; padding: 6px;">🌍 Celý svět</button>
+             <button onclick="filterByArea('world')" data-translate-key="areaWorld" style="width: 100%; font-size: 0.85em; background: #607d8b; padding: 6px;">🌍 Celý svět</button>
             
-            <button onclick="filterByArea('na')" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🌎 S. Amerika</button>
-            <button onclick="filterByArea('eu')" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">Evropa</button>
+            <button onclick="filterByArea('na')" data-translate-key="areaNA" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🌎 S. Amerika</button>
+            <button onclick="filterByArea('eu')" data-translate-key="areaEU" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">Evropa</button>
             
-            <button onclick="filterByArea('sa')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🌎 J. Amerika</button>
-            <button onclick="filterByArea('as')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🏯 Asie</button>
-            <button onclick="filterByArea('au')" style="flex: 1 0 30%; font-size: 0.8em; background: #333; padding: 5px;">🦘 Austrálie/Oceánie</button>
+            <button onclick="filterByArea('sa')" data-translate-key="areaSA" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🌎 J. Amerika</button>
+            <button onclick="filterByArea('as')" data-translate-key="areaAS" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🏯 Asie</button>
+            <button onclick="filterByArea('au')" data-translate-key="areaAU" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🦘 Austrálie/Oceánie</button>
 
-            <button onclick="filterByArea('af')" style="flex: 1 0 48%; font-size: 0.8em; background: #333; padding: 5px;">🐘 Afrika</button>
-            <button onclick="filterByArea('an')" style="flex: 1 0 48%; font-size: 0.8em; background: #333; padding: 5px;">❄️ Antarktida</button>
+            <button onclick="filterByArea('af')" data-translate-key="areaAF" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">🐘 Afrika</button>
+            <button onclick="filterByArea('an')" data-translate-key="areaAN" style="flex: 1 0 48%; font-size: 0.8em; background: #444; padding: 5px;">❄️ Antarktida</button>
         </div>
-        <label for="country-filter" style="font-size: 0.85em;" data-translate-key="analysisCountryLabel">Země (nebo konkrétní místo):</label>
+        <label for="country-filter" style="font-size: 0.85em;" data-translate-key="analysisCountryLabel">Konkrétní země (název nebo kód):</label>
         <div style="display: flex; gap: 5px;">
-            <input type="text" id="country-filter" placeholder="kód/název (např. cz, Poland)" style="margin-top: 5px; width: 60%;">
-            <button id="generate-country-chart" style="background-color: #e91e63; margin-top: 5px; width: 40%; padding: 5px; font-size: 0.8em;">Graf</button>
+            <input type="text" id="country-filter" data-translate-key-placeholder="analysisCountryPlaceholder" placeholder="kód/název (např. cz, Poland)" style="margin-top: 5px; width: 60%; border: 2px solid #00bcd4;">
+            <button id="generate-country-chart" data-translate-key="analysisBtnChart" style="background-color: #e91e63; margin-top: 5px; width: 40%; padding: 5px; font-size: 0.8em;">Graf</button>
         </div>
         
         <div id="analysis-search-status" style="font-size: 0.8em; color: #aaa; margin-top: 5px; margin-bottom: 10px; font-style: italic; min-height: 1.2em;"></div>
         
-        <button id="generate-geo-report" class="custom-button" style="background-color: #009688; margin-top: 5px;">
+        <button id="generate-geo-report" class="custom-button" data-translate-key="reportBtn" style="background-color: #009688; margin-top: 5px;">
             📄 Generovat podrobnou zprávu
         </button>
 
         <div style="display: flex; gap: 5px; margin-top: 15px;">
-            <button id="generate-stats" style="background-color: #3f51b5; width: 50%; font-size: 0.85em;">Statistiky</button>
-            <button id="export-csv" style="background-color: #0681c3; width: 50%; font-size: 0.85em;">Export CSV</button>
+            <button id="generate-stats" data-translate-key="analysisStatsBtn" style="background-color: #3f51b5; width: 50%; font-size: 0.85em;">Statistiky</button>
+            <button id="export-csv" data-translate-key="analysisExportBtn" style="background-color: #0681c3; width: 50%; font-size: 0.85em;">Export CSV</button>
         </div>
 
         <div id="stats-output" style="max-height: 120px; overflow-y: auto; background: #333; border: 1px solid #555; padding: 5px; margin-top: 10px; font-size: 0.8em; display: none;"></div>
@@ -1367,6 +1397,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <span data-translate-key="footerRights">&copy; Jaroslav Svoboda 2025</span></a>. <span data-translate-key="footerThanks">| Poděkování za data: </span><a href="https://www.nuforc.org/" target="_blank">NUFORC</a>, <a href="https://www.geipan.fr/" target="_blank">GEIPAN</a>, <a href="https://www.cufos.org/" target="_blank">CUFOS</a>, <a href="http://www.projektzare.cz/" target="_blank">projekt Záře</a>, <a href="https://cs.wikipedia.org/wiki/UFO" target="_blank">Wikipedie</a>&nbsp;a&nbsp;<a href="https://github.com/richgel999/uap_resources" target="_blank">Richard Geldreich</a>.
 
         <span data-translate-key="footerAI">| K vývoji mapy byly použity nástroje umělé inteligence: </span><a href="https://gemini.google.com/" target="_blank">Google Gemini</a> a <a href="https://copilot.microsoft.com/" target="_blank">Microsoft Copilot</a>.
+        | <a href="#" onclick="document.getElementById('terms-page').style.display='block'; return false;" data-translate-key="footerTerms" style="cursor: pointer; font-weight: bold; color: var(--primary-color);">Podmínky užití</a>
         
         <span style="opacity: 0.6; margin-left: 10px;">
             | <span data-translate-key="footerVisits">Návštěvy:</span> 
@@ -1551,7 +1582,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 infoP1: "Autorem návrhu mapy a grafického loga je Jaroslav Svoboda z České republiky, tato mapa vizualizuje historická data pozorování <strong>neznámých atmosférických fenoménů (UAP) / neidentifikovaných létajících objektů (UFO)</strong> za 20. století a za první čtvrtinu 21. století. K zobrazení jsou také další dostupné historické údaje zapsané od 15. století až po rok 2022, najdete je v panelu <strong>Badatelna</strong>. Formáty datumů jsou MĚSÍC DEN ROK.",
                 infoP2: '<strong>Použité AI nástroje:</strong> Při budování a úpravách tohoto kódu byly využity AI nástroje <a href="https://gemini.google.com/" target="_blank">Google Gemini</a> a <a href="https://copilot.microsoft.com/" target="_blank">Microsoft Copilot</a>.',
                 infoP3: "<strong>Poděkování za data:</strong>",
-                externalSourcesTitle: "Webové zdroje",
+                externalSourcesTitle: "Další webové zdroje",
                 filterYears: "Seznam známých případů",
                 famousCasesLabel: "Některé světově známé případy:",
                 selectCase: "Vyberte případ",
@@ -1568,7 +1599,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 filterReset: "Resetovat filtry",
                 analysisTitle: "📊 Analýza a export dat",
                 analysisDesc: "Pro hledání konkrétní země klikněte do lupy vpravo nahoře v mapě a zadejte název země ručně.",
-                analysisCountryLabel: "Země (název nebo kód):",
+                analysisCountryLabel: "Konkrétní země (název nebo kód):",
                 analysisCountryPlaceholder: "např. Česká republika, us, Francie",
                 analysisCountryBtn: "Generovat graf pro zemi",
                 chartModalTitle: (country, yMin, yMax) => `Graf pozorování UAP/UFO: ${country.toUpperCase()} (${yMin} - ${yMax})`,
@@ -1706,6 +1737,43 @@ newsSourceError: "Chyba zdroje dat (RSS).",
                 statPeakYear: "Vrcholný rok",
                 statTopShape: "Nejčastější tvar",
                 statNightTime: "Podíl nočních jevů",
+                analysisQuickArea: "Rychlý výběr oblasti:",
+                areaWorld: "🌍 Celý svět",
+                areaNA: "🌎 S. Amerika",
+                areaEU: "Evropa",
+                areaSA: "🌎 J. Amerika",
+                areaAS: "🏯 Asie",
+                areaAU: "🦘 Austrálie/Oceánie",
+                areaAF: "🐘 Afrika",
+                areaAN: "❄️ Antarktida",
+                analysisBtnChart: "Graf",
+                areaSelected: "Vybraná oblast",
+                filterSwitching: "Přepínám na:",
+                filterActiveArea: "✅ Filtr aktivní:",
+                recordsCount: "záznamů",
+                footerTerms: "Podmínky užití",
+                termsTitle: "Podmínky užití interaktivní mapy",
+                termsContent: `<p>Vítejte na UAP/UFO MAPA, webové stránce provozované autorem mapy Jaroslavem Svobodou. Tyto podmínky upravují vaše používání webu UAP/UFO MAPA.</p>
+<p><strong>Používání webu UAP/UFO MAPA</strong><br>
+Web UAP/UFO MAPA poskytuje svým uživatelům přístup k řadě zdrojů, včetně, ale nikoli výhradně, dat, informací a obsahu (souhrnně označovaných jako „materiály“) týkajícím se záznamů o pozorováních UAP/UFO fenoménů. Vaše používání webu UAP/UFO MAPA a jeho materiálů se řídí těmito Podmínkami.</p>
+<p><strong>Zákazy</strong><br>
+Používání webu UAP/UFO MAPA je omezeno pouze na zákonné účely. Konkrétně je vám bez výslovného písemného souhlasu autora zakázáno:</p>
+<ul>
+    <li>Sbírání, extrakce nebo jiné sběr jakýchkoli materiálů z UAP/UFO MAPA pro jakýkoli účel, včetně, ale nikoli výhradně, komerčního použití. To zahrnuje, ale není výhradně omezeno na použití jakýchkoli automatizovaných prostředků, jako jsou boti nebo vyhledávací roboti, k přístupu k jakýmkoli materiálům, jejich extrakci nebo sběru. Toto omezení se ale nevztahuje na dostupné mapové funkce, které jsou pro širší veřejnost v mapě aktivní, např. je možné stahovat mapou vygenerované analytické reporty.</li>
+    <li>Reprodukce, duplikace, kopírování, prodej, další prodej nebo jiné zneužívání UAP/UFO MAPA nebo jeho materiálů pro jakékoli komerční účely.</li>
+</ul>
+<p><strong>Prohlášení o vyloučení záruky</strong><br>
+UAP/UFO MAPA a jejich materiály jsou poskytovány „tak, jak jsou“ a bez jakékoli záruky, ať už výslovné nebo implicitní, včetně, ale nikoli výhradně, implicitních záruk prodejnosti, vhodnosti pro konkrétní účel nebo neporušení práv.</p>
+<p><strong>Omezení odpovědnosti</strong><br>
+Autor mapy nenese odpovědnost za žádné škody vzniklé v důsledku vašeho používání webu UAP/UFO MAPA nebo jeho materiálů, včetně, ale nikoli výhradně, nepřímých, náhodných, zvláštních nebo následných škod, a to i v případě, že autor mapy byl o možnosti takových škod informován.</p>
+<p><strong>Změny těchto podmínek</strong><br>
+Autor mapy si vyhrazuje právo kdykoli a bez předchozího upozornění provádět změny těchto podmínek. Vaše další používání webu UAP/UFO MAPA po zveřejnění jakýchkoli změn těchto podmínek představuje souhlas s těmito změnami.</p>
+<p><strong>Rozhodné právo</strong><br>
+Tyto Podmínky se řídí a vykládají v souladu se zákony státu Česká republika, bez ohledu na jakékoli principy kolize právních norem.</p>
+<p><strong>Kontaktní informace</strong><br>
+Máte-li jakékoli dotazy ohledně těchto Podmínek nebo webu UAP/UFO MAPA, kontaktujte autora prosím v kontaktním formuláři zde: <a href="https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/</a></p>
+<p><strong>Souhlas s podmínkami</strong><br>
+Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito Podmínkami. Pokud s těmito Podmínkami nesouhlasíte, web UAP/UFO MAPA prosím nepoužívejte.</p>`,
             },
             en: {
                 menuHelp: "❓ Help",
@@ -1856,7 +1924,7 @@ newsSourceError: "Chyba zdroje dat (RSS).",
                 filterReset: "Reset Filters",
                 analysisTitle: "📊 Data Analysis & Export",
                 analysisDesc: "To search for a specific country, click the magnifying glass in the top right of the map and enter the country name manually.",
-                analysisCountryLabel: "Country (name or code):",
+                analysisCountryLabel: "Specific country (name or code):",
                 analysisCountryPlaceholder: "e.g. Czech Republic, us, France",
                 analysisCountryBtn: "Generate chart for country",
                 chartModalTitle: (country, yMin, yMax) => `UAP/UFO Sighting Chart: ${country.toUpperCase()} (${yMin} - ${yMax})`,
@@ -1994,6 +2062,44 @@ reportBtn: "📄 Generate Detailed Report",
                 statPeakYear: "Peak Year",
                 statTopShape: "Top Shape",
                 statNightTime: "Nighttime Ratio",
+                analysisQuickArea: "Quick area selection:",
+                areaWorld: "🌍 Whole World",
+                areaNA: "🌎 N. America",
+                areaEU: "Europe",
+                areaSA: "🌎 S. America",
+                areaAS: "🏯 Asia",
+                areaAU: "🦘 Australia/Oceania",
+                areaAF: "🐘 Africa",
+                areaAN: "❄️ Antarctica",
+                analysisBtnChart: "Chart",
+                areaSelected: "Selected area",
+                filterSwitching: "Switching to:",
+                filterActiveArea: "✅ Filter active:",
+                recordsCount: "records",
+                footerTerms: "Terms of Use",
+                termsTitle: "Interactive Map Terms of Use",
+                termsContent: `<p>Welcome to UAP/UFO MAPA, a website operated by the author of the map, Jaroslav Svoboda. These terms govern your use of the UAP/UFO MAPA website.</p>
+<p><strong>Use of the UAP/UFO MAPA website</strong><br>
+The UAP/UFO MAPA website provides its users with access to a variety of resources, including, but not limited to, data, information, and content (collectively, the "Materials") relating to records of UAP/UFO sightings. Your use of the UAP/UFO MAPA website and its materials is governed by these Terms.</p>
+<p><strong>Prohibitions</strong><br>
+Your use of the UAP/UFO MAPA website is limited to lawful purposes only. Specifically, you are prohibited from:</p>
+<ul>
+    <li>Collect, extract, or otherwise collect any materials from the UAP/UFO MAPA for any purpose, including, but not limited to, commercial use. This includes, but is not limited to, the use of any automated means, such as bots or search robots, to access, extract or collect any materials. However, this restriction does not apply to available map functions that are active for the general public in the map, e.g. it is possible to download analytical reports generated by the map.</li>
+    <li>Reproduction, duplication, copying, sale, resale or other exploitation of UAP/UFO MAPA or its materials for any commercial purposes.</li>
+</ul>
+<p><strong>Warranty Disclaimer</strong><br>
+UAP/UFO MAPA and its materials are provided "as is" and without warranty of any kind, either express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose or non-infringement.</p>
+<p><strong>Limitation of Liability</strong><br>
+The map author is not liable for any damages arising from your use of the UAP/UFO MAPA website or its materials, including, but not limited to, indirect, incidental, special or consequential damages, even if the map author has been advised of the possibility of such damages.</p>
+<p><strong>Changes to these terms and conditions</strong><br>
+The map author reserves the right to make changes to these terms and conditions at any time and without prior notice. Your continued use of the UAP/UFO MAPA website following the posting of any changes to these terms constitutes your acceptance of those changes.</p>
+<p><strong>Governing Law</strong><br>
+These Terms shall be governed by and construed in accordance with the laws of the Czech Republic, without regard to any principles of conflict of laws.</p>
+<p><strong>Contact Information</strong><br>
+If you have any questions regarding these Terms or the UAP/UFO MAPA website, please contact the author using the contact form here: <a href="https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/</a></p>
+<p><strong>Agreement with Terms</strong><br>
+By using the UAP/UFO MAPA website, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use the UAP/UFO MAPA website.</p>`,
+                termsBackBtn: "⬅ Back to Map",
             }
         };
 
@@ -2683,7 +2789,9 @@ if (typeof updateRecordBtnUI === 'function' && typeof isRecording !== 'undefined
             };
 
            window.filterByArea = function(areaCode) {
-                // 1. Vymazání ručního vyhledávání (aby nerušilo filtr kontinentu)
+                const langData = translations[currentLanguage]; // Načtení slovníku
+
+                // 1. Vymazání ručního vyhledávání
                 const countryInput = document.getElementById('country-filter');
                 if (countryInput) {
                     countryInput.value = ""; 
@@ -2692,48 +2800,45 @@ if (typeof updateRecordBtnUI === 'function' && typeof isRecording !== 'undefined
                 // 2. Nastavíme globální filtr regionu
                 window.currentRegionFilter = areaCode;
                 
-                // 3. Nastavíme popisek pro analýzu
-                let label = "Celý svět";
+                // 3. Dynamické nastavení popisku s ohledem na jazyk
+                let label = langData.areaWorld.replace("🌍 ", "");
                 if (areaCode !== 'world') {
                     const labels = {
-                        'eu': "Evropa", 'na': "Severní Amerika", 'sa': "Jižní Amerika",
-                        'as': "Asie", 'au': "Austrálie a Oceánie", 'af': "Afrika", 'an': "Antarktida"
+                        'eu': langData.areaEU, 
+                        'na': langData.areaNA.replace("🌎 ", ""), 
+                        'sa': langData.areaSA.replace("🌎 ", ""),
+                        'as': langData.areaAS.replace("🏯 ", ""), 
+                        'au': langData.areaAU.replace("🦘 ", ""), 
+                        'af': langData.areaAF.replace("🐘 ", ""), 
+                        'an': langData.areaAN.replace("❄️ ", "")
                     };
-                    label = labels[areaCode] || "Vybraná oblast";
+                    label = labels[areaCode] || langData.areaSelected;
                 }
                 window.currentAnalysisName = label;
 
-                // 4. Aktualizujeme UI status
+                // 4. Aktualizujeme UI status s překlady
                 const statusEl = document.getElementById('analysis-search-status');
                 if(statusEl) {
-                    statusEl.innerHTML = `<span class="ai-loader"></span> Přepínám na: <strong>${label}</strong>...`;
+                    statusEl.innerHTML = `<span class="ai-loader"></span> ${langData.filterSwitching} <strong>${label}</strong>...`;
                 }
 
                 // 5. Spustíme proces s loaderem
                 updateMapWithLoader(() => {
-                    // === HLAVNÍ OPRAVA ZDE ===
-                    // Musíme explicitně přefiltrovat a překreslit body!
-                    // Tím se aktualizuje i proměnná window.currentlyFilteredData
                     if (typeof updateMarkers === 'function') {
                         updateMarkers(allData); 
                     }
-                    // =========================
 
-                    // Nyní aktualizujeme text statusu (už máme správná data)
                     if(statusEl) {
                         const count = window.currentlyFilteredData ? window.currentlyFilteredData.length : 0;
-                        statusEl.innerHTML = `✅ Filtr aktivní: <strong>${label}</strong> (${count} záznamů)`;
+                        statusEl.innerHTML = `${langData.filterActiveArea} <strong>${label}</strong> (${count} ${langData.recordsCount})`;
                         statusEl.style.color = "#4caf50";
                     }
                     
-                    // A nakonec provedeme zoom na nově vyfiltrovaná data
                     if (window.currentlyFilteredData && window.currentlyFilteredData.length > 0 && areaCode !== 'world' && map) {
                          const latLngs = window.currentlyFilteredData.map(p => [p.lat, p.lon]);
-                         // Vezmeme vzorek pro rychlý výpočet hranic (optimalizace)
                          const sample = latLngs.filter((_, i) => i % 10 === 0); 
                          const boundsData = sample.length > 0 ? sample : latLngs;
                          
-                         // Jemný zoom na oblast
                          map.fitBounds(L.latLngBounds(boundsData), { padding: [50, 50], maxZoom: 8 });
                     } else if (areaCode === 'world') {
                         map.setView([20, 0], 2);
@@ -6886,6 +6991,17 @@ function updateRecordBtnUI(recording) {
                 Tento dokument je automaticky generovaný na základě dostupných historických dat. Nemusí reflektovat kompletní realitu všech pozorování. Zdroje dat: NUFORC, GEIPAN, Záře.
             </div>
         </div>
+    </div>
+    <div id="terms-page" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background-dark); z-index: 99999; overflow-y: auto; padding: 40px; box-sizing: border-box; color: var(--text-light);">
+        <div style="max-width: 800px; margin: 0 auto; line-height: 1.6; padding-bottom: 80px;">
+            <h1 data-translate-key="termsTitle" style="color: var(--primary-color); border-bottom: 2px solid #555; padding-bottom: 10px;">Podmínky užití mapy</h1>
+            
+            <div data-translate-key="termsContent" style="margin-top: 20px;"></div>
+        </div>
+
+        <button onclick="document.getElementById('terms-page').style.display='none'" style="position: fixed; top: 50%; right: 20px; transform: translateY(-50%); background-color: var(--primary-color); color: #212121; padding: 15px 25px; border-radius: 50px; font-weight: bold; font-size: 1.1em; box-shadow: -2px 5px 15px rgba(0,0,0,0.8); z-index: 100000; width: auto; margin: 0; border: 2px solid #fff; cursor: pointer;">
+            <span data-translate-key="termsBackBtn">⬅ Zpět</span>
+        </button>
     </div>
 </body>
 </html>
