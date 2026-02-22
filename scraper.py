@@ -34,19 +34,60 @@ def update_nuforc_data():
     geo_cache = {}
     
     # 1. Získání dat z textové databáze NUFORC (Index By Event Date)
-    # Zde použijeme ukázkovou URL, v reálu může být potřeba doladit přesnou adresu, kde mají aktuálně tabulky
-    url = "https://nuforc.org/webreports/ndxevent.html"
+    # 1. Získání reálných dat z NUFORC (Index By Event Date)
+    print("Stahuji rozcestník měsíců z NUFORC...")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+    index_url = "https://nuforc.org/webreports/ndxevent.html"
     
-    # --- PRO ÚČELY TOHOTO SKRIPTU ZDE SIMULUJEME VYTAŽENÁ DATA Z WEBU ---
-    # (Protože NUFORC občas mění strukturu HTML, toto je ukázka, jak se data poskládají, jakmile je BeautifulSoup přečte)
-    raw_scraped_data = [
-        {"occurred": "07/01/2025 01:20", "city": "Prague", "state": "Prague", "country": "Czech Republic", 
-         "shape": "Unknown", "duration": "10 min", "summary": "Drone lights (green, red and white lights) no sound", 
-         "reported": "06/30/2025"},
-        {"occurred": "06/15/2025 22:00", "city": "Mustang", "state": "OK", "country": "US", 
-         "shape": "Light", "duration": "0.3 sec", "summary": "Ball of bright white light spotted near S.W. 59th.", 
-         "reported": "06/16/2025"}
-    ]
+    raw_scraped_data = []
+    
+    try:
+        response = requests.get(index_url, headers=headers, timeout=15)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Najdeme všechny odkazy směřující na jednotlivé měsíce
+        month_links = [a['href'] for a in soup.find_all('a', href=True) if 'ndxe' in a['href']]
+        
+        # Omezíme se pouze na posledních 25 měsíců (pro pokrytí tvého požadavku 24 měsíců)
+        recent_links = month_links[:25]
+        
+        for link in recent_links:
+            page_url = link if link.startswith('http') else f"https://nuforc.org/webreports/{link}"
+            print(f"Čtu tabulku z: {page_url}")
+            
+            try:
+                # Modul pandas přečte veškeré HTML tabulky na dané stránce
+                tables = pd.read_html(page_url)
+                if tables:
+                    df_month = tables[0]
+                    # Sjednocení názvů sloupců na malá písmena
+                    df_month.columns = [str(c).lower().strip() for c in df_month.columns]
+                    
+                    # Projdeme tabulku a převedeme ji do našeho formátu
+                    for index, row in df_month.iterrows():
+                        date_time = str(row.get('date / time', row.get('datetime', '')))
+                        if not date_time or date_time == 'nan':
+                            continue
+                            
+                        raw_scraped_data.append({
+                            "occurred": date_time,
+                            "city": str(row.get('city', '')).replace('nan', ''),
+                            "state": str(row.get('state', '')).replace('nan', ''),
+                            "country": str(row.get('country', '')).replace('nan', ''),
+                            "shape": str(row.get('shape', '')).replace('nan', ''),
+                            "duration": str(row.get('duration', '')).replace('nan', ''),
+                            "summary": str(row.get('summary', '')).replace('nan', ''),
+                            "reported": str(row.get('posted', row.get('reported', ''))).replace('nan', '')
+                        })
+                # Slušnost k serveru - vteřina pauza mezi stahováním měsíců
+                time.sleep(1) 
+            except Exception as e:
+                print(f"Nepodařilo se zpracovat {page_url}: {e}")
+                
+    except Exception as e:
+        print(f"Chyba při stahování hlavního indexu: {e}")
+
+    print(f"Úspěšně staženo {len(raw_scraped_data)} surových záznamů. Přistupuji ke geokódování a filtraci data...")
     
     # Výpočet data před 24 měsíci pro filtraci
     limit_date = datetime.now() - relativedelta(months=24)
