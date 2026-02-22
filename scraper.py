@@ -33,11 +33,11 @@ def update_nuforc_data():
     geolocator = Nominatim(user_agent="nuforc_github_scraper_bot")
     geo_cache = {}
     
-    # 1. Získání dat z textové databáze NUFORC (Index By Event Date)
     # 1. Získání reálných dat z NUFORC (Index By Event Date)
+    # 1. Získání reálných dat z NUFORC (nová struktura webu)
     print("Stahuji rozcestník měsíců z NUFORC...")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-    index_url = "https://nuforc.org/webreports/ndxevent.html"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    index_url = "https://nuforc.org/ndx/?id=event"
     
     raw_scraped_data = []
     
@@ -45,27 +45,28 @@ def update_nuforc_data():
         response = requests.get(index_url, headers=headers, timeout=15)
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Najdeme všechny odkazy směřující na jednotlivé měsíce
-        month_links = [a['href'] for a in soup.find_all('a', href=True) if 'ndxe' in a['href']]
+        # Najdeme všechny odkazy směřující na jednotlivé měsíce (nová struktura 'subndx')
+        month_links = [a['href'] for a in soup.find_all('a', href=True) if 'subndx' in a['href']]
         
-        # Omezíme se pouze na posledních 25 měsíců (pro pokrytí tvého požadavku 24 měsíců)
+        # Omezíme se pouze na posledních 25 měsíců
         recent_links = month_links[:25]
         
         for link in recent_links:
-            page_url = link if link.startswith('http') else f"https://nuforc.org/webreports/{link}"
+            page_url = f"https://nuforc.org{link}" if link.startswith('/') else f"https://nuforc.org/{link}"
             print(f"Čtu tabulku z: {page_url}")
             
             try:
-                # Modul pandas přečte veškeré HTML tabulky na dané stránce
+                # pandas umí krásně přečíst HTML tabulky
                 tables = pd.read_html(page_url)
                 if tables:
                     df_month = tables[0]
-                    # Sjednocení názvů sloupců na malá písmena
                     df_month.columns = [str(c).lower().strip() for c in df_month.columns]
                     
-                    # Projdeme tabulku a převedeme ji do našeho formátu
                     for index, row in df_month.iterrows():
-                        date_time = str(row.get('date / time', row.get('datetime', '')))
+                        # Hledáme správný název sloupce pro datum
+                        date_col = 'occurred' if 'occurred' in df_month.columns else ('date / time' if 'date / time' in df_month.columns else 'datetime')
+                        date_time = str(row.get(date_col, ''))
+                        
                         if not date_time or date_time == 'nan':
                             continue
                             
@@ -77,9 +78,9 @@ def update_nuforc_data():
                             "shape": str(row.get('shape', '')).replace('nan', ''),
                             "duration": str(row.get('duration', '')).replace('nan', ''),
                             "summary": str(row.get('summary', '')).replace('nan', ''),
-                            "reported": str(row.get('posted', row.get('reported', ''))).replace('nan', '')
+                            "reported": str(row.get('reported', row.get('posted', ''))).replace('nan', '')
                         })
-                # Slušnost k serveru - vteřina pauza mezi stahováním měsíců
+                # Pauza mezi stahováním jednotlivých měsíců
                 time.sleep(1) 
             except Exception as e:
                 print(f"Nepodařilo se zpracovat {page_url}: {e}")
@@ -88,9 +89,9 @@ def update_nuforc_data():
         print(f"Chyba při stahování hlavního indexu: {e}")
 
     print(f"Úspěšně staženo {len(raw_scraped_data)} surových záznamů. Přistupuji ke geokódování a filtraci data...")
-    
-    # Výpočet data před 24 měsíci pro filtraci
-    limit_date = datetime.now() - relativedelta(months=24)
+
+    # ZDE JE TEN TESTOVACÍ OMEZOVAČ NA 30 ZÁZNAMŮ (Až si ověříš, že to funguje, smaž to [:30] )
+    for row in raw_scraped_data[:100]:
     
     formatted_rows = []
     
