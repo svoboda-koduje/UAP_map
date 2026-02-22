@@ -6,22 +6,20 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
 import csv
+import io
 
 def get_coordinates(city, state, country, geolocator, cache):
-    """Získá GPS souřadnice pro dané město přes OpenStreetMap (s respektem k jejich limitům)."""
     query = f"{city}, {state}, {country}"
     if query in cache:
         return cache[query]
-    
     try:
         location = geolocator.geocode(query, timeout=10)
-        time.sleep(1.1)  # Nutná prodleva pro bezplatný server OSM
+        time.sleep(1.1)
         if location:
             cache[query] = (location.latitude, location.longitude)
             return cache[query]
     except Exception as e:
         print(f"Chyba při geokódování {query}: {e}")
-    
     cache[query] = ("", "")
     return cache[query]
 
@@ -30,35 +28,43 @@ def update_nuforc_data():
     geolocator = Nominatim(user_agent="nuforc_github_scraper_bot")
     geo_cache = {}
     
-    # 1. Získání reálných dat z NUFORC (nová struktura webu)
-    print("Stahuji rozcestník měsíců z NUFORC...")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    # Skrýváme se za standardní prohlížeč Chrome, aby nás server nezablokoval
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
     index_url = "https://nuforc.org/ndx/?id=event"
     
     raw_scraped_data = []
     
     try:
+        print(f"Připojuji se na hlavní rozcestník: {index_url}")
         response = requests.get(index_url, headers=headers, timeout=15)
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Najdeme všechny odkazy směřující na jednotlivé měsíce
         month_links = [a['href'] for a in soup.find_all('a', href=True) if 'subndx' in a['href']]
-        recent_links = month_links[:25] # Stačí nám 25 nejnovějších měsíců
+        print(f"Nalezeno {len(month_links)} odkazů na měsíce.")
+        
+        recent_links = month_links[:25]
         
         for link in recent_links:
-            page_url = f"https://nuforc.org{link}" if link.startswith('/') else f"https://nuforc.org/{link}"
+            page_url = f"https://nuforc.org{link}" if link.startswith('/') else (link if link.startswith('http') else f"https://nuforc.org/{link}")
             print(f"Čtu tabulku z: {page_url}")
             
             try:
-                tables = pd.read_html(page_url)
+                # Obejít blokování od serverů - stáhneme ručně přes requests, až pak čte pandas
+                page_response = requests.get(page_url, headers=headers, timeout=15)
+                tables = pd.read_html(io.StringIO(page_response.text))
+                
                 if tables:
                     df_month = tables[0]
                     df_month.columns = [str(c).lower().strip() for c in df_month.columns]
                     
                     for index, row in df_month.iterrows():
-                        date_col = 'occurred' if 'occurred' in df_month.columns else ('date / time' if 'date / time' in df_month.columns else 'datetime')
-                        date_time = str(row.get(date_col, ''))
+                        # Inteligentní detekce sloupce s datem (kdyby náhodou NUFORC měnil názvy)
+                        date_col = next((col for col in df_month.columns if 'occurred' in col or 'date / time' in col or 'datetime' in col), None)
                         
+                        if not date_col:
+                            continue
+                            
+                        date_time = str(row.get(date_col, ''))
                         if not date_time or date_time == 'nan':
                             continue
                             
@@ -72,35 +78,40 @@ def update_nuforc_data():
                             "summary": str(row.get('summary', '')).replace('nan', ''),
                             "reported": str(row.get('reported', row.get('posted', ''))).replace('nan', '')
                         })
-                time.sleep(1) # Slušnost k serveru NUFORC
+                    print(f"Úspěšně zpracováno, prozatímní počet hlášení: {len(raw_scraped_data)}")
+                else:
+                    print(f"Na stránce {page_url} nebyla nalezena žádná tabulka.")
+                
+                time.sleep(1) 
             except Exception as e:
-                print(f"Nepodařilo se zpracovat {page_url}: {e}")
+                print(f"Chyba při zpracování tabulky {page_url}: {e}")
                 
     except Exception as e:
-        print(f"Chyba při stahování hlavního indexu: {e}")
+        print(f"Kritická chyba při stahování hlavního indexu: {e}")
 
-    print(f"Úspěšně staženo {len(raw_scraped_data)} surových záznamů. Přistupuji ke geokódování a filtraci data...")
+    print(f"CELKEM staženo {len(raw_scraped_data)} surových záznamů z webu.")
 
-    # Výpočet limitního data (24 měsíců zpět)
+    # Ochrana proti tvorbě prázdných souborů
+    if len(raw_scraped_data) == 0:
+        print("POZOR: Nepodařilo se stáhnout žádná data. Skript nemůže pokračovat a bude ukončen.")
+        raise Exception("Nebyly staženy žádné záznamy.")
+
     limit_date = datetime.now() - relativedelta(months=24)
     formatted_rows = []
     
-    # ZDE JE TEN TESTOVACÍ OMEZOVAČ NA 30 ZÁZNAMŮ
+    print("Přistupuji ke geokódování a formátování (TESTOVACÍ VZOREK 30 ZÁZNAMŮ)...")
     for row in raw_scraped_data[:30]:
         try:
-            # Ošetření různých formátů data pro filtraci
             date_str = row["occurred"].split(" ")[0]
             if len(date_str.split('/')) == 3:
                 event_date = datetime.strptime(date_str, "%m/%d/%Y")
                 if event_date < limit_date:
-                    continue # Přeskočí staré záznamy
-        except Exception as e:
-            pass # Pokud datum nejde rozparsovat, záznam propustíme
+                    continue
+        except Exception:
+            pass
             
-        # Získání GPS přes API
         lat, lng = get_coordinates(row["city"], row["state"], row["country"], geolocator, geo_cache)
         
-        # Sestavení finálního řádku
         formatted_rows.append({
             "datetime": row["occurred"],
             "city": row["city"].upper() if row["city"] else "",
@@ -115,7 +126,6 @@ def update_nuforc_data():
             "longitude": lng,
             "archive_id": ""
         })
-        print(f"Zpracováno: {row['city']} -> Lat: {lat}, Lng: {lng}")
 
     columns = [
         "datetime", "city", "state", "country", "shape", 
@@ -123,11 +133,10 @@ def update_nuforc_data():
         "comments", "date posted", "latitude", "longitude", "archive_id"
     ]
     
-    # Export do CSV
     df = pd.DataFrame(formatted_rows, columns=columns)
     filename = "nuforc_aktualni_pozorovani.csv"
     df.to_csv(filename, index=False, encoding='utf-8', quoting=csv.QUOTE_MINIMAL)
-    print(f"Hotovo! Uloženo do {filename}")
+    print(f"Hotovo! Uloženo do {filename}. Počet skutečně uložených řádků: {len(df)}")
 
 if __name__ == "__main__":
     update_nuforc_data()
