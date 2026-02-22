@@ -1,0 +1,39 @@
+name: Automatická aktualizace dat NUFORC
+
+on:
+  schedule:
+    # Tento zápis znamená spuštění každou neděli o půlnoci (UTC)
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    # Tento řádek nám umožní spouštět proces manuálně tlačítkem na GitHubu (skvělé pro testování!)
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+
+    # Důležité povolení, aby mohl bot zapisovat zpět do tvého repozitáře
+    permissions:
+      contents: write
+
+    steps:
+      - name: Stáhnutí repozitáře
+        uses: actions/checkout@v3
+
+      - name: Příprava prostředí Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalace potřebných knihoven
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests beautifulsoup4 geopy python-dateutil
+
+      - name: Spuštění stahovacího skriptu
+        run: python scraper.py
+
+      - name: Uložení a odeslání CSV do repozitáře
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automatická aktualizace dat o pozorování (posledních 24 měsíců)"
+          file_pattern: "nuforc_aktualni_pozorovani.csv"
