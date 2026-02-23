@@ -38,7 +38,7 @@ def update_nuforc_data():
         soup = BeautifulSoup(response.text, 'html.parser')
         
         month_links = [a['href'] for a in soup.find_all('a', href=True) if 'subndx' in a['href']]
-        recent_links = month_links[:25] # Stačí posledních 25 měsíců
+        recent_links = month_links[:38]
         
         for link in recent_links:
             page_url = f"https://nuforc.org{link}" if link.startswith('/') else f"https://nuforc.org/{link}"
@@ -82,13 +82,13 @@ def update_nuforc_data():
     if len(raw_scraped_data) == 0:
         raise Exception("Nebyly staženy žádné záznamy.")
 
-    limit_date = datetime.now() - relativedelta(months=24)
+    limit_date = datetime(2023, 1, 1)
     formatted_rows = []
     
     print("Přistupuji ke geokódování a formátování (TESTOVACÍ VZOREK 30 ZÁZNAMŮ)...")
     
     # TESTOVACÍ OMEZOVAČ - POKUD VŠE ZAFUNGUJE, SMAŽ TOTO [:30] A NECH TAM JEN: for row in raw_scraped_data:
-    for row in raw_scraped_data[:30]:
+    for row in raw_scraped_data:
         try:
             date_str = row["occurred"].split(" ")[0]
             if len(date_str.split('/')) == 3:
