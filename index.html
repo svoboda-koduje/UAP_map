@@ -183,15 +183,6 @@
                 display: block; 
                 margin: 4px 3px; /* Malý odstup pro případ zalomení řádků */
             }
-
-            /* Přepínač jazyka (poslední v seznamu) */
-            #lang-switcher {
-                margin-left: auto; /* Pokud je místo, odtlačí se doprava, jinak se zařadí */
-                background-color: var(--primary-color);
-                color: #212121;
-                border: none;
-                height: 34px; 
-            }
             
             /* Třída pro JS posouvání již není potřeba pro tento typ layoutu, 
                protože tlačítka se zalomí a jsou všechna vidět. */
@@ -234,20 +225,69 @@
             color: var(--primary-color);
             background: none;
             border: none;
+            order: 4; /* ZMĚNA: Zařadí se vždy jako absolutně poslední prvek vpravo */
+            margin-right: 5px;
+            min-width: 40px; /* Zajištění stejné šířky pro text i loader */
+            text-align: center;
+        }
+        .hamburger-loader {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
+
+        /* Nové tlačítko Nápovědy v hlavičce */
+        #header-help-btn {
+            margin-left: auto; /* ZMĚNA: Toto odtlačí nápovědu i jazyk úplně doprava */
+            margin-right: 5px; /* Malá mezera mezi Nápovědou a tlačítkem EN */
+            margin-top: -2px;
+            box-sizing: border-box;
+            order: 2; /* Zařadí se za menu, ale před EN a Hamburger */
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            height: 34px;
+            width: auto;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3001;
+            transition: all 0.2s;
+        }
+
+        #header-help-btn:hover {
+            background-color: #333;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
         }
 
         #lang-switcher {
+            margin-left: 0; /* ZMĚNA: Přenechali jsme funkci 'auto' tlačítku Nápovědy */
+            margin-right: 15px; 
+            order: 3; /* ZMĚNA: Zařadí se za Nápovědu, ale před Hamburger */
             background-color: var(--primary-color);
             color: var(--background-dark);
             border: none;
-            padding: 5px 10px;
+            padding: 0 15px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.8em;
-            margin-left: 10px;
-            width: auto;
-            margin-right: 20px;
+            font-size: 0.9em;
+            height: 34px;
+            width: auto; 
+            min-width: 50px; 
+            flex-shrink: 0; 
+            margin-top: 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3001; 
         }
 
         /* RESPONZIVITA MENU */
@@ -292,13 +332,7 @@
                 white-space: normal; /* OPRAVA: Povolí zalamování dlouhého textu pod sebe */
                 box-sizing: border-box; /* OPRAVA: Tlačítka už nebudou vyjíždět ze sloupce */
             }
-            #lang-switcher {
-                margin: 15px auto;
-                display: block;
-                width: calc(100% - 30px);
-                text-align: center;
-                box-sizing: border-box;
-            }
+ 
         }
         /* Mobilní optimalizace ovládacích prvků */
 @media (max-width: 768px) {
@@ -397,7 +431,8 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             top: calc(var(--header-height) + 180px); 
             left: 10px; 
             bottom: auto; 
-            height: auto; 
+            height: auto;
+            max-height: calc(100vh - 280px); 
         }
 
         #panel-timeline {
@@ -1066,7 +1101,10 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <span id="title" data-translate-key="mapTitle">Interaktivní mapa UAP</span>
         </div>
 
-        <button class="hamburger" onclick="document.getElementById('main-nav').classList.toggle('active')">☰</button>
+        <button class="hamburger" onclick="toggleMobileMenu()">
+    <span class="hamburger-icon">☰</span>
+    <span class="hamburger-loader ai-loader" style="display: none; margin: 0;"></span>
+</button>
 
         <ul class="nav-menu" id="main-nav">
             <li><button class="nav-btn" onclick="togglePanel('panel-famous')" data-translate-key="menuFamous">⭐ Známé případy pozorování UFO/UAP</button></li>
@@ -1082,11 +1120,10 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <li><button class="nav-btn" onclick="togglePanel('news-panel')" data-translate-key="menuNews">📡 Live News</button></li>
             <li><button class="nav-btn" onclick="togglePanel('archive-panel')" data-translate-key="menuResearch">🛠️ Badatelna</button></li>
             <li><button class="nav-btn" onclick="togglePanel('sources-panel')" data-translate-key="menuSources">🌐 Další webové zdroje</button></li>
-            <li><button class="nav-btn" onclick="togglePanel('help-panel')" data-translate-key="menuHelp">❓ Nápověda / Help</button></li>
             <li><button class="nav-btn" onclick="togglePanel('info-dropdown-bottom-left')" data-translate-key="menuInfo">ℹ️ Info o mapě</button></li>
-            
-            <li><button id="lang-switcher">EN</button></li>
         </ul>
+        <button id="header-help-btn" onclick="togglePanel('help-panel')" data-translate-key="menuHelp">❓ Nápověda / Help</button>
+        <button id="lang-switcher">EN</button>
     </div>
 
     <div id="map"></div>
@@ -1096,7 +1133,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <details>
             <summary data-translate-key="infoTitle">Informace</summary>
             <div class="info-dropdown-content">
-                <p data-translate-key="infoP1">Autorem návrhu mapy a grafického loga je Jaroslav Svoboda z České republiky, tato mapa vizualizuje historická data pozorování <strong>neznámých atmosférických fenoménů (UAP) / neidentifikovaných létajících objektů (UFO)</strong> za 20. století a za první čtvrtinu 21. století. K zobrazení jsou také další dostupné historické údaje zapsané od 15. století až po rok 2022, najdete je v panelu <strong>Badatelna</strong>. Formáty datumů všech záznamů jsou MĚSÍC DEN ROK.</p>
+                <p data-translate-key="infoP1">Autorem návrhu mapy a grafického loga je Jaroslav Svoboda z České republiky, tato mapa vizualizuje historická data pozorování <strong>neznámých atmosférických fenoménů (UAP) / neidentifikovaných létajících objektů (UFO)</strong> za 20. století a za první čtvrtinu 21. století. K zobrazení jsou také další dostupné historické údaje zapsané od 15. století až po současnost, najdete je v panelu <strong>Badatelna</strong>. Formáty datumů všech záznamů jsou MĚSÍC DEN ROK.</p>
 
                 <p data-translate-key="infoP2">
                     <strong>Použité AI nástroje:</strong> Při budování a úpravách tohoto kódu byly využity AI nástroje
@@ -1154,13 +1191,13 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <hr style="border-color: #444; margin: 10px 0;">
 
         <label for="year-min" data-translate-key="filterYearMin">Minimální rok: <span id="year-min-val">1900</span></label>
-        <input type="range" id="year-min" min="1900" max="2025" value="1900">
+        <input type="range" id="year-min" min="1900" max="2030" value="1900">
 
-        <label for="year-max" data-translate-key="filterYearMax">Maximální rok: <span id="year-max-val">2025</span></label>
-        <input type="range" id="year-max" min="1900" max="2025" value="2025">
+        <label for="year-max" data-translate-key="filterYearMax">Maximální rok: <span id="year-max-val">2030</span></label>
+        <input type="range" id="year-max" min="1900" max="2030" value="2030">
 
         <label for="specific-year" style="margin-top: 10px;" data-translate-key="filterYearSpecific">Zadat konkrétní rok:</label>
-        <input type="number" id="specific-year" placeholder="Např. 1997" min="1900" max="2025">
+        <input type="number" id="specific-year" placeholder="Např. 1997" min="1900" max="2026">
         
         <button id="apply-filters" class="primary-button" data-translate-key="filterApply" style="margin-top: 15px;">Aplikovat manuální filtry</button>
         <button id="reset-filters" style="background-color: #607d8b; margin-top: 5px;" data-translate-key="filterReset">Resetovat filtry</button>
@@ -1193,9 +1230,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <label data-translate-key="timelineRange">Rozsah přehrávání:</label>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="number" id="timeline-start-year" value="1940" min="1400" max="2025" style="width: 70px;">
+            <input type="number" id="timeline-start-year" value="1940" min="1400" max="2026" style="width: 70px;">
             <span data-translate-key="timelineTo">až</span>
-            <input type="number" id="timeline-end-year" value="2025" min="1400" max="2025" style="width: 70px;">
+            <input type="number" id="timeline-end-year" value="2026" min="1400" max="2026" style="width: 70px;">
         </div>
     </div>
 
@@ -1209,6 +1246,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání:</label>
         <input type="text" id="comment-search" placeholder="Hledat text..." >
+        <button class="reset-data-btn" style="background-color: #607d8b; margin-top: 15px;" onclick="updateMapWithLoader(() => resetFilters(), 'Resetuji filtry a text...')">
+    Resetovat filtry a hledání
+</button>
         </div>
 
     <div id="panel-view" class="sidebar-panel">
@@ -1264,6 +1304,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <div id="stats-output" style="max-height: 120px; overflow-y: auto; background: #333; border: 1px solid #555; padding: 5px; margin-top: 10px; font-size: 0.8em; display: none;"></div>
         <button id="hide-stats" style="background-color: #607d8b; margin-top: 5px; font-size: 0.8em; padding: 5px;" data-translate-key="analysisHideStatsBtn">Skrýt statistiky</button>
+        <button class="reset-analysis-btn" style="background-color: #607d8b; margin-top: 10px;" onclick="updateMapWithLoader(() => resetFilters(), 'Obnovuji globální zobrazení...')">
+    Zrušit výběr oblasti / Reset
+</button>
     </div>
 
     <div id="panel-spatial" class="sidebar-panel">
@@ -1307,8 +1350,8 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
     </div>
 <div id="help-panel" class="sidebar-panel" style="display: none;">
-        <button class="panel-close-btn" onclick="togglePanel('help-panel')">✕</button>
-        <div id="help-content-container" style="overflow-y: auto; max-height: 70vh; padding-right: 5px;">
+        <button class="panel-close-btn" onclick="togglePanel('help-panel')" style="z-index: 10; background-color: var(--background-dark); border-radius: 4px;">✕</button>
+        <div id="help-content-container" style="overflow-y: auto; max-height: 70vh; padding-right: 21px; margin-top: 15px;">
             <span data-translate-key="helpContent"></span>
         </div>
     </div>
@@ -1372,6 +1415,9 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     <input type="text" id="archive-search-input" placeholder="Filtrovat v načteném seznamu..." 
            data-translate-key-placeholder="archiveSearchPlaceholder"
            style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;">
+           <button id="btn-reset-archive" class="custom-button" style="background-color: #607d8b; margin-top: 5px;" onclick="resetArchivePanel()">
+    Vyčistit archiv a mapu
+</button>
 
     <div id="archive-results">
         <p style="color: #888; font-style: italic; text-align: center;" data-translate-key="archiveDefaultText">
@@ -1394,7 +1440,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
     <div id="footer-bar">
         <a href="https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/" target="_blank" class="footer-link">
-        <span data-translate-key="footerRights">&copy; Jaroslav Svoboda 2025</span></a>. <span data-translate-key="footerThanks">| Poděkování za data: </span><a href="https://www.nuforc.org/" target="_blank">NUFORC</a>, <a href="https://www.geipan.fr/" target="_blank">GEIPAN</a>, <a href="https://www.cufos.org/" target="_blank">CUFOS</a>, <a href="http://www.projektzare.cz/" target="_blank">projekt Záře</a>, <a href="https://cs.wikipedia.org/wiki/UFO" target="_blank">Wikipedie</a>&nbsp;a&nbsp;<a href="https://github.com/richgel999/uap_resources" target="_blank">Richard Geldreich</a>.
+        <span data-translate-key="footerRights">&copy; Jaroslav Svoboda 2026</span></a>. <span data-translate-key="footerThanks">| Poděkování za data: </span><a href="https://www.nuforc.org/" target="_blank">NUFORC</a>, <a href="https://www.geipan.fr/" target="_blank">GEIPAN</a>, <a href="https://www.cufos.org/" target="_blank">CUFOS</a>, <a href="http://www.projektzare.cz/" target="_blank">projekt Záře</a>, <a href="https://cs.wikipedia.org/wiki/UFO" target="_blank">Wikipedie</a>&nbsp;a&nbsp;<a href="https://github.com/richgel999/uap_resources" target="_blank">Richard Geldreich</a>.
 
         <span data-translate-key="footerAI">| K vývoji mapy byly použity nástroje umělé inteligence: </span><a href="https://gemini.google.com/" target="_blank">Google Gemini</a> a <a href="https://copilot.microsoft.com/" target="_blank">Microsoft Copilot</a>.
         | <a href="#" onclick="document.getElementById('terms-page').style.display='block'; return false;" data-translate-key="footerTerms" style="cursor: pointer; font-weight: bold; color: var(--primary-color);">Podmínky užití</a>
@@ -1510,7 +1556,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
 
                     <h4>6. Panel: 📊 Statistiky pro země a export CSV</h4>
                     <p>Nástroj pro statistické vyhodnocení.<br>
-                    <strong>Graf pro zemi:</strong> Klikněte myší kamkoli do mapy nebo zadejte kód země (např. "cz", "us", "de"). Aplikace vygeneruje graf četnosti pozorování v průběhu let pro danou zemi.<br>
+                    <strong>Graf pro zemi:</strong> Klikněte myší kamkoli do mapy nebo v panelu zadejte kód či název země (např. "cz", "us", "Česká republika"). Také můžete vybírat z tlačítek kontinentů. Aplikace vygeneruje graf četnosti pozorování v průběhu let pro danou zemi. Pro profesionálnější statistiku použijte zelené tlačítko <strong>Generovat podrobnou zprávu</strong>.<br>
                     <strong>Export CSV:</strong> Umožňuje stáhnout aktuálně vyfiltrovaná data do tabulkového souboru pro vlastní použití (Excel, Google Sheets).</p>
 
                     <h4>7. Panel: 🗺️ Zobrazení pohoří</h4>
@@ -1543,6 +1589,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <h4>📝 Tipy pro uživatele</h4>
                     <ul>
                         <li><strong>Kombinujte filtry:</strong> Zkuste najít např. <em>"Trojúhelníky"</em> (Shape: Triangle), v <em>"Létě"</em> (Season: Summer), pouze v <em>"Noci"</em> (Time: Night).</li>
+                        <li><strong>Generujte souhrnné detailní zprávy:</strong> V panelu <strong>Statistiky pro země a export CSV</strong> využijte zelené tlačítko <strong>Generovat podrobnou zprávu</strong>.</li>
                         <li><strong>Používejte Heatmapu:</strong> Pro rychlý přehled, kde je v dané zemi nejvíce pozorování, přepněte na <em>Heatmapu</em>.</li>
                         <li><strong>Detail případu:</strong> Pokud má položka poznámku "⭐ Známé případy", bublina obsahuje i odkaz na externí zdroje (Wikipedie) pro ověření faktů.</li>
                     </ul>
@@ -1575,11 +1622,11 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 pageTitle: "Interaktivní mapa UAP/UFO pozorování - Jaroslav Svoboda",
                 mapTitle: "Interaktivní mapa UAP/UFO pozorování",
                 langSwitcher: "EN",
-                footerRights: "&copy; Jaroslav Svoboda 2025",
+                footerRights: "&copy; Jaroslav Svoboda 2026",
                 footerThanks: "| Poděkování za data: ",
                 footerAI: "| K vývoji byly použity nástroje umělé inteligence: ",
                 infoTitle: "Informace",
-                infoP1: "Autorem návrhu mapy a grafického loga je Jaroslav Svoboda z České republiky, tato mapa vizualizuje historická data pozorování <strong>neznámých atmosférických fenoménů (UAP) / neidentifikovaných létajících objektů (UFO)</strong> za 20. století a za první čtvrtinu 21. století. K zobrazení jsou také další dostupné historické údaje zapsané od 15. století až po rok 2022, najdete je v panelu <strong>Badatelna</strong>. Formáty datumů jsou MĚSÍC DEN ROK.",
+                infoP1: "Autorem návrhu mapy a grafického loga je Jaroslav Svoboda z České republiky, tato mapa vizualizuje historická data pozorování <strong>neznámých atmosférických fenoménů (UAP) / neidentifikovaných létajících objektů (UFO)</strong> za 20. století a za první čtvrtinu 21. století. K zobrazení jsou také další dostupné historické údaje zapsané od 15. století až po současnost, najdete je v panelu <strong>Badatelna</strong>. Formáty datumů jsou MĚSÍC DEN ROK.",
                 infoP2: '<strong>Použité AI nástroje:</strong> Při budování a úpravách tohoto kódu byly využity AI nástroje <a href="https://gemini.google.com/" target="_blank">Google Gemini</a> a <a href="https://copilot.microsoft.com/" target="_blank">Microsoft Copilot</a>.',
                 infoP3: "<strong>Poděkování za data:</strong>",
                 externalSourcesTitle: "Další webové zdroje",
@@ -1835,7 +1882,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
 
                     <h4>6. Panel: 📊 Country statistics and CSV export</h4>
                     <p>Statistics evaluation tool.<br>
-                    <strong>Country chart:</strong> Click anywhere on the map (right mouse button or left button mouse click) or enter a country code (e.g. "cz", "us", "de"). The application will generate a chart of sighting frequency over the years for that country.<br>
+                    <strong>Country chart:</strong> Click anywhere on the map or enter the country code or name in the panel (e.g. "cz", "us", "Czech Republic"). You can also choose from the continent buttons. The application will generate a graph of the frequency of observations over the years for the given country. For more professional statistics, use the green button <strong>Generate detailed report</strong>.<br>
                     <strong>CSV export:</strong> Allows you to download filtered data to a CSV file for your own analysis (e.g. in Excel, Google Sheets).</p>
 
                     <h4>7. Panel: 🗺️ View of the mountain range</h4>
@@ -1868,6 +1915,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <h4>📝 User Tips</h4>
                     <ul>
                         <li><strong>Combine filters:</strong> Try finding e.g. <em>"Triangles"</em> (Shape: Triangle), in <em>"Summer"</em> (Season: Summer), only in <em>"Night"</em> (Time: Night).</li>
+                        <li><strong>Generate detailed summary reports:</strong> In the <strong>Country statistics and CSV export</strong> panel, use the green <strong>Generate detailed report</strong> button.</li>
                         <li><strong>Use Heatmap:</strong> For a quick overview of where the most observations are in a given country, switch to <em>Heatmap</em>.</li>
                         <li><strong>Case detail:</strong> If the item has the note "⭐ Known cases", the bubble also includes a link to external sources (Wikipedia) for fact-checking.</li>
                     </ul>
@@ -1900,11 +1948,11 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 pageTitle: "Interactive UAP/UFO Sighting Map - Jaroslav Svoboda",
                 mapTitle: "Interactive UAP/UFO Sighting Map",
                 langSwitcher: "CS",
-                footerRights: "&copy; Jaroslav Svoboda 2025",
+                footerRights: "&copy; Jaroslav Svoboda 2026",
                 footerThanks: "| Data acknowledgements: ",
                 footerAI: "| AI tools were used during development: ",
                 infoTitle: "Information",
-                infoP1: "The author of the map design and graphic logo is Jaroslav Svoboda from the Czech Republic, this map visualizes historical sighting data of <strong>Unknown Atmospheric Phenomena (UAP) / Unidentified Flying Objects (UFOs)</strong> from the 20th century and the first quarter of the 21st century. Other historical data recorded from the 15th century to 2022 are also available for viewing, you can find them in the <strong>Research room</strong> panel. Date formats are MONTH DAY YEAR.",
+                infoP1: "The author of the map design and graphic logo is Jaroslav Svoboda from the Czech Republic, this map visualizes historical sighting data of <strong>Unknown Atmospheric Phenomena (UAP) / Unidentified Flying Objects (UFOs)</strong> from the 20th century and the first quarter of the 21st century. Other historical data recorded from the 15th century to the present are also available for viewing, you can find them in the <strong>Research room</strong> panel. Date formats are MONTH DAY YEAR.",
                 infoP2: '<strong>AI tools used:</strong> AI tools <a href="https://gemini.google.com/" target="_blank">Google Gemini</a> and <a href="https://copilot.microsoft.com/" target="_blank">Microsoft Copilot</a> were used in building and modifying this code.',
                 infoP3: "<strong>Data Acknowledgements:</strong>",
                 externalSourcesTitle: "Other web sources",
@@ -2051,7 +2099,7 @@ spatialFilterActive: "✅ Filter active",
 archiveFileLoadingStatus: "Loading file...",
 archiveFileProcessingStatus: "Processing uploaded file...",
 newsSourceError: "Data source error (RSS).",
-reportBtn: "📄 Generate Detailed Report",
+reportBtn: "📄 Generate detailed report",
                 reportTitle: (loc) => `UAP ANALYSIS: ${loc.toUpperCase()}`,
                 reportIntro: (loc, start, end, count) => `This document presents an automated analysis of Unidentified Anomalous Phenomena (UAP) sightings for <strong>${loc}</strong> within the timeframe of <strong>${start} to ${end}</strong>. A total of <strong>${count}</strong> valid reports were recorded in this area and period.`,
                 reportPeak: (year, count) => `A significant point in the timeline is the year <strong>${year}</strong>, which saw the highest concentration of reports (${count} cases).`,
@@ -3191,7 +3239,7 @@ function loadDataWithPapaParse() {
                                 const yearAndTime = parts[2].split(' ');
                                 year = parseInt(yearAndTime[0]);
                                 if (yearAndTime.length > 1 && yearAndTime[1].includes(':')) hour = parseInt(yearAndTime[1].split(':')[0]);
-                                if (isNaN(year) || year <= 1900 || year > 2026) return null;
+                                if (isNaN(year) || year <= 1900 || year > 2030) return null;
                             } else return null;
                         } catch (e) { return null; }
 
@@ -3648,12 +3696,45 @@ document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
     });
 });
 
-                // Vyhledávání v textu (ponecháno s Debounce funkcí)
-                let commentTimeout;
-                document.getElementById('comment-search').addEventListener('input', () => {
-                    clearTimeout(commentTimeout);
-                    commentTimeout = setTimeout(() => updateMarkers(allData), 300);
-                });
+                // === UPRAVENÉ VYHLEDÁVÁNÍ: ENTER (PŘELET) + LOADER + INPUT (DEBOUNCE) ===
+let commentTimeout;
+const commentSearchInput = document.getElementById('comment-search');
+
+if (commentSearchInput) {
+    // 1. Reakce na stisknutí klávesy ENTER
+    commentSearchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Zabráníme obnovení stránky
+            clearTimeout(commentTimeout);
+            
+            // Spustíme loader (využíváme tvou stávající funkci updateMapWithLoader)
+            updateMapWithLoader(() => {
+                isSearching = false;
+                updateMarkers(allData);
+
+                // LOGIKA PŘELETU: Pokud po vyfiltrování zbyl právě jeden bod
+                if (window.currentlyFilteredData && window.currentlyFilteredData.length === 1) {
+                    const singlePoint = window.currentlyFilteredData[0];
+                    map.flyTo([singlePoint.lat, singlePoint.lon], 12, {
+                        animate: true,
+                        duration: 2
+                    });
+                }
+            }, "Prohledávám databázi..."); 
+            
+            this.blur(); // Skryje klávesnici na mobilech
+        }
+    });
+
+    // 2. Reakce na průběžné psaní (ponecháno pro plynulost, přidán loader)
+    commentSearchInput.addEventListener('input', () => {
+        clearTimeout(commentTimeout);
+        commentTimeout = setTimeout(() => {
+            updateMapWithLoader(() => updateMarkers(allData), "Filtruji...");
+        }, 800); // 800ms prodleva, aby se kolečko neroztáčelo při každém písmenku
+    });
+}
+// === KONEC UPRAVENÉ ČÁSTI ===
 
                 document.getElementById('year-min').addEventListener('input', function () { document.getElementById('year-min-val').innerText = this.value; });
                 document.getElementById('year-max').addEventListener('input', function () { document.getElementById('year-max-val').innerText = this.value; });
@@ -5360,7 +5441,7 @@ if (resetMtnBtn) {
 
                 // 2. Resetovat posuvníky roků (Range)
                 const minYear = 1900;
-                const maxYear = 2025;
+                const maxYear = 2026;
                 document.getElementById('year-min').value = minYear;
                 document.getElementById('year-min-val').innerText = minYear;
                 document.getElementById('year-max').value = maxYear;
@@ -6094,6 +6175,26 @@ function populateArchiveYears() {
                     }
                 }
             };
+            // Nová funkce pro úplný reset archivního panelu
+window.resetArchivePanel = function() {
+    // 1. Vymazat data v paměti
+    currentArchiveData = [];
+    lastRenderedArchiveEvents = [];
+    
+    // 2. Vymazat UI
+    document.getElementById('archive-year-input').value = "";
+    document.getElementById('archive-search-input').value = "";
+    document.getElementById('archive-status-text').innerText = translations[currentLanguage].archiveStatusNotLoaded;
+    document.getElementById('archive-status-text').style.color = "#aaa";
+    document.getElementById('archive-results').innerHTML = `<p style="color: #888; font-style: italic; text-align: center;">${translations[currentLanguage].archiveDefaultText}</p>`;
+    
+    // 3. Vymazat body z mapy
+    if (archiveLayerGroup) {
+        archiveLayerGroup.clearLayers();
+    }
+    
+    console.log("Badatelský archiv byl vyčištěn.");
+};
 
             // === Listenery pro nové prvky ===
             const btnLoadArchive = document.getElementById('btn-load-archive-year');
@@ -6553,15 +6654,16 @@ function makeElementDraggable(elementId) {
                 document.body.style.cursor = 'wait';
                 if (loader) {
                     loader.style.display = 'block';
-                    if (loaderText) loaderText.innerText = "Načítám panel..."; // Nebo použijte překlad
+                    if (loaderText) loaderText.innerText = "Otevírám panel..."; // Informujeme o akci
                 }
 
-                // B) Zpoždění 100ms zajistí, že prohlížeč STIHNE vykreslit loader
-                // předtím, než se vlákno zasekne výpočtem layoutu panelu.
-                setTimeout(() => {
+                // B) Trik pro prohlížeče: Double requestAnimationFrame
+                // Zaručí, že se loader skutečně fyzicky vykreslí (paint) předtím, 
+                // než začneme počítat složitý DOM layout otevíraného panelu.
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         try {
-                            // Zobrazit panel
+                            // Zobrazit panel (Zde nastává ten náročný výpočet pro prohlížeč)
                             el.style.display = 'flex';
                             
                             // Přidat animační třídu (fade in efekt)
@@ -6592,12 +6694,16 @@ function makeElementDraggable(elementId) {
                         } catch (err) {
                             console.error("Chyba při otevírání panelu:", err);
                         } finally {
-                            // C) Skrýt loader a vrátit kurzor (vždy, i při chybě)
-                            if (loader) loader.style.display = 'none';
-                            document.body.style.cursor = 'default';
+                            // C) DŮLEŽITÉ: Neschovávat loader okamžitě!
+                            // Dáme prohlížeči šanci vykreslit otevřený panel, 
+                            // a až zlomek sekundy poté schováme loader. Zamezíme tak pocitu "záseku".
+                            setTimeout(() => {
+                                if (loader) loader.style.display = 'none';
+                                document.body.style.cursor = 'default';
+                            }, 50); // 50ms pauza pro plynulý přechod
                         }
                     });
-                }, 100); // 100ms je bezpečný čas pro UI repaint
+                });
             };
             
             window.togglePanel = togglePanel;
@@ -6698,10 +6804,10 @@ function makeElementDraggable(elementId) {
                 if(minRange && maxRange) {
                     // Nastavíme zpět široký rozsah
                     minRange.value = 1900; 
-                    maxRange.value = 2025;
+                    maxRange.value = 2026;
                     // Aktualizujeme popisky
                     document.getElementById('year-min-val').innerText = 1900;
-                    document.getElementById('year-max-val').innerText = 2025;
+                    document.getElementById('year-max-val').innerText = 2026;
                     
                     // Překreslit mapu
                     updateMarkers(allData);
@@ -6956,6 +7062,36 @@ function updateRecordBtnUI(recording) {
                     });
                 }
             });
+            // =========================================================================
+        // === FUNKCE PRO OVLÁDÁNÍ MOBILNÍHO MENU S INDIKACÍ ===
+        // =========================================================================
+        window.toggleMobileMenu = function() {
+            const nav = document.getElementById('main-nav');
+            const hamburgerBtn = document.querySelector('.hamburger');
+            const icon = hamburgerBtn.querySelector('.hamburger-icon');
+            const loader = hamburgerBtn.querySelector('.hamburger-loader');
+            
+            if (!nav) return;
+
+            // 1. Okamžitě zobrazit loader a skrýt ikonu
+            if (icon) icon.style.display = 'none';
+            if (loader) loader.style.display = 'inline-block';
+
+            // 2. Dáme prohlížeči jasný povel k vykreslení (paint) loaderu.
+            // Při PRVNÍM otevření menu musí prohlížeč spočítat celý layout všech tlačítek, 
+            // což trvá déle. Zvýšíme tedy zpoždění na 150ms, aby měl prohlížeč 
+            // čas ukázat točící se kolečko PŘEDTÍM, než zamrzne výpočtem.
+            setTimeout(() => {
+                // Přepnutí třídy (toto způsobí onen těžký výpočet při prvním kliku)
+                nav.classList.toggle('active');
+
+                // Návrat ikonky až poté, co se menu vykreslí
+                requestAnimationFrame(() => {
+                    if (icon) icon.style.display = 'inline-block';
+                    if (loader) loader.style.display = 'none';
+                });
+            }, 150); 
+        };
 </script>
 <div id="report-modal">
         <div id="report-paper">
