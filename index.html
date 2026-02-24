@@ -85,11 +85,14 @@
             width: 100%;
             height: calc(100% - var(--header-height));
             z-index: 1;
-            cursor: crosshair;
+            cursor: grab;
             position: absolute;
             top: var(--header-height);
             left: 0;
         }
+        #map:active {
+            cursor: grabbing;
+            }
 
         /* === HLAVIČKA A NAVIGACE === */
         #header {
@@ -137,6 +140,14 @@
             padding-bottom: 5px;
             flex-shrink: 0;
             height: 50px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .header-brand:hover {
+            opacity: 0.8;
         }
 
         /* Navigační menu */
@@ -363,6 +374,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     will-change: transform, top, left;
     backface-visibility: hidden;
 }
+
 }
 
         /* === PRELOADER === */
@@ -402,6 +414,25 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             box-sizing: border-box;
             will-change: transform, left, top; 
             transform: translateZ(0);
+        }
+        /* === VYLEPŠENÝ EFEKT ZÁŘE (GLOW) === */
+        .panel-active-glow {
+            /* Kombinace dvou stínů pro intenzivní "neonový" efekt */
+            box-shadow: 
+                0 0 15px rgba(0, 188, 212, 0.9),  /* Vnitřní jasné jádro */
+                0 0 50px rgba(0, 188, 212, 0.6) !important; /* Vnější rozptýlená záře */
+            
+            /* Změna barvy rámečku na jasně svítivou */
+            border: 1px solid #00bcd4 !important; 
+            
+            /* Jemné zvětšení panelu (pop-up efekt) */
+            transform: scale(1.02) !important; 
+            
+            /* Zajistí, že zářící panel bude nad vším ostatním */
+            z-index: 10000 !important;
+            
+            /* Plynulý přechod */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .panel-close-btn {
@@ -740,6 +771,67 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         a.custom-button:hover {
             background-color: #455a64; /* Světlejší při najetí */
             opacity: 1;
+        }
+        /* === VYLEPŠENÍ VÝBĚRU ROKU (STEPPER) === */
+        
+        /* 1. Skrytí výchozích malých šipek v prohlížeči */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        /* 1. Skrytí výchozích malých šipek v prohlížeči */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        
+        input[type=number] {
+            -moz-appearance: textfield; /* Pro Firefox */
+            appearance: textfield;      /* Standardní vlastnost pro kompatibilitu */
+        }
+
+        /* 2. Kontejner pro ovládání roku */
+        .year-stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* 3. Styl pro velká tlačítka +/- */
+        .stepper-btn {
+            background-color: #444;
+            color: var(--primary-color);
+            border: 1px solid #555;
+            width: 40px;
+            height: 40px;
+            font-size: 1.4em;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation; /* Rychlá reakce na dotyk */
+            user-select: none;
+        }
+
+        .stepper-btn:active {
+            background-color: var(--primary-color);
+            color: #212121;
+        }
+
+        /* Úprava samotného inputu uprostřed */
+        .year-input-styled {
+            width: 70px !important;
+            text-align: center;
+            font-size: 1.1em;
+            height: 40px;
+            margin: 0 !important;
+            font-weight: bold;
         }
         
         input[type="text"], input[type="number"], select {
@@ -1211,7 +1303,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         <h3 data-translate-key="timelineTitle" style="color: #ff9800;">🎬 Přehrávač historie</h3>
 
         <div style="text-align: center; margin-bottom: 15px;">
-            <div id="timeline-display-year" style="font-size: 4em; font-weight: bold; color: var(--primary-color); text-shadow: 0 0 10px rgba(0,188,212,0.3);">1940</div>
+            <div id="timeline-display-year" style="font-size: 4em; font-weight: bold; color: var(--primary-color); text-shadow: 0 0 10px rgba(0,188,212,0.3);">1900</div>
             <div id="timeline-stats" style="font-size: 0.9em; color: #aaa;">Připraveno</div>
         </div>
 
@@ -1228,11 +1320,20 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <hr style="border-color: #444; margin: 15px 0;">
 
-        <label data-translate-key="timelineRange">Rozsah přehrávání:</label>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="number" id="timeline-start-year" value="1940" min="1400" max="2026" style="width: 70px;">
-            <span data-translate-key="timelineTo">až</span>
-            <input type="number" id="timeline-end-year" value="2026" min="1400" max="2026" style="width: 70px;">
+        <label data-translate-key="timelineRange" style="margin-top: 10px; display:block;">Rozsah přehrávání:</label>
+        
+        <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Od roku (Start):</div>
+        <div class="year-stepper-container">
+            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', -1)">−</button>
+            <input type="number" id="timeline-start-year" class="year-input-styled" value="1900" min="1400" max="2026">
+            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', 1)">+</button>
+        </div>
+
+        <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Do roku (End):</div>
+        <div class="year-stepper-container">
+            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', -1)">−</button>
+            <input type="number" id="timeline-end-year" class="year-input-styled" value="2026" min="1400" max="2026">
+            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', 1)">+</button>
         </div>
     </div>
 
@@ -6506,6 +6607,7 @@ function makeElementDraggable(elementId) {
             e.target.tagName === 'SUMMARY') { 
             return; 
         }
+        elmnt.classList.add('panel-active-glow');
         document.body.style.cursor = 'grabbing';
 
         const evt = e.type === 'touchstart' ? e.touches[0] : e;
@@ -6596,6 +6698,10 @@ function makeElementDraggable(elementId) {
         document.ontouchmove = null;
         document.body.style.cursor = 'default';
         
+        setTimeout(() => {
+            elmnt.classList.remove('panel-active-glow');
+        }, 200);
+        
         if (rafId) {
             cancelAnimationFrame(rafId);
             rafId = null;
@@ -6668,6 +6774,14 @@ function makeElementDraggable(elementId) {
                             
                             // Přidat animační třídu (fade in efekt)
                             el.classList.add('panel-opening');
+                            el.classList.add('panel-active-glow');
+                            // Efekt automaticky zmizí po 1.5 sekundě (upozorní uživatele na nové okno)
+                            setTimeout(() => {
+                                // Zkontrolujeme, zda uživatel panel mezitím nezačal táhnout (aby nezhasl pod rukou)
+                                if (document.body.style.cursor !== 'grabbing') {
+                                    el.classList.remove('panel-active-glow');
+                                }
+                            }, 1500);
                             
                             // Zvednout panel do popředí (Z-index)
                             if (typeof bringToFront === 'function') {
@@ -6724,7 +6838,7 @@ function makeElementDraggable(elementId) {
             // =========================================================================
 
             let timelineInterval = null;
-            let timelineCurrentYear = 1940;
+            let timelineCurrentYear = 1900;
             let isPlaying = false;
 
             // Inicializace přehrávače (Listenery)
@@ -7092,6 +7206,72 @@ function updateRecordBtnUI(recording) {
                 });
             }, 150); 
         };
+        // === FUNKCE PRO OVLÁDÁNÍ STEPPERU LETOPOČTU ===
+        window.adjustTimelineYear = function(inputId, delta) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            let currentVal = parseInt(input.value) || 1900;
+            let newVal = currentVal + delta;
+            
+            // Kontrola limitů (min/max dle atributů HTML)
+            const min = parseInt(input.min) || 1400;
+            const max = parseInt(input.max) || 2030;
+
+            if (newVal >= min && newVal <= max) {
+                input.value = newVal;
+                // Vyvoláme event change, aby se případně přepočítaly závislosti (pokud nějaké jsou)
+                input.dispatchEvent(new Event('change'));
+            }
+        };
+        // === FUNKCE: ZAVŘÍT VŠECHNA OKNA KLIKNUTÍM NA LOGO ===
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const headerBrand = document.querySelector('.header-brand');
+            
+            if (headerBrand) {
+                headerBrand.addEventListener('click', () => {
+                    console.log("Zavírám všechny panely..."); // Pro kontrolu
+
+                    // 1. Seznam všech možných selektorů oken/panelů
+                    const panelsToClose = [
+                        '.sidebar-panel',       // Většina panelů (Famous, Time, Data, View...)
+                        '#news-panel',          // Panel zpráv
+                        '#archive-panel',       // Panel archivu
+                        '#chart-modal',         // Graf
+                        '#report-modal',        // Report
+                        '#terms-page'           // Podmínky užití
+                    ];
+
+                    // 2. Projít a skrýt
+                    panelsToClose.forEach(selector => {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(el => {
+                            el.style.display = 'none';
+                            el.classList.remove('panel-active-glow'); // Odstranit záři
+                            el.classList.remove('panel-opening');     // Odstranit animaci
+                        });
+                    });
+
+                    // 3. Zavřít detail "Info o mapě" (vlevo dole), pokud je otevřený
+                    const infoDetails = document.querySelector('#info-dropdown-bottom-left details');
+                    if (infoDetails) {
+                        infoDetails.removeAttribute('open');
+                    }
+
+                    // 4. Zavřít mobilní menu, pokud je otevřené
+                    const nav = document.getElementById('main-nav');
+                    if (nav && nav.classList.contains('active')) {
+                        nav.classList.remove('active');
+                        // Reset ikony hamburgeru
+                        const icon = document.querySelector('.hamburger-icon');
+                        const loader = document.querySelector('.hamburger-loader');
+                        if (icon) icon.style.display = 'inline-block';
+                        if (loader) loader.style.display = 'none';
+                    }
+                });
+            }
+        });
 </script>
 <div id="report-modal">
         <div id="report-paper">
