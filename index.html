@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -300,6 +301,141 @@
             justify-content: center;
             z-index: 3001; 
         }
+/* === NOVÝ STYL PRO TLAČÍTKO MOZKU (WIDGET) === */
+        #ai-assistant-widget {
+            position: fixed;
+            top: 225px; /* Umístění pod vrstvami */
+            right: 75px;
+            z-index: 4000;
+            background: rgba(33, 33, 33, 0.95); /* Tmavé poloprůhledné pozadí */
+            border: 2px solid #00bcd4; /* Azurový rámeček */
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.4); /* Záře */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            width: 90px;
+            height: 90px;
+            min-width: 90px;
+            box-sizing: border-box;
+            cursor: pointer; /* Kurzor naznačuje posun */
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        /* Pojistka pro malé displeje, aby widget nepřekážel */
+        @media (max-height: 768px) {
+            #ai-assistant-widget {
+                top: auto !important;
+                bottom: 80px !important; /* Nad patičkou */
+                right: 15px !important;
+                left: auto !important;
+            }
+        }
+
+        #ai-assistant-widget:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 188, 212, 0.7);
+            background: rgba(40, 40, 40, 1);
+        }
+
+        /* Samotné klikací tlačítko uvnitř */
+        #ai-btn-inner {
+            background: transparent;
+            border: none;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #ai-btn-inner i, #ai-btn-inner span {
+    pointer-events: none; 
+}
+
+        #ai-btn-inner i {
+            font-size: 2em; /* Velká ikona */
+            color: #00bcd4;
+            margin-bottom: 4px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+
+        #ai-btn-inner span {
+            font-size: 0.75em;
+            font-weight: bold;
+            line-height: 1.2;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        /* === STYLY PRO CHYTRÉ MISE (TEMATICKÁ ANALÝZA) === */
+.mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mission-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.mission-card:hover {
+    background: rgba(0, 188, 212, 0.15);
+    border-color: #00bcd4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mission-icon {
+    font-size: 2em;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.mission-title {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #e0e0e0;
+    margin-bottom: 3px;
+}
+
+.mission-desc {
+    font-size: 0.75em;
+    color: #aaa;
+    line-height: 1.2;
+}
+
+/* Animace pro načítání v misi */
+.mission-loading {
+    border-color: #ff9800 !important;
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+}
 
         /* RESPONZIVITA MENU */
         @media (max-width: 900px) {
@@ -844,6 +980,46 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             color: var(--text-light);
             box-sizing: border-box;
         }
+        /* Styly pro Analytický panel */
+.analysis-section h3 {
+    color: var(--primary-color);
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #444;
+}
+
+.stat-box .stat-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+    display: block;
+}
+
+.stat-box .stat-label {
+    font-size: 0.8em;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.anomaly-item {
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.anomaly-icon {
+    color: #ff9800; /* Oranžová pro upozornění */
+}
 
         /* === VYSKAKOVACÍ OKNA (MODALS) === */
         #news-panel {
@@ -5359,7 +5535,7 @@ async function exportFilteredToCSV() {
                     'panel-famous', 'panel-time', 'panel-data', 
                     'panel-view', 'panel-analysis', 'panel-spatial', 
                     'news-panel', 'archive-panel', 'sources-panel',
-                    'help-panel' // Ujistíme se, že i nápověda je posuvná
+                    'help-panel', 'ai-assistant-widget', 'panel-timeline', 'panel-ai'
                 ];
 
                 draggableIds.forEach(id => {
@@ -6611,9 +6787,6 @@ function makeElementDraggable(elementId) {
         document.body.style.cursor = 'grabbing';
 
         const evt = e.type === 'touchstart' ? e.touches[0] : e;
-        
-        // Zabráníme označování textu při tahu (pouze u myši)
-        if (e.type === 'mousedown') e.preventDefault();
 
         // Aktivace správy Z-indexu (původní funkce)
         if (typeof bringToFront === 'function') bringToFront(elmnt);
@@ -6661,7 +6834,6 @@ function makeElementDraggable(elementId) {
     }
 
     function performDrag(clientX, clientY) {
-        // Využití requestAnimationFrame z tvého kódu pro maximální výkon
         if (rafId) cancelAnimationFrame(rafId);
 
         rafId = requestAnimationFrame(() => {
@@ -6671,23 +6843,28 @@ function makeElementDraggable(elementId) {
             let newLeft = initialLeft + deltaX;
             let newTop = initialTop + deltaY;
 
-            // --- OCHRANNÉ LIMITY (ZACHOVÁNY) ---
+            // --- OCHRANNÉ LIMITY (Zpřísněno) ---
             
-            // 1. Ochrana proti zajetí pod menu (Header height)
-            const headerHeight = 65; 
-            if (newTop < headerHeight) newTop = headerHeight;
+            // 1. Ochrana proti zajetí do MENU a MAPOVÝCH IKON (Hlavička + ovládací prvky)
+            // Header má cca 60px. Ovládání vrstev a lupa jsou pod ním.
+            // Nastavíme bezpečnou zónu 160px od vrchu.
+            const minTopLimit = 160; 
+            if (newTop < minTopLimit) newTop = minTopLimit;
 
-            // 2. Ochrana proti vyjetí do stran
+            // 2. Ochrana proti vyjetí do stran (zůstat v okně)
             const maxLeft = window.innerWidth - elmnt.offsetWidth;
             if (newLeft < 0) newLeft = 0;
             if (newLeft > maxLeft) newLeft = maxLeft;
 
-            // 3. Ochrana proti vyjetí dolů
-            const maxTop = window.innerHeight - 50; 
+            // 3. Ochrana proti vyjetí dolů (patička)
+            const maxTop = window.innerHeight - elmnt.offsetHeight - 40; // 40px rezerva dole
             if (newTop > maxTop) newTop = maxTop;
 
             elmnt.style.top = newTop + "px";
             elmnt.style.left = newLeft + "px";
+            
+            // Důležité: Při manuálním posunu zrušíme případné centrování z CSS transform
+            elmnt.style.transform = "none";
         });
     }
 
@@ -6728,6 +6905,8 @@ function makeElementDraggable(elementId) {
 
             // 4. News (Nejnovější hlášení)
             makeElementDraggable("news-panel");
+
+            makeElementDraggable("panel-ai");
             
             // 5. Graf (Chart modal) - volitelně, pokud chcete hýbat i grafem
             // makeElementDraggable("chart-container"); // U modalu je to složitější kvůli overlayi, raději nechat.
@@ -7272,6 +7451,154 @@ function updateRecordBtnUI(recording) {
                 });
             }
         });
+        // === CENTRÁLNÍ MOZEK / RESEARCH MISSIONS ===
+
+async function runResearchMission(missionType) {
+    const statusEl = document.getElementById('ai-status-output');
+    
+    // === NOVÉ: Zobrazit globální loader, aby uživatel věděl, že se pracuje ===
+    const globalLoader = document.getElementById('processing-indicator');
+    const loaderText = document.getElementById('processing-text');
+    if (loaderText) loaderText.innerText = "Analyzuji 300 000+ záznamů...";
+    if (globalLoader) globalLoader.style.display = 'block';
+    
+    // Indikace v panelu
+    statusEl.innerHTML = '<span class="ai-loader"></span> 🤖 Provádím misi...';
+    document.body.style.cursor = 'wait';
+
+    // Krátká pauza pro vykreslení UI
+    await new Promise(r => setTimeout(r, 100));
+
+    const sourceData = allData; 
+    let filteredResults = [];
+    let missionTitle = "";
+    let analysisNote = "";
+
+    try {
+        switch (missionType) {
+            case 'water':
+                missionTitle = "Analýza: Vodní světy (USO)";
+                const waterWords = ["ocean", "sea", "lake", "water", "river", "beach", "coast", "harbor", "island", "pacific", "atlantic"];
+                filteredResults = sourceData.filter(d => {
+                    const text = (d.comment + " " + d.city).toLowerCase();
+                    return waterWords.some(w => text.includes(w));
+                });
+                analysisNote = `Filtrováno na výskyt USO (Unidentified Submerged Objects) a pozorování nad vodními plochami.`;
+                break;
+
+            case 'nuclear':
+                missionTitle = "Analýza: Jaderná souvislost";
+                const nukeWords = ["nuclear", "atomic", "missile", "silo", "plant", "power station", "base", "afb", "weapon", "plutonium"];
+                filteredResults = sourceData.filter(d => {
+                    const text = (d.comment + " " + d.city).toLowerCase();
+                    return nukeWords.some(w => text.includes(w));
+                });
+                analysisNote = `Detekce výskytu v blízkosti strategických jaderných a vojenských zařízení.`;
+                break;
+
+            case 'strangeness':
+                missionTitle = "Analýza: Vysoká podivnost";
+                const strangeWords = ["landed", "entity", "humanoid", "creature", "abduction", "paralysis", "missing time", "telepathic", "beam", "burn", "mark"];
+                filteredResults = sourceData.filter(d => {
+                    const text = (d.comment).toLowerCase();
+                    return strangeWords.some(w => text.includes(w));
+                });
+                analysisNote = `Případy s prvky CE-3/CE-4: Přistání, entity, telepatie nebo fyzické stopy.`;
+                break;
+
+            case 'tictac':
+                missionTitle = "Analýza: Tvar Tic-Tac / Doutník";
+                filteredResults = sourceData.filter(d => {
+                    const s = (d.shape || "").toLowerCase();
+                    const c = (d.comment || "").toLowerCase();
+                    return s === 'cigar' || s === 'cylinder' || c.includes('tic tac') || c.includes('tictac') || c.includes('capsule');
+                });
+                analysisNote = `Analýza objektů válcovitého tvaru (Doutník/Tic-Tac), proslavených incidentem USS Nimitz.`;
+                break;
+
+            case 'fast_mover':
+                missionTitle = "Analýza: Rychlé manévry";
+                const fastWords = ["accelerat", "instant", "speed", "mach", "hypersonic", "zoom", "zip", "shot off", "vanish"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    return fastWords.some(w => c.includes(w));
+                });
+                analysisNote = `Výběr objektů vykazujících nemožné zrychlení nebo okamžité zmizení (jedna z pěti pozorovatelných charakteristik).`;
+                break;
+
+            case 'swarm':
+                missionTitle = "Analýza: Rojové události";
+                const dateCounts = {};
+                sourceData.forEach(d => {
+                    if (d.dt) {
+                        const dateOnly = d.dt.split(' ')[0]; 
+                        dateCounts[dateOnly] = (dateCounts[dateOnly] || 0) + 1;
+                    }
+                });
+                const activeDates = Object.keys(dateCounts).filter(date => dateCounts[date] > 30);
+                filteredResults = sourceData.filter(d => d.dt && activeDates.includes(d.dt.split(' ')[0]));
+                analysisNote = `Zobrazeny dny s extrémní aktivitou (>30 hlášení/den), indikující "UFO Flaps".`;
+                break;
+                
+             case 'deep_scan':
+                missionTitle = "Sken oblasti (Aktuální pohled)";
+                const mapBounds = map.getBounds();
+                filteredResults = sourceData.filter(row => {
+                    if (!row.lat || !row.lon) return false;
+                    return mapBounds.contains([row.lat, row.lon]);
+                });
+                analysisNote = `Detailní analýza všech objektů v aktuálně viditelném výřezu mapy.`;
+                break;
+        }
+
+        // VÝSLEDEK
+        if (filteredResults.length > 0) {
+            window.currentlyFilteredData = filteredResults;
+            window.currentAnalysisName = missionTitle;
+            
+            // A) Aktualizace mapy (Zobrazíme výsledek mise)
+            updateMarkers(filteredResults, true);
+            
+            // B) Info uživateli
+            statusEl.innerHTML = `✅ Nalezeno ${filteredResults.length} případů. Otevírám report...`;
+            statusEl.style.color = "#4caf50";
+
+            // C) Statistiky a Report
+            const stats = analyzeStatistics(filteredResults);
+            
+            // Otevřeme VELKÝ report
+            renderReport(stats, missionTitle, filteredResults);
+            
+            // Přidáme poznámku do reportu
+            const reportContent = document.getElementById('report-content-body');
+            if (reportContent) {
+                const noteHtml = `
+                    <div style="background-color: #e8f5e9; color: #1b5e20; padding: 15px; border-left: 5px solid #2a9f62; margin-bottom: 20px; border-radius: 4px;">
+                        <h4 style="margin-top:0; color:#1b5e20;">🤖 AI Insight</h4>
+                        <p style="margin-bottom:0;">${analysisNote}</p>
+                        <small style="display:block; margin-top:10px; color:#555;">Poznámka: Po zavření tohoto reportu se mapa automaticky vrátí do původního stavu.</small>
+                    </div>
+                `;
+                reportContent.innerHTML = noteHtml + reportContent.innerHTML;
+            }
+
+            // Nastavíme příznak, že běží mise (pro správný reset při zavření)
+            window.isMissionActive = true;
+
+        } else {
+            statusEl.innerHTML = "❌ Žádná data pro tuto misi nenalezena.";
+            statusEl.style.color = "#f44336";
+        }
+
+    } catch (err) {
+        console.error(err);
+    } finally {
+        document.body.style.cursor = 'default';
+        // === NOVÉ: Skrýt globální loader po dokončení práce ===
+        const globalLoader = document.getElementById('processing-indicator');
+        if (globalLoader) globalLoader.style.display = 'none';
+    }
+}
 </script>
 <div id="report-modal">
         <div id="report-paper">
@@ -7319,5 +7646,383 @@ function updateRecordBtnUI(recording) {
             <span data-translate-key="termsBackBtn">⬅ Zpět</span>
         </button>
     </div>
+    <div id="panel-ai" class="sidebar-panel" style="width: 340px; max-height: 85vh; top: 80px; right: 80px; display: none;">
+        <button class="panel-close-btn" onclick="togglePanel('panel-ai')">✕</button>
+        
+        <div class="panel-header" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-robot" style="font-size: 1.4em; color: #00bcd4;"></i>
+            <div>
+                <h3 style="margin: 0; color: #00bcd4; font-size: 1.2em;">Tematická analýza</h3>
+                <span style="font-size: 0.8em; color: #aaa;">Vyberte cíl analýzy</span>
+            </div>
+        </div>
+        
+        <div class="panel-content">
+            <p style="font-size: 0.9em; color: #ccc; margin-bottom: 15px;">
+                Algoritmus prohledá databázi a zobrazí pouze relevantní případy. Vyberte analytickou misi:
+            </p>
+    
+            <div class="mission-grid">
+                <div class="mission-card" onclick="runResearchMission('water')">
+                    <span class="mission-icon">🌊</span>
+                    <span class="mission-title">Vodní světy</span>
+                    <span class="mission-desc">USO nad oceány a jezery.</span>
+                </div>
+    
+                <div class="mission-card" onclick="runResearchMission('nuclear')">
+                    <span class="mission-icon">☢️</span>
+                    <span class="mission-title">Jaderná stopa</span>
+                    <span class="mission-desc">Výskyt u základen a elektráren.</span>
+                </div>
+    
+                <div class="mission-card" onclick="runResearchMission('swarm')">
+                    <span class="mission-icon">🐝</span>
+                    <span class="mission-title">Roj / Flap</span>
+                    <span class="mission-desc">Dny s extrémní aktivitou.</span>
+                </div>
+    
+                <div class="mission-card" onclick="runResearchMission('strangeness')">
+                    <span class="mission-icon">👽</span>
+                    <span class="mission-title">Kontakt</span>
+                    <span class="mission-desc">Entity, únosy a přistání.</span>
+                </div>
+                 <div class="mission-card" onclick="runResearchMission('triangle_wave')">
+                    <span class="mission-icon">🔺</span>
+                    <span class="mission-title">Trojúhelníky</span>
+                    <span class="mission-desc">Velké tiché objekty.</span>
+                </div>
+                <div class="mission-card" onclick="runResearchMission('tictac')">
+                    <span class="mission-icon">💊</span>
+                    <span class="mission-title">Tic-Tac / Doutník</span>
+                    <span class="mission-desc">Objekty tvaru válce či kapsle.</span>
+                </div>
+
+                 <div class="mission-card" onclick="runResearchMission('fast_mover')">
+                    <span class="mission-icon">⚡</span>
+                    <span class="mission-title">Extrémní rychlost</span>
+                    <span class="mission-desc">Okamžité zrychlení a manévry.</span>
+                </div>
+                 <div class="mission-card" onclick="runResearchMission('deep_scan')">
+                    <span class="mission-icon">🔎</span>
+                    <span class="mission-title">Sken oblasti</span>
+                    <span class="mission-desc">Co vidím právě teď na mapě?</span>
+                </div>
+            </div>
+    
+            <div id="ai-status-output" style="margin-top: 10px; font-size: 0.85em; color: #ffeb3b; min-height: 20px; text-align: center;"></div>
+    
+            <div id="mission-results-container" style="display: none; border-top: 1px solid #444; margin-top: 15px; padding-top: 15px;">
+                
+                <h4 style="color: #eee; margin: 0 0 10px 0;">📋 Výsledky mise</h4>
+                
+                <div class="analysis-section">
+                     <div id="analysis-anomalies" style="font-size: 0.9em; background: rgba(0, 188, 212, 0.1); padding: 10px; border-radius: 4px; border-left: 3px solid #00bcd4; margin-bottom: 10px;">
+                        </div>
+                     
+                     <div id="analysis-stats-grid" style="display: flex; gap: 5px; justify-content: space-between;">
+                        </div>
+                </div>
+    
+                <hr style="border-color: #444; margin: 15px 0;">
+    
+                <div class="analysis-section">
+                    <h3 style="font-size: 0.9em; color: #aaa;">
+                        🤖 AI Prompt (pro externí analýzu)
+                    </h3>
+                    <textarea id="ai-prompt-output" readonly style="width: 100%; height: 50px; background: #222; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 0.8em; margin-bottom: 5px; padding: 5px;"></textarea>
+                    <button class="custom-button" onclick="copyAiPrompt()" style="background-color: #455a64; font-size: 0.8em; padding: 5px;">
+                        <i class="fas fa-copy"></i> Zkopírovat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <hr style="border-color: #444; margin: 15px 0;">
+
+        <div class="analysis-section">
+            <h3 style="font-size: 1em; border-bottom: 1px solid #444; padding-bottom: 5px; color: #eee;">
+                🔍 Detekované anomálie
+            </h3>
+            <div id="analysis-anomalies" style="min-height: 60px; max-height: 120px; background: rgba(0,0,0,0.2); overflow-y: auto; padding: 10px; border: 1px solid #444; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; color: #888;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Zatím nebyla provedena analýza.</span>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border-color: #444; margin: 15px 0;">
+
+        <div class="analysis-section">
+            <h3 style="font-size: 1em; border-bottom: 1px solid #444; padding-bottom: 5px; color: #eee;">
+                🤖 Prompt pro externí AI (ChatGPT/Gemini)
+            </h3>
+            <p style="font-size: 0.85em; color: #aaa; margin-bottom: 5px;">
+                Vygenerovaný souhrn pro vložení do LLM:
+            </p>
+            <textarea id="ai-prompt-output" readonly style="width: 100%; height: 60px; background: #222; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 0.8em; margin-bottom: 5px; padding: 5px; box-sizing: border-box; resize: vertical;"></textarea>
+            <button class="custom-button" onclick="copyAiPrompt()" style="background-color: #455a64; font-size: 0.9em; padding: 8px;">
+                <i class="fas fa-copy"></i> Zkopírovat text
+            </button>
+        </div>
+    </div>
+</div>
+
+        <hr class="custom-hr">
+
+<div id="ai-assistant-widget" title="Kliknutím otevřete nabídku hloubkových tematických analýz">
+    <div id="ai-btn-inner" onclick="togglePanel('panel-ai')">
+        <i class="fas fa-brain"></i>
+        <span>Hloubková<br>analýza</span>
+    </div>
+</div>
+<script>
+    // Pomocná funkce pro bezpečné získání dat
+    function getAnalysisData() {
+        // Zkusíme najít filtrovaná data, pokud neexistují, vezmeme všechna
+        if (typeof currentlyFilteredData !== 'undefined' && currentlyFilteredData.length > 0) {
+            return currentlyFilteredData;
+        }
+        if (typeof filteredData !== 'undefined' && filteredData.length > 0) {
+            return filteredData;
+        }
+        if (typeof allData !== 'undefined' && allData.length > 0) {
+            return allData;
+        }
+        return [];
+    }
+
+    // Hlavní analytická funkce
+    function runDeepAnalysis() {
+        const rawData = getAnalysisData();
+        
+        // Musí existovat globální proměnná 'map'
+        if (typeof map === 'undefined') return;
+        
+        const mapBounds = map.getBounds();
+
+        // Filtrujeme jen data viditelná v aktuálním výřezu mapy
+        let datasetToAnalyze = rawData.filter(row => {
+            const lat = parseFloat(row.latitude || row.lat);
+            const lng = parseFloat(row.longitude || row.lng || row.long);
+            
+            if (isNaN(lat) || isNaN(lng)) return false;
+            return mapBounds.contains([lat, lng]);
+        });
+
+        const anomalyBox = document.getElementById('analysis-anomalies');
+        const statsGrid = document.getElementById('analysis-stats-grid');
+        
+        if (datasetToAnalyze.length === 0) {
+            if(anomalyBox) anomalyBox.innerHTML = "<div style='padding:10px'>V aktuálním pohledu mapy nejsou žádná data k analýze.</div>";
+            if(statsGrid) statsGrid.innerHTML = "";
+            return;
+        }
+
+        // --- VÝPOČTY STATISTIK ---
+        let shapeCounts = {};
+        let yearCounts = {};
+        
+        datasetToAnalyze.forEach(row => {
+            // Tvar
+            let shape = "neurčeno";
+            if (row.shape) shape = row.shape.trim().toLowerCase();
+            if (shape === "") shape = "neurčeno";
+            
+            shapeCounts[shape] = (shapeCounts[shape] || 0) + 1;
+
+            // Rok
+            let year = row.year;
+            // Pokud není rok přímo v datech, zkusíme ho vytáhnout z datumu
+            if (!year && (row.datetime || row.dt)) {
+                let d = row.datetime || row.dt;
+                let m = d.match(/\d{4}/);
+                if(m) year = m[0];
+            }
+            
+            if (year) {
+                yearCounts[year] = (yearCounts[year] || 0) + 1;
+            }
+        });
+
+        // Seřazení
+        let sortedShapes = Object.entries(shapeCounts).sort((a, b) => b[1] - a[1]);
+        let topShape = sortedShapes.length > 0 ? sortedShapes[0] : ['N/A', 0];
+
+        let sortedYears = Object.entries(yearCounts).sort((a, b) => b[1] - a[1]);
+        let topYear = sortedYears.length > 0 ? sortedYears[0] : ['N/A', 0];
+
+        // --- VYKRESLENÍ STATISTIK ---
+        const gridHTML = `
+            <div class="stat-box">
+                <span class="stat-value">${datasetToAnalyze.length}</span>
+                <span class="stat-label">Případů v pohledu</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">${topShape[0].toUpperCase()}</span>
+                <span class="stat-label">Top tvar (${Math.round((topShape[1]/datasetToAnalyze.length)*100)}%)</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">${topYear[0]}</span>
+                <span class="stat-label">Top rok</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-value">${Object.keys(shapeCounts).length}</span>
+                <span class="stat-label">Typů objektů</span>
+            </div>
+        `;
+        if(statsGrid) statsGrid.innerHTML = gridHTML;
+
+        // --- DETEKCE ANOMÁLIÍ ---
+        let anomaliesHTML = "";
+        
+        // 1. Dominance tvaru
+        if (topShape[1] > 0 && (topShape[1] / datasetToAnalyze.length) > 0.40) {
+            anomaliesHTML += `<div class="anomaly-item">
+                <i class="fas fa-exclamation-triangle anomaly-icon"></i> 
+                <div><strong>Dominance tvaru '${topShape[0]}'.</strong><br>Tento tvar tvoří přes 40 % pozorování v této oblasti.</div>
+            </div>`;
+        }
+
+        // 2. USO (Voda) detektor
+        let waterKeywords = ["ocean", "sea", "lake", "water", "river", "beach", "coast", "nav", "ship"];
+        let waterCount = 0;
+        datasetToAnalyze.forEach(row => {
+            let c = (row.comments || row.comment || "").toLowerCase();
+            if(waterKeywords.some(w => c.includes(w))) waterCount++;
+        });
+        
+        if (waterCount > 0) {
+             anomaliesHTML += `<div class="anomaly-item">
+                <i class="fas fa-water anomaly-icon" style="color: #00bcd4;"></i> 
+                <div><strong>Zmínky o vodě (${waterCount}x).</strong><br>Komentáře obsahují klíčová slova naznačující blízkost vody (USO).</div>
+            </div>`;
+        }
+
+        if (anomaliesHTML === "") {
+            anomaliesHTML = "<div style='padding:10px; color:#aaa; font-style:italic;'>Žádné statistické extrémy nenalezeny.</div>";
+        }
+        
+        if(anomalyBox) anomalyBox.innerHTML = anomaliesHTML;
+
+        // --- GENERÁTOR PROMPTU ---
+        generateAiPrompt(datasetToAnalyze, topShape, topYear);
+    }
+
+    // Funkce pro přípravu textu pro externí AI
+    function generateAiPrompt(data, topShape, topYear) {
+        // Vybereme náhodné komentáře
+        let longComments = data.filter(d => (d.comments || d.comment || "").length > 30);
+        let sampleComments = longComments
+            .sort(() => 0.5 - Math.random()) 
+            .slice(0, 5) 
+            .map(d => `- "${(d.comments || d.comment || "").substring(0, 200).replace(/[\r\n]+/g, " ")}..."`)
+            .join("\n");
+
+        const prompt = `Jsem badatel v oblasti UAP. Potřebuji, abys analyzoval tento vzorek dat a hledal souvislosti, které nejsou zřejmé.
+DATASET: ${data.length} pozorování ve vybrané oblasti.
+STATISTIKA: Nejčastější tvar: "${topShape[0]}", Nejaktivnější rok: ${topYear[0]}.
+NÁHODNÝ VZOREK SVĚDECTVÍ:
+${sampleComments}
+
+ÚKOL:
+1. Přečti si svědectví a hledej společné jmenovatele v chování objektů (pohyb, světla, reakce).
+2. Odpovídají popisy konvenčním letadlům, dronům, nebo vykazují anomální charakteristiky (The Five Observables)?
+3. Navrhni hypotézu pro tuto konkrétní oblast.
+Odpověz česky, stručně a formou odrážek.`;
+
+        const promptBox = document.getElementById('ai-prompt-output');
+        if(promptBox) promptBox.value = prompt;
+    }
+
+    function copyAiPrompt() {
+        const copyText = document.getElementById("ai-prompt-output");
+        if(copyText) {
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                alert("Prompt zkopírován! Vložte jej do ChatGPT nebo Gemini.");
+            });
+        }
+    }
+    // === 1. RESETOVÁNÍ MAPY PO ZAVŘENÍ REPORTU (Fix bodů 3, 4, 5) ===
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeReportBtn = document.getElementById('close-report-btn');
+        const reportModal = document.getElementById('report-modal');
+
+        // Funkce pro reset mapy a UI s animací
+        function closeAndResetReport() {
+            const reportModal = document.getElementById('report-modal');
+            
+            // Pokud nebyla aktivní mise, jen zavřeme okno (rychlé)
+            if (!window.isMissionActive) {
+                reportModal.style.display = 'none';
+                return;
+            }
+
+            // Pokud byla mise aktivní, bude to trvat -> ZAPNOUT LOADER
+            // Použijeme updateMapWithLoader, který zajistí zobrazení točícího se kolečka
+            updateMapWithLoader(() => {
+                // 1. Zavřít okno
+                reportModal.style.display = 'none';
+                
+                // 2. Resetovat mapu (těžká operace)
+                console.log("Mise ukončena, resetuji mapu...");
+                resetFilters(); 
+                window.isMissionActive = false; 
+
+                // 3. Vymazat text v panelu
+                const aiStatus = document.getElementById('ai-status-output');
+                if(aiStatus) aiStatus.innerHTML = "";
+                
+            }, "Obnovuji původní data mapy..."); // Text, který uvidí uživatel
+        }
+
+        // Listener na tlačítko "Zavřít"
+        if (closeReportBtn) {
+            // Odstraníme staré listenery (pomocí klonování, pro jistotu)
+            const newBtn = closeReportBtn.cloneNode(true);
+            closeReportBtn.parentNode.replaceChild(newBtn, closeReportBtn);
+            
+            newBtn.addEventListener('click', closeAndResetReport);
+        }
+
+        // Listener na kliknutí mimo okno (šedé pozadí)
+        window.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                closeAndResetReport();
+            }
+        });
+    });
+
+    // === 2. OCHRANA WIDGETU PROTI ZMIZENÍ (Fix bodu 2) ===
+    window.addEventListener('resize', () => {
+        const widget = document.getElementById('ai-assistant-widget');
+        if (!widget) return;
+
+        const rect = widget.getBoundingClientRect();
+        const winWidth = window.innerWidth;
+        const winHeight = window.innerHeight;
+
+        // Pokud je widget mimo pravý okraj
+        if (rect.right > winWidth) {
+            widget.style.left = (winWidth - rect.width - 10) + 'px';
+            widget.style.top = rect.top + 'px'; // Udržet Y pozici
+            widget.style.transform = 'none'; // Důležité pro fixní pozici
+        }
+
+        // Pokud je widget mimo spodní okraj
+        if (rect.bottom > winHeight) {
+            widget.style.top = (winHeight - rect.height - 10) + 'px';
+            widget.style.left = rect.left + 'px';
+            widget.style.transform = 'none';
+        }
+        
+        // Pokud je widget mimo horní okraj (např. kvůli hlavičce)
+        if (rect.top < 70) {
+             widget.style.top = '80px';
+        }
+    });
+</script>
 </body>
 </html>
