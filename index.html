@@ -304,8 +304,8 @@
 /* === NOVÝ STYL PRO TLAČÍTKO MOZKU (WIDGET) === */
         #ai-assistant-widget {
             position: fixed;
-            top: 225px; /* Umístění pod vrstvami */
-            right: 75px;
+            top: 410px; /* Umístění pod vrstvami */
+            right: 13px;
             z-index: 4000;
             background: rgba(33, 33, 33, 0.95); /* Tmavé poloprůhledné pozadí */
             border: 2px solid #00bcd4; /* Azurový rámeček */
@@ -1785,7 +1785,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <p>Tento projekt navrhl a vytvořil <strong>Jaroslav Svoboda</strong> z Hradce Králové v České republice. Mapa byla tvořena od srpna 2025 do první čtvrtiny roku 2026 s cílem poskytnout badatelům i veřejnosti moderní nástroj pro zkoumání fenoménu UAP/UFO v globálním měřítku.</p>
 
                     <h4>📂 Zdroje dat</h4>
-                    <p>Síla této mapy spočívá v datech. Aplikace kombinuje a vizualizuje informace ze čtyř hlavních zdrojů:</p>
+                    <p>Síla této mapy spočívá v datech. Aplikace kombinuje a vizualizuje informace z několika hlavních zdrojů:</p>
                     <ul>
                         <li><strong>Hlavní databáze:</strong> Základ tvoří masivní CSV soubor obsahující více než <strong>300 000 záznamů</strong> o pozorování. Data pocházejí z renomovaných veřejných databází organizací <strong>NUFORC</strong> (National UFO Reporting Center), <strong>GEIPAN</strong> (Francouzská vesmírná agentura), <strong>CUFOS</strong> (Center for UFO Studies) a českého <strong>projektu Záře</strong>.</li>
                         <li><strong>Historické a významné případy:</strong> Speciální výběr celosvětově nejznámějších incidentů je čerpaný z <strong>Wikipedie</strong> a ověřených zdrojů.</li>
@@ -1807,6 +1807,11 @@ function updateMapWithLoader(customAction = null, customText = null) {
                    <strong>Vyhledávání míst (Lupa)</strong></p>
                     <p>V pravém horním rohu mapy (pod ovládáním vrstev mapy pod hlavičkou menu) se nachází <strong>ikona lupy</strong>. Slouží k rychlému přesunu na konkrétní město nebo lokalitu kdekoli na Zeměkouli (např. zadáním "Hradec Králové").</p>
 
+                    <h4>Plovoucí panel: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px; color: #00bcd4;">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+    </svg> HLOUBKOVÁ ANALÝZA</h4>
+                    <p>Umožňuje hloubkovou analýzu pro více specifických typů výskytů.<br>Tyto funkce umožňují odkrývat detailní vzorce chování UFO/UAP fenoménů.</p>
 
                     <h4>1. Panel: ⭐ Známé případy pozorování UFO/UAP</h4>
                     <p>Umožňuje rychle najít a zobrazit slavné historické incidenty (např. Roswell 1947, UFO nad Vranovem 1987, Phoenix Lights 1997).<br>Vyberte případ ze seznamu a mapa vás automaticky přenese na místo události a zobrazí URL odkaz na detailní popis události.</p>
@@ -1831,7 +1836,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <strong>Body (Markers):</strong> Zobrazuje jednotlivé případy jakožto body mapě. Při větším oddálení se body shlukují do tzv. "clusterů" s číslem počtu případů.<br>
                     <strong>Heatmapa:</strong> Zobrazuje sdružené zobrazení hustoty výskytu. Ideální pro identifikaci oblastí s největší aktivitou výskytů pozorování UFO/UAP (tzv. Hotspots).</p>
 
-                    <h4>6. Panel: 📊 Statistiky pro země a export CSV</h4>
+                    <h4>6. Panel: 📊 Analýza pro státy a export dat</h4>
                     <p>Nástroj pro statistické vyhodnocení.<br>
                     <strong>Graf pro zemi:</strong> Klikněte myší kamkoli do mapy nebo v panelu zadejte kód či název země (např. "cz", "us", "Česká republika"). Také můžete vybírat z tlačítek kontinentů. Aplikace vygeneruje graf četnosti pozorování v průběhu let pro danou zemi. Pro profesionálnější statistiku použijte zelené tlačítko <strong>Generovat podrobnou zprávu</strong>.<br>
                     <strong>Export CSV:</strong> Umožňuje stáhnout aktuálně vyfiltrovaná data do tabulkového souboru pro vlastní použití (Excel, Google Sheets).</p>
@@ -1866,7 +1871,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <h4>📝 Tipy pro uživatele</h4>
                     <ul>
                         <li><strong>Kombinujte filtry:</strong> Zkuste najít např. <em>"Trojúhelníky"</em> (Shape: Triangle), v <em>"Létě"</em> (Season: Summer), pouze v <em>"Noci"</em> (Time: Night).</li>
-                        <li><strong>Generujte souhrnné detailní zprávy:</strong> V panelu <strong>Statistiky pro země a export CSV</strong> využijte zelené tlačítko <strong>Generovat podrobnou zprávu</strong>.</li>
+                        <li><strong>Generujte souhrnné detailní zprávy:</strong> V panelu <strong>Analýza pro státy a export dat</strong> využijte zelené tlačítko <strong>Generovat podrobnou zprávu</strong>.</li>
                         <li><strong>Používejte Heatmapu:</strong> Pro rychlý přehled, kde je v dané zemi nejvíce pozorování, přepněte na <em>Heatmapu</em>.</li>
                         <li><strong>Detail případu:</strong> Pokud má položka poznámku "⭐ Známé případy", bublina obsahuje i odkaz na externí zdroje (Wikipedie) pro ověření faktů.</li>
                     </ul>
@@ -1876,7 +1881,7 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 menuTime: "📅 Filtrování podle času a období",
                 menuData: "🔍 Filtrování podle tvaru objektu a ve fulltextu",
                 menuView: "👁️ Zobrazení bodů nebo heatmapy",
-                menuAnalysis: "📊 Statistiky pro země a export CSV",
+                menuAnalysis: "📊 Analýza pro státy a export dat",
                 menuSpatial: "🗺️ Zobrazení pohoří",
                 menuNews: "📡 Live News",
                 menuResearch: "🛠️ Badatelna",
@@ -2098,6 +2103,57 @@ Tyto Podmínky se řídí a vykládají v souladu se zákony státu Česká repu
 Máte-li jakékoli dotazy ohledně těchto Podmínek nebo webu UAP/UFO MAPA, kontaktujte autora prosím v kontaktním formuláři zde: <a href="https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/jaroslav-svoboda-5a71a16a/</a></p>
 <p><strong>Souhlas s podmínkami</strong><br>
 Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito Podmínkami. Pokud s těmito Podmínkami nesouhlasíte, web UAP/UFO MAPA prosím nepoužívejte.</p>`,
+// --- Nové překlady pro AI Panel ---
+                aiWidgetText: "Hloubková<br>analýza",
+                aiPanelTitle: "Tematická analýza",
+                aiPanelSubtitle: "Pomocí tlačítek níže můžete vybrat cíl hloubkové analýzy specifických případů.",
+                aiPanelDesc: "Algoritmus prohledá databázi a zobrazí pouze relevantní případy. Vyberte analytickou misi:",
+                
+                // Názvy misí (karty)
+                missWater: "Vodní světy",
+                missWaterDesc: "USO nad oceány a jezery.",
+                missNuke: "Jaderná stopa",
+                missNukeDesc: "Výskyt u základen a elektráren.",
+                missSwarm: "Roj / Flap",
+                missSwarmDesc: "Dny s extrémní aktivitou.",
+                missStrange: "Kontakt",
+                missStrangeDesc: "Entity, únosy a přistání.",
+                missTriangle: "Trojúhelníky",
+                missTriangleDesc: "Velké tiché objekty.",
+                missTicTac: "Tic-Tac / Doutník",
+                missTicTacDesc: "Objekty tvaru válce či kapsle.",
+                missFast: "Extrémní rychlost",
+                missFastDesc: "Okamžité zrychlení a manévry.",
+                missScan: "Sken oblasti",
+                missScanDesc: "Co vidím právě teď na mapě?",
+
+                // Texty pro generované reporty (použito v JS)
+                repTitleWater: "Analýza: Vodní světy (USO)",
+                repNoteWater: "Filtrováno na výskyt USO (Unidentified Submerged Objects) a pozorování nad vodními plochami.",
+                repTitleNuke: "Analýza: Jaderná souvislost",
+                repNoteNuke: "Detekce výskytu v blízkosti strategických jaderných a vojenských zařízení.",
+                repTitleSwarm: "Analýza: Rojové události",
+                repNoteSwarm: "Zobrazeny dny s extrémní aktivitou (>30 hlášení/den), indikující 'UFO Flaps'.",
+                repTitleStrange: "Analýza: Vysoká podivnost",
+                repNoteStrange: "Případy s prvky CE-3/CE-4: Přistání, entity, telepatie nebo fyzické stopy.",
+                repTitleTicTac: "Analýza: Tvar Tic-Tac / Doutník",
+                repNoteTicTac: "Analýza objektů válcovitého tvaru (Doutník/Tic-Tac), proslavených incidentem USS Nimitz.",
+                repTitleFast: "Analýza: Rychlé manévry",
+                repNoteFast: "Výběr objektů vykazujících nemožné zrychlení nebo okamžité zmizení (jedna z pěti pozorovatelných charakteristik).",
+                repTitleScan: "Sken oblasti (Aktuální pohled)",
+                repNoteScan: "Detailní analýza všech objektů v aktuálně viditelném výřezu mapy.",
+                repTitleTriangle: "Analýza: Trojúhelníky", 
+                repNoteTriangle: "Filtrováno na velké trojúhelníkové objekty (často černé, tiché, nízko letící).",
+
+                // Výsledky panelu
+                aiStatusWorking: "🤖 Provádím misi...",
+                aiStatusFound: (count) => `✅ Nalezeno ${count} případů. Otevírám report...`,
+                aiStatusNone: "❌ Žádná data pro tuto misi nenalezena.",
+                aiResultsTitle: "📋 Výsledky mise",
+                aiPromptTitle: "🤖 AI Prompt (pro externí analýzu)",
+                aiPromptCopy: "Zkopírovat",
+                aiAnomaliesTitle: "🔍 Detekované anomálie",
+                aiNoAnomalies: "Zatím nebyla provedena analýza.",
             },
             en: {
                 menuHelp: "❓ Help",
@@ -2131,6 +2187,11 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <p><strong>Search for places (Magnifier)</strong></p>
                     <p>In the upper right corner of the map (under the map layer controls under the menu header) there is <strong>a magnifying glass icon</strong>. It is used to quickly move to a specific city or location anywhere on the globe (e.g. by entering "Hradec Králové").</p>
 
+                    <h4>Floating panel: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px; color: #00bcd4;"> 
+<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+<path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+</svg> IN-DEPTH ANALYSIS</h4>
+<p>Allows in-depth analysis for more specific types of occurrences.<br>These features allow uncover detailed patterns of behavior of UFO/UAP phenomena.</p>
 
                     <h4>1. Panel: ⭐ Famous cases of UFO/UAP sightings</h4>
                     <p>Allows you to quickly find and view famous historical incidents (e.g. Roswell 1947, UFO over Vranov 1987, Phoenix Lights 1997).
@@ -2157,7 +2218,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <strong>Points (Markers):</strong> Displays individual cases as points on the map. At greater zoom-out, the points are grouped into so-called "clusters" with a number of cases.<br>
                     <strong>Heatmap:</strong> Displays a composite view of the density of occurrences. Ideal for identifying areas with the highest activity of UFO/UAP sightings (so-called Hotspots).</p>
 
-                    <h4>6. Panel: 📊 Country statistics and CSV export</h4>
+                    <h4>6. Panel: 📊 Analysis for countries and data export</h4>
                     <p>Statistics evaluation tool.<br>
                     <strong>Country chart:</strong> Click anywhere on the map or enter the country code or name in the panel (e.g. "cz", "us", "Czech Republic"). You can also choose from the continent buttons. The application will generate a graph of the frequency of observations over the years for the given country. For more professional statistics, use the green button <strong>Generate detailed report</strong>.<br>
                     <strong>CSV export:</strong> Allows you to download filtered data to a CSV file for your own analysis (e.g. in Excel, Google Sheets).</p>
@@ -2202,7 +2263,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 menuTime: "📅 Filtering by time & day period",
                 menuData: "🔍 Filtering by object shape & by fullext in comments",
                 menuView: "👁️ View points or heatmaps",
-                menuAnalysis: "📊 Country statistics and CSV export",
+                menuAnalysis: "📊 Analysis for countries and data export",
                 menuSpatial: "🗺️ View of the mountain range",
                 menuNews: "📡 Live News",
                 menuResearch: "🛠️ Research room",
@@ -2425,6 +2486,57 @@ If you have any questions regarding these Terms or the UAP/UFO MAPA website, ple
 <p><strong>Agreement with Terms</strong><br>
 By using the UAP/UFO MAPA website, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use the UAP/UFO MAPA website.</p>`,
                 termsBackBtn: "⬅ Back to Map",
+                // --- New translations for AI Panel ---
+                aiWidgetText: "Deep<br>Analysis",
+                aiPanelTitle: "Thematic Analysis",
+                aiPanelSubtitle: "Use the buttons below to select a target for in-depth analysis of specific cases.",
+                aiPanelDesc: "The algorithm scans the database and displays only relevant cases. Select an analysis mission:",
+
+                // Mission Names (Cards)
+                missWater: "Water Worlds",
+                missWaterDesc: "USO over oceans and lakes.",
+                missNuke: "Nuclear Trail",
+                missNukeDesc: "Sightings near bases and power plants.",
+                missSwarm: "Swarm / Flap",
+                missSwarmDesc: "Days with extreme activity.",
+                missStrange: "Contact",
+                missStrangeDesc: "Entities, abductions, and landings.",
+                missTriangle: "Triangles",
+                missTriangleDesc: "Large silent objects.",
+                missTicTac: "Tic-Tac / Cigar",
+                missTicTacDesc: "Cylindrical or capsule-shaped objects.",
+                missFast: "Extreme Speed",
+                missFastDesc: "Instant acceleration and maneuvers.",
+                missScan: "Area Scan",
+                missScanDesc: "What do I see on the map right now?",
+
+                // Texts for generated reports (Used in JS)
+                repTitleWater: "Analysis: Water Worlds (USO)",
+                repNoteWater: "Filtered for USO (Unidentified Submerged Objects) and sightings over bodies of water.",
+                repTitleNuke: "Analysis: Nuclear Connection",
+                repNoteNuke: "Detection of occurrence near strategic nuclear and military facilities.",
+                repTitleSwarm: "Analysis: Swarm Events",
+                repNoteSwarm: "Showing days with extreme activity (>30 reports/day), indicating 'UFO Flaps'.",
+                repTitleStrange: "Analysis: High Strangeness",
+                repNoteStrange: "Cases with CE-3/CE-4 elements: Landings, entities, telepathy, or physical traces.",
+                repTitleTicTac: "Analysis: Tic-Tac / Cigar Shape",
+                repNoteTicTac: "Analysis of cylindrical objects (Cigar/Tic-Tac), famous from the USS Nimitz incident.",
+                repTitleFast: "Analysis: Fast Movers",
+                repNoteFast: "Selection of objects exhibiting impossible acceleration or instantaneous disappearance (Five Observables).",
+                repTitleScan: "Area Scan (Current View)",
+                repNoteScan: "Detailed analysis of all objects in the currently visible map viewport.",
+                repTitleTriangle: "Analysis: Triangles", 
+                repNoteTriangle: "Filtered for large triangular objects (often black, silent, low flying).",
+
+                // Panel Results
+                aiStatusWorking: "🤖 Executing mission...",
+                aiStatusFound: (count) => `✅ Found ${count} cases. Opening report...`,
+                aiStatusNone: "❌ No data found for this mission.",
+                aiResultsTitle: "📋 Mission Results",
+                aiPromptTitle: "🤖 AI Prompt (for external analysis)",
+                aiPromptCopy: "Copy Text",
+                aiAnomaliesTitle: "🔍 Detected Anomalies",
+                aiNoAnomalies: "No analysis performed yet.",
             }
         };
 
@@ -7455,15 +7567,17 @@ function updateRecordBtnUI(recording) {
 
 async function runResearchMission(missionType) {
     const statusEl = document.getElementById('ai-status-output');
+    // Načtení textů dle aktuálního jazyka
+    const t = translations[currentLanguage]; 
     
-    // === NOVÉ: Zobrazit globální loader, aby uživatel věděl, že se pracuje ===
+    // === NOVÉ: Zobrazit globální loader ===
     const globalLoader = document.getElementById('processing-indicator');
     const loaderText = document.getElementById('processing-text');
-    if (loaderText) loaderText.innerText = "Analyzuji 300 000+ záznamů...";
+    if (loaderText) loaderText.innerText = "Analyzing 300 000+ records...";
     if (globalLoader) globalLoader.style.display = 'block';
     
     // Indikace v panelu
-    statusEl.innerHTML = '<span class="ai-loader"></span> 🤖 Provádím misi...';
+    statusEl.innerHTML = `<span class="ai-loader"></span> ${t.aiStatusWorking}`;
     document.body.style.cursor = 'wait';
 
     // Krátká pauza pro vykreslení UI
@@ -7477,57 +7591,57 @@ async function runResearchMission(missionType) {
     try {
         switch (missionType) {
             case 'water':
-                missionTitle = "Analýza: Vodní světy (USO)";
+                missionTitle = t.repTitleWater;
                 const waterWords = ["ocean", "sea", "lake", "water", "river", "beach", "coast", "harbor", "island", "pacific", "atlantic"];
                 filteredResults = sourceData.filter(d => {
                     const text = (d.comment + " " + d.city).toLowerCase();
                     return waterWords.some(w => text.includes(w));
                 });
-                analysisNote = `Filtrováno na výskyt USO (Unidentified Submerged Objects) a pozorování nad vodními plochami.`;
+                analysisNote = t.repNoteWater;
                 break;
 
             case 'nuclear':
-                missionTitle = "Analýza: Jaderná souvislost";
+                missionTitle = t.repTitleNuke;
                 const nukeWords = ["nuclear", "atomic", "missile", "silo", "plant", "power station", "base", "afb", "weapon", "plutonium"];
                 filteredResults = sourceData.filter(d => {
                     const text = (d.comment + " " + d.city).toLowerCase();
                     return nukeWords.some(w => text.includes(w));
                 });
-                analysisNote = `Detekce výskytu v blízkosti strategických jaderných a vojenských zařízení.`;
+                analysisNote = t.repNoteNuke;
                 break;
 
             case 'strangeness':
-                missionTitle = "Analýza: Vysoká podivnost";
+                missionTitle = t.repTitleStrange;
                 const strangeWords = ["landed", "entity", "humanoid", "creature", "abduction", "paralysis", "missing time", "telepathic", "beam", "burn", "mark"];
                 filteredResults = sourceData.filter(d => {
                     const text = (d.comment).toLowerCase();
                     return strangeWords.some(w => text.includes(w));
                 });
-                analysisNote = `Případy s prvky CE-3/CE-4: Přistání, entity, telepatie nebo fyzické stopy.`;
+                analysisNote = t.repNoteStrange;
                 break;
 
             case 'tictac':
-                missionTitle = "Analýza: Tvar Tic-Tac / Doutník";
+                missionTitle = t.repTitleTicTac;
                 filteredResults = sourceData.filter(d => {
                     const s = (d.shape || "").toLowerCase();
                     const c = (d.comment || "").toLowerCase();
                     return s === 'cigar' || s === 'cylinder' || c.includes('tic tac') || c.includes('tictac') || c.includes('capsule');
                 });
-                analysisNote = `Analýza objektů válcovitého tvaru (Doutník/Tic-Tac), proslavených incidentem USS Nimitz.`;
+                analysisNote = t.repNoteTicTac;
                 break;
 
             case 'fast_mover':
-                missionTitle = "Analýza: Rychlé manévry";
+                missionTitle = t.repTitleFast;
                 const fastWords = ["accelerat", "instant", "speed", "mach", "hypersonic", "zoom", "zip", "shot off", "vanish"];
                 filteredResults = sourceData.filter(d => {
                     const c = (d.comment || "").toLowerCase();
                     return fastWords.some(w => c.includes(w));
                 });
-                analysisNote = `Výběr objektů vykazujících nemožné zrychlení nebo okamžité zmizení (jedna z pěti pozorovatelných charakteristik).`;
+                analysisNote = t.repNoteFast;
                 break;
 
             case 'swarm':
-                missionTitle = "Analýza: Rojové události";
+                missionTitle = t.repTitleSwarm;
                 const dateCounts = {};
                 sourceData.forEach(d => {
                     if (d.dt) {
@@ -7537,17 +7651,27 @@ async function runResearchMission(missionType) {
                 });
                 const activeDates = Object.keys(dateCounts).filter(date => dateCounts[date] > 30);
                 filteredResults = sourceData.filter(d => d.dt && activeDates.includes(d.dt.split(' ')[0]));
-                analysisNote = `Zobrazeny dny s extrémní aktivitou (>30 hlášení/den), indikující "UFO Flaps".`;
+                analysisNote = t.repNoteSwarm;
                 break;
                 
+            case 'triangle_wave':
+                missionTitle = t.repTitleTriangle;
+                filteredResults = sourceData.filter(d => {
+                    const s = (d.shape || "").toLowerCase();
+                    const c = (d.comment || "").toLowerCase();
+                    return s === 'triangle' || c.includes('triangle') || c.includes('black triangle');
+                });
+                analysisNote = t.repNoteTriangle;
+                break;
+
              case 'deep_scan':
-                missionTitle = "Sken oblasti (Aktuální pohled)";
+                missionTitle = t.repTitleScan;
                 const mapBounds = map.getBounds();
                 filteredResults = sourceData.filter(row => {
                     if (!row.lat || !row.lon) return false;
                     return mapBounds.contains([row.lat, row.lon]);
                 });
-                analysisNote = `Detailní analýza všech objektů v aktuálně viditelném výřezu mapy.`;
+                analysisNote = t.repNoteScan;
                 break;
         }
 
@@ -7560,7 +7684,7 @@ async function runResearchMission(missionType) {
             updateMarkers(filteredResults, true);
             
             // B) Info uživateli
-            statusEl.innerHTML = `✅ Nalezeno ${filteredResults.length} případů. Otevírám report...`;
+            statusEl.innerHTML = t.aiStatusFound(filteredResults.length);
             statusEl.style.color = "#4caf50";
 
             // C) Statistiky a Report
@@ -7576,7 +7700,7 @@ async function runResearchMission(missionType) {
                     <div style="background-color: #e8f5e9; color: #1b5e20; padding: 15px; border-left: 5px solid #2a9f62; margin-bottom: 20px; border-radius: 4px;">
                         <h4 style="margin-top:0; color:#1b5e20;">🤖 AI Insight</h4>
                         <p style="margin-bottom:0;">${analysisNote}</p>
-                        <small style="display:block; margin-top:10px; color:#555;">Poznámka: Po zavření tohoto reportu se mapa automaticky vrátí do původního stavu.</small>
+                        <small style="display:block; margin-top:10px; color:#555;">Note: Map will reset after closing this report.</small>
                     </div>
                 `;
                 reportContent.innerHTML = noteHtml + reportContent.innerHTML;
@@ -7586,7 +7710,7 @@ async function runResearchMission(missionType) {
             window.isMissionActive = true;
 
         } else {
-            statusEl.innerHTML = "❌ Žádná data pro tuto misi nenalezena.";
+            statusEl.innerHTML = t.aiStatusNone;
             statusEl.style.color = "#f44336";
         }
 
@@ -7594,7 +7718,6 @@ async function runResearchMission(missionType) {
         console.error(err);
     } finally {
         document.body.style.cursor = 'default';
-        // === NOVÉ: Skrýt globální loader po dokončení práce ===
         const globalLoader = document.getElementById('processing-indicator');
         if (globalLoader) globalLoader.style.display = 'none';
     }
@@ -7646,66 +7769,67 @@ async function runResearchMission(missionType) {
             <span data-translate-key="termsBackBtn">⬅ Zpět</span>
         </button>
     </div>
+
     <div id="panel-ai" class="sidebar-panel" style="width: 340px; max-height: 85vh; top: 80px; right: 80px; display: none;">
         <button class="panel-close-btn" onclick="togglePanel('panel-ai')">✕</button>
         
         <div class="panel-header" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-robot" style="font-size: 1.4em; color: #00bcd4;"></i>
             <div>
-                <h3 style="margin: 0; color: #00bcd4; font-size: 1.2em;">Tematická analýza</h3>
-                <span style="font-size: 0.8em; color: #aaa;">Vyberte cíl analýzy</span>
+                <h3 style="margin: 0; color: #00bcd4; font-size: 1.2em;" data-translate-key="aiPanelTitle">Tematická analýza</h3>
+                <span style="font-size: 0.8em; color: #aaa;" data-translate-key="aiPanelSubtitle">Pomocí tlačítek níže můžete vybrat cíl hloubkové analýzy specifických případů.</span>
             </div>
         </div>
         
         <div class="panel-content">
-            <p style="font-size: 0.9em; color: #ccc; margin-bottom: 15px;">
+            <p style="font-size: 0.9em; color: #ccc; margin-bottom: 15px;" data-translate-key="aiPanelDesc">
                 Algoritmus prohledá databázi a zobrazí pouze relevantní případy. Vyberte analytickou misi:
             </p>
     
             <div class="mission-grid">
                 <div class="mission-card" onclick="runResearchMission('water')">
                     <span class="mission-icon">🌊</span>
-                    <span class="mission-title">Vodní světy</span>
-                    <span class="mission-desc">USO nad oceány a jezery.</span>
+                    <span class="mission-title" data-translate-key="missWater">Vodní světy</span>
+                    <span class="mission-desc" data-translate-key="missWaterDesc">USO nad oceány a jezery.</span>
                 </div>
     
                 <div class="mission-card" onclick="runResearchMission('nuclear')">
                     <span class="mission-icon">☢️</span>
-                    <span class="mission-title">Jaderná stopa</span>
-                    <span class="mission-desc">Výskyt u základen a elektráren.</span>
+                    <span class="mission-title" data-translate-key="missNuke">Jaderná stopa</span>
+                    <span class="mission-desc" data-translate-key="missNukeDesc">Výskyt u základen a elektráren.</span>
                 </div>
     
                 <div class="mission-card" onclick="runResearchMission('swarm')">
                     <span class="mission-icon">🐝</span>
-                    <span class="mission-title">Roj / Flap</span>
-                    <span class="mission-desc">Dny s extrémní aktivitou.</span>
+                    <span class="mission-title" data-translate-key="missSwarm">Roj / Flap</span>
+                    <span class="mission-desc" data-translate-key="missSwarmDesc">Dny s extrémní aktivitou.</span>
                 </div>
     
                 <div class="mission-card" onclick="runResearchMission('strangeness')">
                     <span class="mission-icon">👽</span>
-                    <span class="mission-title">Kontakt</span>
-                    <span class="mission-desc">Entity, únosy a přistání.</span>
+                    <span class="mission-title" data-translate-key="missStrange">Kontakt</span>
+                    <span class="mission-desc" data-translate-key="missStrangeDesc">Entity, únosy a přistání.</span>
                 </div>
                  <div class="mission-card" onclick="runResearchMission('triangle_wave')">
                     <span class="mission-icon">🔺</span>
-                    <span class="mission-title">Trojúhelníky</span>
-                    <span class="mission-desc">Velké tiché objekty.</span>
+                    <span class="mission-title" data-translate-key="missTriangle">Trojúhelníky</span>
+                    <span class="mission-desc" data-translate-key="missTriangleDesc">Velké tiché objekty.</span>
                 </div>
                 <div class="mission-card" onclick="runResearchMission('tictac')">
                     <span class="mission-icon">💊</span>
-                    <span class="mission-title">Tic-Tac / Doutník</span>
-                    <span class="mission-desc">Objekty tvaru válce či kapsle.</span>
+                    <span class="mission-title" data-translate-key="missTicTac">Tic-Tac / Doutník</span>
+                    <span class="mission-desc" data-translate-key="missTicTacDesc">Objekty tvaru válce či kapsle.</span>
                 </div>
 
                  <div class="mission-card" onclick="runResearchMission('fast_mover')">
                     <span class="mission-icon">⚡</span>
-                    <span class="mission-title">Extrémní rychlost</span>
-                    <span class="mission-desc">Okamžité zrychlení a manévry.</span>
+                    <span class="mission-title" data-translate-key="missFast">Extrémní rychlost</span>
+                    <span class="mission-desc" data-translate-key="missFastDesc">Okamžité zrychlení a manévry.</span>
                 </div>
                  <div class="mission-card" onclick="runResearchMission('deep_scan')">
                     <span class="mission-icon">🔎</span>
-                    <span class="mission-title">Sken oblasti</span>
-                    <span class="mission-desc">Co vidím právě teď na mapě?</span>
+                    <span class="mission-title" data-translate-key="missScan">Sken oblasti</span>
+                    <span class="mission-desc" data-translate-key="missScanDesc">Co vidím právě teď na mapě?</span>
                 </div>
             </div>
     
@@ -7713,25 +7837,25 @@ async function runResearchMission(missionType) {
     
             <div id="mission-results-container" style="display: none; border-top: 1px solid #444; margin-top: 15px; padding-top: 15px;">
                 
-                <h4 style="color: #eee; margin: 0 0 10px 0;">📋 Výsledky mise</h4>
+                <h4 style="color: #eee; margin: 0 0 10px 0;" data-translate-key="aiResultsTitle">📋 Výsledky mise</h4>
                 
                 <div class="analysis-section">
                      <div id="analysis-anomalies" style="font-size: 0.9em; background: rgba(0, 188, 212, 0.1); padding: 10px; border-radius: 4px; border-left: 3px solid #00bcd4; margin-bottom: 10px;">
                         </div>
-                     
-                     <div id="analysis-stats-grid" style="display: flex; gap: 5px; justify-content: space-between;">
+                      
+                      <div id="analysis-stats-grid" style="display: flex; gap: 5px; justify-content: space-between;">
                         </div>
                 </div>
     
                 <hr style="border-color: #444; margin: 15px 0;">
     
                 <div class="analysis-section">
-                    <h3 style="font-size: 0.9em; color: #aaa;">
+                    <h3 style="font-size: 0.9em; color: #aaa;" data-translate-key="aiPromptTitle">
                         🤖 AI Prompt (pro externí analýzu)
                     </h3>
                     <textarea id="ai-prompt-output" readonly style="width: 100%; height: 50px; background: #222; color: #0f0; border: 1px solid #444; font-family: monospace; font-size: 0.8em; margin-bottom: 5px; padding: 5px;"></textarea>
                     <button class="custom-button" onclick="copyAiPrompt()" style="background-color: #455a64; font-size: 0.8em; padding: 5px;">
-                        <i class="fas fa-copy"></i> Zkopírovat
+                        <i class="fas fa-copy"></i> <span data-translate-key="aiPromptCopy">Zkopírovat</span>
                     </button>
                 </div>
             </div>
@@ -7774,7 +7898,7 @@ async function runResearchMission(missionType) {
 <div id="ai-assistant-widget" title="Kliknutím otevřete nabídku hloubkových tematických analýz">
     <div id="ai-btn-inner" onclick="togglePanel('panel-ai')">
         <i class="fas fa-brain"></i>
-        <span>Hloubková<br>analýza</span>
+        <span data-translate-key="aiWidgetText">Hloubková<br>analýza</span>
     </div>
 </div>
 <script>
