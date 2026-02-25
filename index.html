@@ -33,6 +33,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
     <script src="https://unpkg.com/leaflet.glify@3.2.0/dist/glify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         /* Styl pro rychlý náhled WebGL bodu při najetí myší */
@@ -1349,6 +1350,64 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             color: #ffffff; /* Při najetí myší odkaz zbělá */
             text-decoration: none;
         }
+        /* === OPRAVA TISKU DO PDF (STYLY) === */
+@media print {
+    /* Skryjeme všechno na stránce */
+    body * {
+        visibility: hidden;
+        overflow: visible !important;
+    }
+    
+    /* Zviditelníme pouze Report Modal a jeho obsah */
+    #report-modal, #report-modal * {
+        visibility: visible;
+    }
+
+    #report-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: white;
+        overflow: visible !important; /* Důležité pro vícestránkový tisk */
+        z-index: 999999;
+        display: block !important; /* Vynutit zobrazení při tisku */
+    }
+
+    #report-paper {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+        border: none;
+    }
+
+    /* Skryjeme ovládací tlačítka v reportu při tisku */
+    .report-actions, #download-report-img-btn, #close-report-btn, .print-btn-hide {
+        display: none !important;
+    }
+    
+    /* Vynutíme černé písmo pro tisk */
+    #report-paper, p, h2, h3, h4, li {
+        color: #000 !important;
+    }
+    
+    /* Zajištění, aby se grafy nerozsekly mezi stránky */
+    canvas, .report-stat-grid {
+        page-break-inside: avoid;
+    }
+    #evolution-canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+    }
+    
+    .mission-card {
+        page-break-inside: avoid; /* Aby se kartičky misí nerozsekly v půlce */
+    }
+}
     </style>
 </head>
 
@@ -2154,6 +2213,67 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 aiPromptCopy: "Zkopírovat",
                 aiAnomaliesTitle: "🔍 Detekované anomálie",
                 aiNoAnomalies: "Zatím nebyla provedena analýza.",
+                // --- Nové mise (sada 2) ---
+                missPilot: "Letecká pozorování",
+                missPilotDesc: "Hlášení pilotů a posádek letadel.",
+                missMilitary: "Vojenské / Radar",
+                missMilitaryDesc: "Armáda, námořnictvo a radarová potvrzení.",
+                missSilent: "Tichý let",
+                missSilentDesc: "Objekty pohybující se bez hluku.",
+                missEM: "EM Efekty",
+                missEMDesc: "Výpadky proudu, rušení rádií, zastavení aut.",
+                
+                // Reporty pro nové mise
+                repTitlePilot: "Analýza: Letecká bezpečnost (Piloti)",
+                repNotePilot: "Filtrováno na klíčová slova související s letectvím (pilot, cockpit, altitude, flight level). Vysoká kredibilita svědků.",
+                repTitleMilitary: "Analýza: Vojenská a radarová data",
+                repNoteMilitary: "Případy zahrnující vojenský personál, základny nebo radarová potvrzení. Často spojené s jadernými zařízeními.",
+                repTitleSilent: "Analýza: Absence zvukové stopy",
+                repNoteSilent: "Fyzikální anomálie: Velké objekty pohybující se vysokou rychlostí nebo vznášející se zcela bez hluku.",
+                repTitleEM: "Analýza: Elektromagnetické interference",
+                repNoteEM: "Případy, kdy se objekt fyzicky projevil na okolí (rušení elektroniky, zhasnutí motoru, statická elektřina).",
+                // --- Nové Mise (Sada 3) ---
+                missCredible: "Důvěryhodný svědek",
+                missCredibleDesc: "Piloti, policie + radarové potvrzení.",
+                missDuration: "Dlouhé trvání",
+                missDurationDesc: "Pozorování delší než 30 minut.",
+                missPsycho: "Psychologický dopad",
+                missPsychoDesc: "Strach, klid, telepatie, vědomí.",
+                missMass: "Hromadná pozorování",
+                missMassDesc: "Školy, stadiony, davy lidí.",
+                missEvo: "Tvarová evoluce",
+                missEvoDesc: "Jak se měnily tvary v čase (graf).",
+                
+                // Grand Report
+                btnGrandReport: "📄 SESTAVIT VELKOU ZPRÁVU (PDF)",
+                grandReportTitle: "VELKÁ BADATELSKÁ ZPRÁVA",
+                grandReportIntro: "Tento dokument je automatickým souhrnem hloubkové analýzy databáze UAP. Obsahuje výsledky všech dostupných analytických misí aplikovaných na aktuální dataset.",
+
+                // Reporty pro nové mise
+                repTitleCredible: "Analýza: Vysoká kredibilita (Cross-Over)",
+                repNoteCredible: "Průnik množin: Případy hlášené profesionály (pilot/armáda/policie) A ZÁROVEŇ potvrzené technicky (radar) nebo nezávislými svědky.",
+                repTitleDuration: "Analýza: Časová anomálie (>30 min)",
+                repNoteDuration: "Filtr vylučuje krátkodobé jevy (meteory, světlice). Zaměřeno na objekty, které se v oblasti zdržovaly dlouhodobě.",
+                repTitlePsycho: "Analýza: Interakce s vědomím",
+                repNotePsycho: "Případy obsahující popisy silných emocí, změněných stavů vědomí, telepatie nebo 'Oz faktoru' (ticho, izolace).",
+                repTitleMass: "Analýza: Hromadná svědectví",
+                repNoteMass: "Případy s velkým počtem svědků, často v obydlených oblastech, školách nebo při veřejných akcích.",
+                repTitleEvo: "Analýza: Historická evoluce tvarů",
+                repNoteEvo: "Statistický pohled na to, jak se měnila morfologie hlášených objektů v průběhu desetiletí.",
+                grandReportIntro: "Tento dokument je automatickým souhrnem hloubkové analýzy databáze UAP. Obsahuje výsledky všech dostupných analytických misí aplikovaných na aktuální dataset.",
+                
+                // === NOVÉ PŘEKLADY PRO VELKOU ZPRÁVU ===
+                grandReportLoading: "Sestavuji Velkou zprávu...",
+                grandReportDataset: "Analyzovaný dataset:",
+                grandReportTimeRange: "Časový rozsah:",
+                grandReportDate: "Datum generování:",
+                grandReportPrint: "🖨️ Uložit jako PDF / Tisk",
+                grandReportClose: "ZAVŘÍT",            
+                // === NOVÉ PŘEKLADY PRO PATIČKU REPORTU A GRAF ===
+                globalChartLabel: "Celkový počet hlášení ve světě",
+                globalChartXAxis: "Dekády",
+                reportDisclaimer: "Tento dokument je automaticky generovaný na základě dostupných historických dat. Nemusí reflektovat kompletní realitu všech pozorování. Zdroje dat: NUFORC, GEIPAN, Záře.",
+                reportCopyright: "© Jaroslav Svoboda - Interaktivní mapa UAP",
             },
             en: {
                 menuHelp: "❓ Help",
@@ -2537,6 +2657,69 @@ By using the UAP/UFO MAPA website, you agree to be bound by these Terms. If you 
                 aiPromptCopy: "Copy Text",
                 aiAnomaliesTitle: "🔍 Detected Anomalies",
                 aiNoAnomalies: "No analysis performed yet.",
+                // --- New Missions (Set 2) ---
+                missPilot: "Aircraft / Pilots",
+                missPilotDesc: "Reports from pilots and flight crews.",
+                missMilitary: "Military / Radar",
+                missMilitaryDesc: "Army, Navy and radar confirmations.",
+                missSilent: "Silent Craft",
+                missSilentDesc: "Objects moving without noise.",
+                missEM: "EM Effects",
+                missEMDesc: "Power outages, radio interference, car stalls.",
+
+                // Reports for new missions
+                repTitlePilot: "Analysis: Aviation Safety (Pilots)",
+                repNotePilot: "Filtered for aviation keywords (pilot, cockpit, altitude, flight level). High witness credibility.",
+                repTitleMilitary: "Analysis: Military & Radar Data",
+                repNoteMilitary: "Cases involving military personnel, bases, or radar confirmations. Often linked to nuclear assets.",
+                repTitleSilent: "Analysis: Audio Signature Absence",
+                repNoteSilent: "Physical anomaly: Large objects moving at speed or hovering completely silently.",
+                repTitleEM: "Analysis: Electromagnetic Interference",
+                repNoteEM: "Cases where the object physically affected the environment (electronics interference, engine failure, static).",
+                // --- New Missions (Set 3) ---
+                missCredible: "Credible Witness",
+                missCredibleDesc: "Pilots, police + radar confirmation.",
+                missDuration: "Long Duration",
+                missDurationDesc: "Sightings lasting over 30 mins.",
+                missPsycho: "Psychological Impact",
+                missPsychoDesc: "Fear, calm, telepathy, consciousness.",
+                missMass: "Mass Sightings",
+                missMassDesc: "Schools, stadiums, crowds.",
+                missEvo: "Shape Evolution",
+                missEvoDesc: "How shapes changed over time (chart).",
+
+                // Grand Report
+                btnGrandReport: "📄 COMPILE GRAND REPORT (PDF)",
+                grandReportTitle: "GRAND RESEARCH REPORT",
+                grandReportIntro: "This document is an automated summary of in-depth UAP database analysis. It contains results from all available analytical missions applied to the current dataset.",
+
+                // Reports
+                repTitleCredible: "Analysis: High Credibility (Cross-Over)",
+                repNoteCredible: "Intersection: Cases reported by professionals (pilot/military/police) AND confirmed technically (radar) or by multiple witnesses.",
+                repTitleDuration: "Analysis: Time Anomaly (>30 min)",
+                repNoteDuration: "Filter excludes short-term phenomena (meteors, flares). Focuses on objects loitering in the area.",
+                repTitlePsycho: "Analysis: Interaction with Consciousness",
+                repNotePsycho: "Cases describing strong emotions, altered states of consciousness, telepathy, or the 'Oz Factor' (silence, isolation).",
+                repTitleMass: "Analysis: Mass Witness Testimony",
+                repNoteMass: "Cases with a large number of witnesses, often in populated areas, schools, or public events.",
+                repTitleEvo: "Analysis: Historical Shape Evolution",
+                repNoteEvo: "Statistical view on how the morphology of reported objects changed over decades.",
+                // ... stávající kód ...
+                grandReportIntro: "This document is an automated summary of in-depth UAP database analysis. It contains results from all available analytical missions applied to the current dataset.",
+
+                // === NEW TRANSLATIONS FOR GRAND REPORT ===
+                grandReportLoading: "Compiling Grand Report...",
+                grandReportDataset: "Analyzed dataset:",
+                grandReportTimeRange: "Time range:",
+                grandReportDate: "Generation date:",
+                grandReportPrint: "🖨️ Save as PDF / Print",
+                grandReportClose: "CLOSE",
+
+                // === NEW TRANSLATIONS FOR REPORT FOOTER AND CHART ===
+                globalChartLabel: "Total reports worldwide",
+                globalChartXAxis: "Decades",
+                reportDisclaimer: "This document is automatically generated based on available historical data. It may not reflect the complete reality of all sightings. Data sources: NUFORC, GEIPAN, Project Záře.",
+                reportCopyright: "© Jaroslav Svoboda - UAP Interactive Map",
             }
         };
 
@@ -4328,112 +4511,109 @@ if (commentSearchInput) {
             // =========================================================================
            // === KROK 3: OPTIMALIZOVANÁ FUNKCE VYKRESLOVÁNÍ (Hybridní: WebGL + Klasika) ===
             
-            let glLayer = null; // Proměnná pro WebGL vrstvu
+            // === KROK 3: OPTIMALIZOVANÁ FUNKCE VYKRESLOVÁNÍ (Hybridní: WebGL + Klasika) ===
+let glLayer = null; // Proměnná pro WebGL vrstvu
 
-            function updateMarkers(data, skipFilters = false) {
-                if (!map) return;
+function updateMarkers(data, skipFilters = false) {
+    if (!map) return;
 
-                // 1. FILTROVÁNÍ DAT (Zachováno z původního kódu)
-                let filteredData;
-                if (skipFilters) {
-                    filteredData = data;
-                } else {
-                    const yearMin = parseInt(document.getElementById('year-min').value);
-                    const yearMax = parseInt(document.getElementById('year-max').value);
-                    const selectedShape = document.getElementById('shape-filter').value;
-                    const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
-                    const selectedSeason = document.getElementById('season-filter').value;
-                    const selectedTimeOfDay = document.getElementById('timeofday-filter').value;
-                    // === NOVÁ LOGIKA: Příprava filtru regionu ===
+    // 1. FILTROVÁNÍ DAT
+    let filteredData;
+    if (skipFilters) {
+        filteredData = data;
+    } else {
+        const yearMin = parseInt(document.getElementById('year-min').value);
+        const yearMax = parseInt(document.getElementById('year-max').value);
+        const selectedShape = document.getElementById('shape-filter').value;
+        const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
+        const selectedSeason = document.getElementById('season-filter').value;
+        const selectedTimeOfDay = document.getElementById('timeofday-filter').value;
+
+        // Filtr regionu
         let regionCodes = null;
-        // Pokud je nastaven filtr regionu a máme mapu kontinentů
         if (window.currentRegionFilter && window.currentRegionFilter !== 'world' && window.continentMap) {
             if (window.continentMap[window.currentRegionFilter]) {
                 regionCodes = new Set(window.continentMap[window.currentRegionFilter]);
             }
         }
-        // ===========================================
 
-                    const seasons = { spring: [3, 4, 5], summer: [6, 7, 8], autumn: [9, 10, 11], winter: [12, 1, 2] };
+        const seasons = { spring: [3, 4, 5], summer: [6, 7, 8], autumn: [9, 10, 11], winter: [12, 1, 2] };
 
-                    filteredData = data.filter(item => {
-                        // 1. Prioritní filtr Regionu
+        filteredData = data.filter(item => {
+            // Prioritní filtr Regionu
             if (regionCodes) {
-                // Pokud bod nemá zemi/stát v seznamu povolených kódů, zahodíme ho
                 if (!regionCodes.has(item.country) && !regionCodes.has(item.state)) {
                     return false;
                 }
             }
-                        if (!item || !item.lat || !item.lon) return false;
-                        if (item.year < yearMin || item.year > yearMax) return false;
-                        if (selectedShape !== 'all' && (item.shape || '').toLowerCase() !== selectedShape) return false;
-                        
-                        if (selectedSeason !== 'all') {
-                            if (item.month === null || !seasons[selectedSeason].includes(item.month)) return false;
-                        }
-                        if (selectedTimeOfDay !== 'all') {
-                            if (selectedTimeOfDay === 'day' && (item.hour < 6 || item.hour > 18)) return false;
-                            if (selectedTimeOfDay === 'night' && (item.hour >= 6 && item.hour < 19)) return false;
-                            if (selectedTimeOfDay === 'unknown' && item.hour !== null) return false;
-                        }
+            if (!item || !item.lat || !item.lon) return false;
+            if (item.year < yearMin || item.year > yearMax) return false;
+            if (selectedShape !== 'all' && (item.shape || '').toLowerCase() !== selectedShape) return false;
 
-                        // Textové hledání (optimalizováno)
-                        if (searchText !== "") {
-                            const haystack = (item.comment + " " + item.city + " " + item.shape).toLowerCase();
-                            if (!haystack.includes(searchText)) return false;
-                        }
-                        return true;
-                    });
-                }
-
-                window.currentlyFilteredData = filteredData; // Uložit pro analýzy
-
-                // 2. VYKRESLOVÁNÍ
-                const viewMode = document.querySelector('input[name="view-mode"]:checked').value;
-                const infoOutput = document.getElementById('info-output');
-                
-                // Vyčištění starých vrstev
-                if (markerClusterGroup) markerClusterGroup.clearLayers();
-                if (heatmapLayer) map.removeLayer(heatmapLayer);
-                if (glLayer) {
-                    try { glLayer.remove(); } catch(e) {} // Glify občas hází chybu při remove, ignorujeme
-                    glLayer = null;
-                }
-
-                // A) HEATMAPA
-                if (viewMode === 'heatmap') {
-                    const heatPoints = filteredData.map(item => [item.lat, item.lon]);
-                    if (!map.hasLayer(heatmapLayer)) map.addLayer(heatmapLayer);
-                    heatmapLayer.setLatLngs(heatPoints);
-                } 
-                // B) BODY (Hybridní režim)
-                else {
-                    // Limit pro přepnutí na WebGL (zvyš výkon)
-                    // Pokud je bodů více než 5000, použijeme GPU akceleraci
-                    // Dynamický limit pro WebGL: Na mobilu přepínáme dříve kvůli slabému CPU
-                const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-                if (isMobile) {
-}
-                const USE_WEBGL_LIMIT = isMobile ? 1500 : 5000;
-
-                    if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
-                        // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
-                        renderWebGLPoints(filteredData);
-                        if(infoOutput) infoOutput.innerHTML += ` <span style="color:#00ffcc">(Režim GPU Akcelerace zapnut)</span>`;
-                    } else {
-                        // --- KLASICKÝ REŽIM (Detailní ikony) ---
-                        renderClassicMarkers(filteredData);
-                    }
-                }
-
-                // Aktualizace textu ve stavovém řádku
-                if (infoOutput && !skipFilters) {
-                     const count = filteredData.length;
-                     const total = allData.length;
-                     // Jednoduchý status text
-                     infoOutput.innerHTML = `Zobrazeno: <strong>${count}</strong> / ${total}`;
-                }
+            if (selectedSeason !== 'all') {
+                if (item.month === null || !seasons[selectedSeason].includes(item.month)) return false;
             }
+            if (selectedTimeOfDay !== 'all') {
+                if (selectedTimeOfDay === 'day' && (item.hour < 6 || item.hour > 18)) return false;
+                if (selectedTimeOfDay === 'night' && (item.hour >= 6 && item.hour < 19)) return false;
+                if (selectedTimeOfDay === 'unknown' && item.hour !== null) return false;
+            }
+
+            // Textové hledání
+            if (searchText !== "") {
+                const haystack = (item.comment + " " + item.city + " " + item.shape).toLowerCase();
+                if (!haystack.includes(searchText)) return false;
+            }
+            return true;
+        });
+    }
+
+    window.currentlyFilteredData = filteredData; // Uložit pro analýzy
+
+    // 2. VYKRESLOVÁNÍ
+    let viewMode = 'markers';
+    const viewModeInput = document.querySelector('input[name="view-mode"]:checked');
+    if (viewModeInput) viewMode = viewModeInput.value;
+    
+    const infoOutput = document.getElementById('info-output');
+
+    // Vyčištění starých vrstev
+    if (markerClusterGroup) markerClusterGroup.clearLayers();
+    if (heatmapLayer) map.removeLayer(heatmapLayer);
+    if (glLayer) {
+        try { glLayer.remove(); } catch (e) { }
+        glLayer = null;
+    }
+
+    // A) HEATMAPA
+    if (viewMode === 'heatmap') {
+        const heatPoints = filteredData.map(item => [item.lat, item.lon]);
+        if (!map.hasLayer(heatmapLayer)) map.addLayer(heatmapLayer);
+        heatmapLayer.setLatLngs(heatPoints);
+    }
+    // B) BODY (Hybridní režim)
+    else {
+        // Detekce mobilu pro výkonnostní limit
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        const USE_WEBGL_LIMIT = isMobile ? 1500 : 5000;
+
+        if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
+            // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
+            renderWebGLPoints(filteredData);
+            if (infoOutput) infoOutput.innerHTML += ` <span style="color:#00ffcc">(Režim GPU Akcelerace zapnut)</span>`;
+        } else {
+            // --- KLASICKÝ REŽIM (Detailní ikony) ---
+            renderClassicMarkers(filteredData);
+        }
+    }
+
+    // Aktualizace textu ve stavovém řádku
+    if (infoOutput && !skipFilters) {
+        const count = filteredData.length;
+        const total = allData.length;
+        infoOutput.innerHTML = `Zobrazeno: <strong>${count}</strong> / ${total}`;
+    }
+}
 
             // Pomocná funkce pro klasické markery (Hezké ikony + Původní vzhled Popup)
             function renderClassicMarkers(data) {
@@ -5489,98 +5669,120 @@ async function exportFilteredToCSV() {
                 };
             }
 
-            function renderReport(stats, locationName, rawData) {
-                const modal = document.getElementById('report-modal');
-                const content = document.getElementById('report-content-body');
-                const statGrid = document.getElementById('report-stats-grid');
-                const langData = translations[currentLanguage];
+            // === FUNKCE: RENDER REPORT (S GRAFEM A DYNAMICKOU PATIČKOU) ===
+function renderReport(stats, locationName, rawData) {
+    const modal = document.getElementById('report-modal');
+    const content = document.getElementById('report-content-body');
+    const statGrid = document.getElementById('report-stats-grid');
+    const titleEl = document.getElementById('report-title');
+    // Důležité: Znovu zobrazíme kontejner grafu, který mohl být skryt Velkou zprávou
+    const chartContainer = document.getElementById('report-chart-container');
+    chartContainer.style.display = 'block'; 
 
-                // A) Sestavení textu (Narrative)
-                const titleEl = document.getElementById('report-title');
-                titleEl.innerText = langData.reportTitle(locationName);
-                
-                // Datum generování
-                document.getElementById('report-date').innerText = new Date().toLocaleDateString();
+    const langData = translations[currentLanguage];
 
-                // Úvod
-                let html = `<p class="report-section">${langData.reportIntro(locationName, stats.minYear, stats.maxYear, stats.count)}</p>`;
+    // 1. Nastavení textů
+    titleEl.innerText = langData.reportTitle(locationName);
+    document.getElementById('report-date').innerText = new Date().toLocaleDateString();
 
-                // Peak
-                if (stats.peakYear) {
-                    html += `<p class="report-section">${langData.reportPeak(stats.peakYear, stats.peakCount)}</p>`;
-                }
+    // 2. Obsah (HTML)
+    let html = `<p class="report-section">${langData.reportIntro(locationName, stats.minYear, stats.maxYear, stats.count)}</p>`;
+    if (stats.peakYear) {
+        html += `<p class="report-section">${langData.reportPeak(stats.peakYear, stats.peakCount)}</p>`;
+    }
+    if (stats.topShapes.length > 0) {
+        const shapeList = stats.topShapes.map(s => `<li><strong>${s[0].toUpperCase()}</strong> (${s[1]}x)</li>`).join('');
+        html += `<p>${langData.reportShapes}</p><ul>${shapeList}</ul>`;
+    }
+    html += `<p class="report-section">${langData.reportTime(stats.time.day, stats.time.night, stats.time.unknown)}</p>`;
+    content.innerHTML = html;
 
-                // Tvary
-                if (stats.topShapes.length > 0) {
-                    const shapeList = stats.topShapes.map(s => `<li><strong>${s[0].toUpperCase()}</strong> (${s[1]}x)</li>`).join('');
-                    html += `<p>${langData.reportShapes}</p><ul>${shapeList}</ul>`;
-                }
+    // 3. Statistiky (Dlaždice)
+    const nightRatio = Math.round((stats.time.night / (stats.time.day + stats.time.night || 1)) * 100);
+    const topShapeStr = stats.topShapes.length > 0 ? stats.topShapes[0][0].toUpperCase() : "N/A";
 
-                // Čas
-                html += `<p class="report-section">${langData.reportTime(stats.time.day, stats.time.night, stats.time.unknown)}</p>`;
+    statGrid.innerHTML = `
+        <div class="report-stat-card">
+            <div class="stat-label">${langData.statTotal}</div>
+            <div class="stat-value">${stats.count}</div>
+        </div>
+        <div class="report-stat-card">
+            <div class="stat-label">${langData.statPeakYear}</div>
+            <div class="stat-value">${stats.peakYear}</div>
+        </div>
+        <div class="report-stat-card">
+            <div class="stat-label">${langData.statTopShape}</div>
+            <div class="stat-value">${topShapeStr}</div>
+        </div>
+        <div class="report-stat-card">
+            <div class="stat-label">${langData.statNightTime}</div>
+            <div class="stat-value">${nightRatio}%</div>
+        </div>
+    `;
 
-                content.innerHTML = html;
+    // 4. Vykreslení Grafu (Timeline)
+    const ctx = document.getElementById('report-chart-canvas').getContext('2d');
+    
+    // Pokud existuje starý graf, zničíme ho
+    if (window.reportChart instanceof Chart) {
+        window.reportChart.destroy();
+    }
 
-                // B) Sestavení mřížky statistik (Dlaždice)
-                const nightRatio = Math.round((stats.time.night / (stats.time.day + stats.time.night || 1)) * 100);
-                const topShapeStr = stats.topShapes.length > 0 ? stats.topShapes[0][0].toUpperCase() : "N/A";
+    const sortedYears = Object.keys(stats.years).sort();
+    const dataPoints = sortedYears.map(y => stats.years[y]);
 
-                statGrid.innerHTML = `
-                    <div class="report-stat-card">
-                        <div class="stat-label">${langData.statTotal}</div>
-                        <div class="stat-value">${stats.count}</div>
-                    </div>
-                    <div class="report-stat-card">
-                        <div class="stat-label">${langData.statPeakYear}</div>
-                        <div class="stat-value">${stats.peakYear}</div>
-                    </div>
-                    <div class="report-stat-card">
-                        <div class="stat-label">${langData.statTopShape}</div>
-                        <div class="stat-value">${topShapeStr}</div>
-                    </div>
-                    <div class="report-stat-card">
-                        <div class="stat-label">${langData.statNightTime}</div>
-                        <div class="stat-value">${nightRatio}%</div>
-                    </div>
-                `;
+    window.reportChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedYears,
+            datasets: [{
+                label: langData.chartDatasetLabel,
+                data: dataPoints,
+                borderColor: '#d32f2f',
+                backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                borderWidth: 2,
+                pointRadius: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Časová osa aktivity (Timeline)' }
+            },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
 
-                // C) Vykreslení grafu (Timeline)
-                const ctx = document.getElementById('report-chart-canvas').getContext('2d');
-                if (reportChart) reportChart.destroy();
+    // 5. NOVÉ: Vložení patičky pod graf (pouze pokud tam ještě není)
+    // Toto zajistí, že se patička zobrazí u malého reportu, ale skryje u Velké zprávy (protože ta skrývá celý chartContainer)
+    let dynamicFooter = document.getElementById('chart-footer-disclaimer');
+    if (!dynamicFooter) {
+        dynamicFooter = document.createElement('div');
+        dynamicFooter.id = 'chart-footer-disclaimer';
+        dynamicFooter.style.marginTop = '20px';
+        dynamicFooter.style.borderTop = '1px solid #ccc';
+        dynamicFooter.style.paddingTop = '10px';
+        dynamicFooter.style.fontSize = '0.8em';
+        dynamicFooter.style.color = '#888';
+        dynamicFooter.style.textAlign = 'center';
+        chartContainer.appendChild(dynamicFooter);
+    }
+    // Naplníme textem z překladů
+    dynamicFooter.innerHTML = langData.reportDisclaimer;
 
-                const sortedYears = Object.keys(stats.years).sort();
-                const dataPoints = sortedYears.map(y => stats.years[y]);
+    // 6. Zobrazit Modal
+    modal.style.display = 'block';
 
-                reportChart = new Chart(ctx, {
-                    type: 'line', // V reportu vypadá Line chart lépe než Bar
-                    data: {
-                        labels: sortedYears,
-                        datasets: [{
-                            label: langData.chartDatasetLabel,
-                            data: dataPoints,
-                            borderColor: '#d32f2f',
-                            backgroundColor: 'rgba(211, 47, 47, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 2,
-                            fill: true,
-                            tension: 0.3 // Hladká křivka
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            title: { display: true, text: 'Timeline of Activity' }
-                        },
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
-
-                // Zobrazení modalu
-                modal.style.display = 'block';
-            }
+    // Přidání tlačítek
+    const actions = document.querySelector('.report-actions');
+    actions.innerHTML = `
+        <button id="download-report-img-btn" onclick="downloadReportAsImage()">💾 Stáhnout jako obrázek</button>
+        <button id="close-report-btn" onclick="document.getElementById('report-modal').style.display='none'">ZAVŘÍT</button>
+    `;
+}
 
             // Listener pro tlačítko generování
             document.addEventListener('DOMContentLoaded', () => {
@@ -5992,180 +6194,123 @@ if (resetMtnBtn) {
             // =========================================================
 
             // Globální úložiště pro spárování ID zprávy a Marker objektu
-            let liveDataMarkersMap = {};
+           // Globální úložiště pro spárování ID zprávy a Marker objektu
+let liveDataMarkersMap = {};
 
-            async function loadLiveData() {
-                const statusEl = document.getElementById('info-output');
-                const newsPanel = document.getElementById('news-panel');
-                const newsListEl = document.getElementById('news-list-content');
+async function loadLiveData() {
+    const statusEl = document.getElementById('info-output');
+    const newsPanel = document.getElementById('news-panel');
+    const newsListEl = document.getElementById('news-list-content');
 
-                // Resetujeme úložiště markerů
-                liveDataMarkersMap = {};
+    // Resetujeme úložiště markerů
+    liveDataMarkersMap = {};
 
-                newsListEl.innerHTML = '<div style="padding:15px; text-align:center; color:#aaa;"><i>Navazuji spojení se zpravodajským kanálem...</i><br>⏳</div>';
-                
-                // Dočasně zobrazíme info o stahování, ale jen pokud tam není chyba
-                if (!statusEl.innerText.includes("CHYBA")) {
-                    statusEl.innerHTML = `<strong style='color: #ff5722;'>${translations[currentLanguage].newsDownloading}</strong>`;
-                }
+    newsListEl.innerHTML = '<div style="padding:15px; text-align:center; color:#aaa;"><i>Navazuji spojení se zpravodajským kanálem...</i><br>⏳</div>';
 
-                const googleNewsUrl = 'https://news.google.com/rss/search?q=UFO+sighting&hl=en-US&gl=US&ceid=US:en';
-                const rssUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(googleNewsUrl);
+    if (statusEl && !statusEl.innerText.includes("CHYBA")) {
+        statusEl.innerHTML = `<strong style='color: #ff5722;'>${translations[currentLanguage].newsDownloading}</strong>`;
+    }
 
-                try {
-                    const response = await fetch(rssUrl);
-                    const data = await response.json();
+    const googleNewsUrl = 'https://news.google.com/rss/search?q=UFO+sighting&hl=en-US&gl=US&ceid=US:en';
+    const rssUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(googleNewsUrl);
 
-                    if (data.status === 'ok') {
-                        const recentItems = data.items.slice(0, 5);
+    try {
+        const response = await fetch(rssUrl);
+        const data = await response.json();
 
-                        let listHtml = `<div id="news-process-status" style="
-                    background: #333; 
-                    color: #ffeb3b; 
-                    padding: 5px; 
-                    margin-bottom: 10px; 
-                    font-size: 0.85em; 
-                    text-align: center; 
-                    border: 1px solid #555;
-                    border-radius: 4px;">
-                    ${translations[currentLanguage].newsLoadingList}
+        if (data.status === 'ok') {
+            const recentItems = data.items.slice(0, 5);
+
+            let listHtml = `<div id="news-process-status" style="background:#333; color:#ffeb3b; padding:5px; margin-bottom:10px; font-size:0.85em; text-align:center; border:1px solid #555; border-radius:4px;">
+                ${translations[currentLanguage].newsLoadingList}
+            </div>`;
+
+            recentItems.forEach((item, index) => {
+                const dateStr = item.pubDate ? item.pubDate.split(' ')[0] : 'Nedávno';
+                listHtml += `
+                <div style="margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 8px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${dateStr}</span>
+                    </div>
+                    <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${item.title}</div>
+                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                        <button onclick="focusOnLiveMarker(${index})" style="background:transparent; border:1px solid #2a9f62; color:#2a9f62; border-radius:3px; cursor:pointer; padding:2px 6px; font-size:0.85em;">
+                            ${translations[currentLanguage].newsShowOnMap}
+                        </button>
+                        <a href="${item.link}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
+                            ${translations[currentLanguage].newsReadArticle}
+                        </a>
+                    </div>
                 </div>`;
+            });
 
-                        recentItems.forEach((item, index) => {
-                            const dateStr = item.pubDate ? item.pubDate.split(' ')[0] : 'Nedávno';
+            newsListEl.innerHTML = listHtml;
+            const newsStatusEl = document.getElementById('news-process-status');
+            let processedCount = 0;
 
-                            listHtml += `
-                        <div style="margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 8px;">
-                            <div style="display:flex; justify-content:space-between;">
-                                <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${dateStr}</span>
-                            </div>
-                            <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${item.title}</div>
-                            
-                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                                <button onclick="focusOnLiveMarker(${index})" style="background:transparent; border:1px solid #2a9f62; color:#2a9f62; border-radius:3px; cursor:pointer; padding:2px 6px; font-size:0.85em;">
-                                    ${translations[currentLanguage].newsShowOnMap}
-                                </button>
-                                
-                                <a href="${item.link}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
-                                    ${translations[currentLanguage].newsReadArticle}
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                        });
+            // === VYLEPŠENÁ SMYČKA PRO ZPRACOVÁNÍ LOKACÍ ===
+            for (let i = 0; i < recentItems.length; i++) {
+                const item = recentItems[i];
+                const invalidLocations = ["ufo", "ufos", "uap", "uaps", "alien", "aliens", "sighting", "sightings", "video", "footage", "photo", "report", "witness", "mystery", "light", "sky", "night", "day", "object", "craft", "recording", "being", "this", "that", "there", "here", "what", "when", "experts", "study", "shows", "rocket", "fuel", "clearest", "something", "scary", "during", "above", "below", "near", "over", "from", "with", "about", "calling", "new", "more", "abducted", "taken", "says", "claims", "bizarre", "strange", "files", "revealed", "woman", "man", "captured", "watch", "look", "real", "fake", "viral", "spark", "residents", "police", "news", "breaking", "after", "before", "possible", "likely", "unidentified", "latest", "update", "warns", "history", "truth", "image", "shape", "the", "a", "an", "and", "but", "for", "are", "were", "been"];
 
-                        newsListEl.innerHTML = listHtml;
-                        const newsStatusEl = document.getElementById('news-process-status');
+                let titlePart = item.title.split('-')[0].trim();
+                let allWords = titlePart.split(/\s+/);
+                let locationCandidate = "";
 
-                        let processedCount = 0;
+                for (let j = 0; j < allWords.length; j++) {
+                    let cleanWord = allWords[j].replace(/[?!.,:;]/g, "");
+                    let lowerWord = cleanWord.toLowerCase();
 
-                       // === VYLEPŠENÁ SMYČKA PRO ZPRACOVÁNÍ LOKACÍ (Fix "recording/being") ===
-                            for (let i = 0; i < recentItems.length; i++) {
-                                const item = recentItems[i];
-
-                                // 1. Ultra rozšířený seznam Stop Words (vše malými písmeny)
-                                const invalidLocations = [
-                                    "ufo", "ufos", "uap", "uaps", "alien", "aliens", "sighting", "sightings", 
-                                    "video", "footage", "photo", "caught", "camera", "report", "reported", "reports",
-                                    "witness", "witnesses", "witnessed", "mystery", "mysterious", "light", "lights", 
-                                    "sky", "skies", "night", "day", "flying", "object", "saucer", "craft",
-                                    "recording", "recorded", "being", "this", "that", "there", "here", "what", "when", 
-                                    "experts", "study", "shows", "likelihood", "rocket", "fuel", "behind",
-                                    "clearest", "ever", "something", "powered", "off", "main", "scary",
-                                    "during", "above", "below", "near", "over", "from", "with", "about",
-                                    "calling", "new", "more", "than", "abducted", "taken", "took", "says", "saying",
-                                    "claims", "claimed", "bizarre", "strange", "files", "revealed", "woman", "man",
-                                    "captured", "watch", "look", "real", "fake", "viral", "spark", "sparks",
-                                    "residents", "left", "baffled", "police", "news", "breaking", "just",
-                                    "after", "before", "possible", "likely", "unidentified", "phenomena",
-                                    "latest", "update", "warns", "warning", "could", "would", "should",
-                                    "history", "truth", "finally", "image", "images", "shape", "shaped", 
-                                    "the", "a", "an", "and", "but", "for", "are", "were", "been", "video"
-                                ];
-
-                                // 2. Získání čistého kandidáta na lokaci
-                                let titlePart = item.title.split('-')[0].trim(); 
-                                
-                                // Rozdělíme nadpis na jednotlivá slova pro analýzu pozice
-                                let allWords = titlePart.split(/\s+/);
-                                let locationCandidate = "";
-
-                                // Projdeme slova a hledáme ta, která:
-                                // - Začínají velkým písmenem
-                                // - Nejsou v blacklistu
-                                // - Nejsou na úplném začátku věty (index 0), pokud je to jediné slovo
-                                for (let j = 0; j < allWords.length; j++) {
-                                    let cleanWord = allWords[j].replace(/[?!.,:;]/g, "");
-                                    let lowerWord = cleanWord.toLowerCase();
-                                    
-                                    // Kontrola: Začíná velkým? Není v blacklistu? Délka > 2?
-                                    if (/^[A-Z]/.test(cleanWord) && !invalidLocations.includes(lowerWord) && cleanWord.length > 2) {
-                                        
-                                        // Ignorujeme slovo na indexu 0, pokud po něm nenásleduje další velké písmeno 
-                                        // (ochrana proti "Is", "The", "Study", "Experts" na začátku věty)
-                                        if (j === 0 && (allWords.length > 1 && !/^[A-Z]/.test(allWords[1]))) {
-                                            continue;
-                                        }
-
-                                        locationCandidate = cleanWord;
-
-                                        // Bonus: Pokud i další slovo začíná velkým, spojíme je (např. "New", "Jersey")
-                                        if (j + 1 < allWords.length) {
-                                            let nextWord = allWords[j+1].replace(/[?!.,:;]/g, "");
-                                            if (/^[A-Z]/.test(nextWord) && !invalidLocations.includes(nextWord.toLowerCase())) {
-                                                locationCandidate += " " + nextWord;
-                                            }
-                                        }
-                                        break; // Našli jsme prvního silného kandidáta, končíme smyčku
-                                    }
-                                }
-
-                                // 4. Finální validace
-                                if (!locationCandidate || locationCandidate.length < 3) {
-                                    console.log(`LiveNews: Lokace v nadpisu "${titlePart}" nerozpoznána, přeskakuji.`);
-                                    liveDataMarkersMap[i] = 'NOT_FOUND';
-                                    addToArchive(item, { display_name: "Lokace nerozpoznána", lat: 0, lon: 0, address: { country_code: 'unknown' } });
-                                    processedCount++;
-                                    continue; 
-                                }
-
-                                if (newsStatusEl) {
-                                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationCandidate}</strong>"</span>`;
-                                }
-
-                                // 5. Bezpečná pauza pro API (Rate Limiting)
-                                await new Promise(r => setTimeout(r, 3000));
-
-                                // Voláme geokódování s očištěným kandidátem
-                                await geocodeAndAddToMap(locationCandidate, item, i);
-
-                                processedCount++;
+                    if (/^[A-Z]/.test(cleanWord) && !invalidLocations.includes(lowerWord) && cleanWord.length > 2) {
+                        if (j === 0 && (allWords.length > 1 && !/^[A-Z]/.test(allWords[1]))) {
+                            continue;
+                        }
+                        locationCandidate = cleanWord;
+                        if (j + 1 < allWords.length) {
+                            let nextWord = allWords[j + 1].replace(/[?!.,:;]/g, "");
+                            if (/^[A-Z]/.test(nextWord) && !invalidLocations.includes(nextWord.toLowerCase())) {
+                                locationCandidate += " " + nextWord;
                             }
-
-                        if (newsStatusEl) {
-                            newsStatusEl.style.color = '#2a9f62';
-                            newsStatusEl.style.borderColor = '#2a9f62';
-                            newsStatusEl.innerHTML = translations[currentLanguage].newsDone;
                         }
-                        
-                        // === OPRAVA ZDE ===
-                        // Původně tu byl řádek, který natvrdo vypsal "Chyba zdroje dat" i při úspěchu.
-                        // Nyní zavoláme updateMarkers, což vrátí zpět správný počet záznamů z CSV.
-                        if (typeof updateMarkers === 'function' && typeof allData !== 'undefined') {
-                             updateMarkers(window.currentlyFilteredData || allData);
-                        }
-
-                    } else {
-                        newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsSourceError}</div>`;
-                        // Pokud selže RSS, vrátíme původní text
-                        if (typeof updateMarkers === 'function') updateMarkers(window.currentlyFilteredData || allData);
+                        break;
                     }
-                } catch (error) {
-                    console.error(error);
-                    statusEl.innerHTML = translations[currentLanguage].newsErrorConnection;
-                    newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsErrorDownload}</div>`;
                 }
+
+                if (!locationCandidate || locationCandidate.length < 3) {
+                    liveDataMarkersMap[i] = 'NOT_FOUND';
+                    addToArchive(item, { display_name: "Lokace nerozpoznána", lat: 0, lon: 0, address: { country_code: 'unknown' } });
+                    processedCount++;
+                    continue;
+                }
+
+                if (newsStatusEl) {
+                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationCandidate}</strong>"</span>`;
+                }
+
+                await new Promise(r => setTimeout(r, 3000));
+                await geocodeAndAddToMap(locationCandidate, item, i);
+                processedCount++;
             }
+
+            if (newsStatusEl) {
+                newsStatusEl.style.color = '#2a9f62';
+                newsStatusEl.style.borderColor = '#2a9f62';
+                newsStatusEl.innerHTML = translations[currentLanguage].newsDone;
+            }
+
+            if (typeof updateMarkers === 'function' && typeof allData !== 'undefined') {
+                updateMarkers(window.currentlyFilteredData || allData);
+            }
+
+        } else {
+            newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsSourceError}</div>`;
+        }
+    } catch (error) {
+        console.error(error);
+        if (statusEl) statusEl.innerHTML = translations[currentLanguage].newsErrorConnection;
+        newsListEl.innerHTML = `<div style="color:#f44336;">${translations[currentLanguage].newsErrorDownload}</div>`;
+    }
+}
             // Robustní funkce pro přímé geokódování s ošetřením chyb
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
     // Použijeme veřejnou CORS proxy pro obejití restrikcí během vývoje
@@ -7673,6 +7818,111 @@ async function runResearchMission(missionType) {
                 });
                 analysisNote = t.repNoteScan;
                 break;
+   
+            case 'pilot':
+                missionTitle = t.repTitlePilot;
+                // Klíčová slova: pilot, kokpit, letová hladina, letadlo, pasažéři, okno letadla
+                const pilotWords = ["pilot", "cockpit", "flight", "altitude", "airline", "passenger", "plane window", "30,000", "ft", "fuselage"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    return pilotWords.some(w => c.includes(w));
+                });
+                analysisNote = t.repNotePilot;
+                break;
+
+            case 'military':
+                missionTitle = t.repTitleMilitary;
+                // Klíčová slova: armáda, námořnictvo, radar, základna, stíhačka, nukleární
+                const milWords = ["military", "navy", "army", "air force", "radar", "base", "intercept", "jet", "soldier", "guard", "nuclear"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    return milWords.some(w => c.includes(w));
+                });
+                analysisNote = t.repNoteMilitary;
+                break;
+
+            case 'silent':
+                missionTitle = t.repTitleSilent;
+                // Klíčová slova: tichý, žádný zvuk, nehlučný
+                const silentWords = ["silent", "no sound", "noise", "quiet", "soundless", "hissing", "humming"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    // Zde je logika trochu složitější - hledáme "silent" nebo "no sound"
+                    // Musíme vyloučit "not silent" (což je vzácné), ale pro jednoduchost:
+                    return c.includes("silent") || c.includes("no sound") || c.includes("without sound") || c.includes("noiseless");
+                });
+                analysisNote = t.repNoteSilent;
+                break;
+
+            case 'em_effect':
+                missionTitle = t.repTitleEM;
+                // Klíčová slova: auto, motor, rádio, elektřina, interference, zhaslo
+                const emWords = ["engine", "car", "stopped", "radio", "interference", "static", "power", "outage", "shut down", "died", "electronic"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    // Hledáme kombinaci slov naznačující selhání
+                    return (c.includes("car") && c.includes("stop")) || 
+                           (c.includes("engine") && c.includes("died")) ||
+                           c.includes("interference") || 
+                           c.includes("power outage") || 
+                           c.includes("radio static");
+                });
+                analysisNote = t.repNoteEM;
+                break;
+  
+            case 'credible':
+                missionTitle = t.repTitleCredible;
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    // Musí to být PILOT/VOJÁK/POLICIE ... A SOUČASNĚ ... RADAR nebo VÍCE SVĚDKŮ
+                    const isPro = c.includes("pilot") || c.includes("military") || c.includes("police") || c.includes("officer");
+                    const isConfirmed = c.includes("radar") || c.includes("multiple witnesses") || c.includes("witnesses") || c.includes("confirmed");
+                    return isPro && isConfirmed;
+                });
+                analysisNote = t.repNoteCredible;
+                break;
+
+            case 'long_duration':
+                missionTitle = t.repTitleDuration;
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    // Hledáme textové indikace času
+                    const textCheck = c.includes("hours") || c.includes("45 min") || c.includes("30 min") || c.includes("all night");
+                    // Pokud máme sloupec duration, použijeme ho (předpoklad: sloupec duration (seconds) je index 5 v CSV, v allData je ale možná jen jako text)
+                    // Zkusíme jednoduchou detekci
+                    return textCheck; 
+                });
+                analysisNote = t.repNoteDuration;
+                break;
+
+            case 'psycho':
+                missionTitle = t.repTitlePsycho;
+                const psyWords = ["fear", "scared", "terrified", "calm", "peaceful", "telepathic", "voice", "head", "paralyzed", "dream", "consciousness"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    return psyWords.some(w => c.includes(w));
+                });
+                analysisNote = t.repNotePsycho;
+                break;
+
+            case 'mass':
+                missionTitle = t.repTitleMass;
+                const massWords = ["school", "stadium", "hundreds of people", "crowd", "group of people", "neighbors", "town", "residents"];
+                filteredResults = sourceData.filter(d => {
+                    const c = (d.comment || "").toLowerCase();
+                    return massWords.some(w => c.includes(w));
+                });
+                analysisNote = t.repNoteMass;
+                break;
+
+            case 'evolution':
+                missionTitle = t.repTitleEvo;
+                // Evoluce je specifická - chceme vidět vše, ale report bude jiný (grafický)
+                // Pro účely mapy vyfiltrujeme jen ty, co mají tvar
+                filteredResults = sourceData.filter(d => d.shape && d.shape !== "unknown" && d.year > 1940);
+                analysisNote = t.repNoteEvo;
+                // Zde bychom ideálně měli přepnout typ grafu v reportu na skládaný (stacked area), to vyřešíme níže
+                break;
         }
 
         // VÝSLEDEK
@@ -7722,6 +7972,266 @@ async function runResearchMission(missionType) {
         if (globalLoader) globalLoader.style.display = 'none';
     }
 }
+
+// === OPRAVENÁ FUNKCE PRO VELKOU ZPRÁVU (GRAND REPORT) - S PŘEKLADY ===
+async function generateGrandReport() {
+    const t = translations[currentLanguage];
+    const modal = document.getElementById('report-modal');
+    const content = document.getElementById('report-content-body');
+    const titleEl = document.getElementById('report-title');
+    const statGrid = document.getElementById('report-stats-grid');
+    const chartContainer = document.getElementById('report-chart-container');
+    const actions = document.querySelector('.report-actions');
+    
+    // Zobrazení loaderu s přeloženým textem
+    updateMapWithLoader(null, t.grandReportLoading);
+    await new Promise(r => setTimeout(r, 200));
+
+    // 1. Nastavení hlavičky
+    titleEl.innerText = t.grandReportTitle;
+    document.getElementById('report-date').innerText = new Date().toLocaleDateString();
+    
+    // Skryjeme mřížku a standardní graf (budeme generovat vlastní obsah)
+    if (statGrid) statGrid.innerHTML = ""; 
+    if (chartContainer) chartContainer.style.display = "none"; 
+
+    // Přidání tlačítek s přeloženými texty
+    if (actions) {
+        actions.innerHTML = `
+            <button onclick="window.print()" class="custom-button" style="background: #e91e63; font-weight:bold;">
+                ${t.grandReportPrint}
+            </button>
+            <button onclick="document.getElementById('report-modal').style.display='none'" class="custom-button" style="background: #333;">
+                ${t.grandReportClose}
+            </button>
+        `;
+    }
+
+    // 2. Úvodní text s přeloženými popisky
+    let fullHtml = `
+        <div style="margin-bottom:30px; font-size:1.1em; border-bottom:1px solid #ccc; padding-bottom:15px;">
+            ${t.grandReportIntro}
+            <br><br>
+            <table style="width:100%; border-collapse: collapse; font-size:0.9em;">
+                <tr><td><strong>${t.grandReportDataset}</strong></td><td>${allData.length.toLocaleString()} ${t.recordsCount}</td></tr>
+                <tr><td><strong>${t.grandReportTimeRange}</strong></td><td>${document.getElementById('year-min').value} - ${document.getElementById('year-max').value}</td></tr>
+                <tr><td><strong>${t.grandReportDate}</strong></td><td>${new Date().toLocaleString()}</td></tr>
+            </table>
+        </div>
+    `;
+
+    // 3. Analýza misí (zbytek funkce zůstává stejný, logika se nemění)
+    const missions = [
+        {id: 'credible', icon: '👮', name: t.missCredible}, 
+        {id: 'pilot', icon: '✈️', name: t.missPilot}, 
+        {id: 'military', icon: '🎖️', name: t.missMilitary},
+        {id: 'nuclear', icon: '☢️', name: t.missNuke},
+        {id: 'water', icon: '🌊', name: t.missWater},
+        {id: 'tictac', icon: '💊', name: t.missTicTac},
+        {id: 'triangle_wave', icon: '🔺', name: t.missTriangle},
+        {id: 'fast_mover', icon: '⚡', name: t.missFast},
+        {id: 'silent', icon: '🤫', name: t.missSilent},
+        {id: 'mass', icon: '👥', name: t.missMass},
+        {id: 'psycho', icon: '🧠', name: t.missPsycho}
+    ];
+
+    for (const m of missions) {
+        let filtered = [];
+        
+        // Zjednodušená logika filtrace pro report
+        if(m.id === 'credible') {
+             filtered = allData.filter(d => {
+                 const c = (d.comment||"").toLowerCase();
+                 return (c.includes("pilot")||c.includes("military")||c.includes("police")) && (c.includes("radar")||c.includes("witnesses"));
+             });
+        } else if (m.id === 'pilot') {
+             filtered = allData.filter(d => ["pilot", "cockpit", "flight", "altitude"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'military') {
+             filtered = allData.filter(d => ["military", "navy", "army", "radar"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'nuclear') {
+             filtered = allData.filter(d => ["nuclear", "atomic", "missile", "silo"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'water') {
+             filtered = allData.filter(d => ["ocean", "sea", "lake", "water"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'tictac') {
+             filtered = allData.filter(d => (d.shape||"").toLowerCase() === 'cigar' || (d.comment||"").toLowerCase().includes("tic tac"));
+        } else if (m.id === 'triangle_wave') {
+             filtered = allData.filter(d => (d.shape||"").toLowerCase() === 'triangle');
+        } else if (m.id === 'fast_mover') {
+             filtered = allData.filter(d => ["accelerat", "instant", "speed", "mach"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'silent') {
+             filtered = allData.filter(d => ["silent", "no sound"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'mass') {
+             filtered = allData.filter(d => ["school", "stadium", "crowd"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        } else if (m.id === 'psycho') {
+             filtered = allData.filter(d => ["fear", "telepathic", "calm"].some(w => (d.comment||"").toLowerCase().includes(w)));
+        }
+
+        if (filtered.length > 0) {
+            const stats = analyzeStatistics(filtered);
+            const ratio = ((filtered.length / allData.length) * 100).toFixed(4);
+            const barWidth = Math.min(ratio * 20, 100); 
+
+            fullHtml += `
+                <div style="margin-bottom: 20px; border: 1px solid #eee; padding: 10px; border-radius: 5px; page-break-inside: avoid;">
+                    <h4 style="margin: 0; color:#333; border-bottom: 1px solid #eee; padding-bottom:5px;">
+                        ${m.icon} ${m.name}
+                    </h4>
+                    <div style="display:flex; justify-content:space-between; font-size:0.9em; margin-top:5px;">
+                        <span>${t.recordsCount || 'Případů'}: <strong>${filtered.length}</strong></span>
+                        <span>Peak: <strong>${stats.peakYear}</strong></span>
+                        <span>${t.statTopShape || 'Tvar'}: <strong>${stats.topShapes[0]?stats.topShapes[0][0]:'-'}</strong></span>
+                    </div>
+                    <div style="background:#eee; height:6px; width:100%; border-radius:3px; margin-top:5px; overflow:hidden;">
+                        <div style="background:#2a9f62; height:100%; width:${barWidth}%;"></div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 4. Sekce Grafů (Evoluce + Globální kontext)
+    fullHtml += `
+        <div style="margin-top: 40px; border-top: 2px solid #d32f2f; padding-top: 20px;">
+            <h2 style="color:#d32f2f; border-bottom: 1px solid #eee; padding-bottom: 10px;">${t.missEvo}</h2>
+            <p style="font-size: 1em; margin-bottom: 15px;">${currentLanguage === 'cs' ? 'Historický vývoj hlášených tvarů objektů v aktuálně vybraném datasetu (všechny dekády).' : 'Historical evolution of reported object shapes in the currently selected dataset (all decades).'}</p>
+            <div style="width:100%; height:300px; position: relative; margin-bottom: 50px; page-break-inside: avoid;">
+                <canvas id="evolution-canvas"></canvas>
+            </div>
+
+            <h2 style="color:#00bcd4; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">${currentLanguage === 'cs' ? 'Globální srovnávací analýza' : 'Global Comparative Analysis'}</h2>
+            <p style="font-size: 1em; margin-bottom: 15px;">${currentLanguage === 'cs' ? 'Srovnání intenzity pozorování v čase pro celou světovou databázi (300 000+ záznamů). Slouží k identifikaci globálních vln aktivity.' : 'Comparison of sighting intensity over time for the entire global database (300,000+ records). Used to identify global waves of activity.'}</p>
+            <div style="width:100%; height:300px; position: relative; page-break-inside: avoid;">
+                <canvas id="global-trend-canvas"></canvas>
+            </div>
+        </div>
+    `;
+
+    // 5. Patička
+    fullHtml += `
+        <div style="margin-top:50px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 0.8em; color: #888; text-align: center;">
+            ${t.reportDisclaimer}
+        </div>
+        <div style="margin-top:20px; text-align:center; font-size:0.8em; color:#aaa;">
+            Report: ${new Date().toLocaleString()} <br>
+            ${t.reportCopyright}
+        </div>
+    `;
+
+    // Zápis HTML do modalu
+    if (content) content.innerHTML = fullHtml;
+    
+    // Zobrazení modalu
+    if (modal) modal.style.display = 'block';
+
+    // 6. Vykreslení grafu a úklid
+    setTimeout(() => {
+        renderEvolutionChart();
+        renderGlobalTrendChart();
+        const pi = document.getElementById('processing-indicator');
+        if(pi) pi.style.display = 'none';
+    }, 500);
+}
+
+// === POMOCNÁ FUNKCE PRO GRAF EVOLUCE (OPRAVENO) ===
+function renderEvolutionChart() {
+    const canvas = document.getElementById('evolution-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const shapesOfInterest = ['disk', 'triangle', 'light', 'cigar', 'fireball'];
+    const decades = {}; 
+
+    if (typeof allData === 'undefined') return;
+
+    allData.forEach(d => {
+        if (!d.year || d.year < 1940 || d.year > 2024) return;
+        const decade = Math.floor(d.year / 10) * 10;
+        let s = (d.shape || "").toLowerCase();
+        
+        if (s.includes('circle') || s.includes('saucer')) s = 'disk';
+        if (s.includes('cylinder')) s = 'cigar';
+        
+        if (shapesOfInterest.includes(s)) {
+            if (!decades[decade]) decades[decade] = { total: 0 };
+            if (!decades[decade][s]) decades[decade][s] = 0;
+            decades[decade][s]++;
+            decades[decade].total++;
+        }
+    });
+
+    const labels = Object.keys(decades).sort();
+    const datasets = shapesOfInterest.map((shape, index) => {
+        const colors = ['#36a2eb', '#ff6384', '#ffcd56', '#4bc0c0', '#9966ff'];
+        return {
+            label: shape.toUpperCase(),
+            data: labels.map(dec => decades[dec][shape] || 0),
+            backgroundColor: colors[index],
+            borderColor: colors[index],
+            fill: false,
+            tension: 0.4
+        };
+    });
+
+    new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: {display: true, text: 'Počet hlášení'} },
+                x: { title: {display: true, text: 'Dekáda'} }
+            }
+        }
+    });
+}
+
+// === NOVÁ FUNKCE PRO GLOBÁLNÍ GRAF (SAMOSTATNÁ - UPRAVENO S PŘEKLADY) ===
+function renderGlobalTrendChart() {
+    const canvas = document.getElementById('global-trend-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // NAČTENÍ PŘEKLADŮ
+    const t = translations[currentLanguage];
+
+    const globalDecades = {};
+    allData.forEach(d => {
+        if (!d.year || d.year < 1940 || d.year > 2024) return;
+        const decade = Math.floor(d.year / 10) * 10;
+        globalDecades[decade] = (globalDecades[decade] || 0) + 1;
+    });
+
+    const labels = Object.keys(globalDecades).sort();
+    const dataPoints = labels.map(dec => globalDecades[dec]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: t.globalChartLabel, // Zde je použit překlad
+                data: dataPoints,
+                backgroundColor: 'rgba(0, 188, 212, 0.4)',
+                borderColor: '#00bcd4',
+                borderWidth: 2,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: t.chartDatasetLabel || 'Počet případů' } },
+                x: { title: { display: true, text: t.globalChartXAxis } } // Zde je použit překlad
+            }
+        }
+    });
+}
 </script>
 <div id="report-modal">
         <div id="report-paper">
@@ -7751,10 +8261,6 @@ async function runResearchMission(missionType) {
 
             <div id="report-chart-container">
                 <canvas id="report-chart-canvas"></canvas>
-            </div>
-            
-            <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 0.8em; color: #888; text-align: center;">
-                Tento dokument je automaticky generovaný na základě dostupných historických dat. Nemusí reflektovat kompletní realitu všech pozorování. Zdroje dat: NUFORC, GEIPAN, Záře.
             </div>
         </div>
     </div>
@@ -7826,11 +8332,68 @@ async function runResearchMission(missionType) {
                     <span class="mission-title" data-translate-key="missFast">Extrémní rychlost</span>
                     <span class="mission-desc" data-translate-key="missFastDesc">Okamžité zrychlení a manévry.</span>
                 </div>
-                 <div class="mission-card" onclick="runResearchMission('deep_scan')">
+                <div class="mission-card" onclick="runResearchMission('pilot')">
+                    <span class="mission-icon">✈️</span>
+                    <span class="mission-title" data-translate-key="missPilot">Letecká pozorování</span>
+                    <span class="mission-desc" data-translate-key="missPilotDesc">Hlášení pilotů a posádek.</span>
+                </div>
+
+                <div class="mission-card" onclick="runResearchMission('military')">
+                    <span class="mission-icon">🎖️</span>
+                    <span class="mission-title" data-translate-key="missMilitary">Vojenské / Radar</span>
+                    <span class="mission-desc" data-translate-key="missMilitaryDesc">Armáda a radarová data.</span>
+                </div>
+
+                <div class="mission-card" onclick="runResearchMission('silent')">
+                    <span class="mission-icon">🤫</span>
+                    <span class="mission-title" data-translate-key="missSilent">Tichý let</span>
+                    <span class="mission-desc" data-translate-key="missSilentDesc">Objekty bez hluku.</span>
+                </div>
+
+                <div class="mission-card" onclick="runResearchMission('em_effect')">
+                    <span class="mission-icon">⚡</span>
+                    <span class="mission-title" data-translate-key="missEM">EM Efekty</span>
+                    <span class="mission-desc" data-translate-key="missEMDesc">Výpadky proudu a motorů.</span>
+                </div>
+                <div class="mission-card" onclick="runResearchMission('credible')">
+                <span class="mission-icon">👮</span>
+                <span class="mission-title" data-translate-key="missCredible">Důvěryhodný svědek</span>
+                <span class="mission-desc" data-translate-key="missCredibleDesc">Piloti, policie + radar.</span>
+            </div>
+
+            <div class="mission-card" onclick="runResearchMission('long_duration')">
+                <span class="mission-icon">⏱️</span>
+                <span class="mission-title" data-translate-key="missDuration">Dlouhé trvání</span>
+                <span class="mission-desc" data-translate-key="missDurationDesc">> 30 minut.</span>
+            </div>
+
+            <div class="mission-card" onclick="runResearchMission('psycho')">
+                <span class="mission-icon">🧠</span>
+                <span class="mission-title" data-translate-key="missPsycho">Psychologický dopad</span>
+                <span class="mission-desc" data-translate-key="missPsychoDesc">Strach, klid, telepatie.</span>
+            </div>
+
+            <div class="mission-card" onclick="runResearchMission('mass')">
+                <span class="mission-icon">👥</span>
+                <span class="mission-title" data-translate-key="missMass">Hromadná pozorování</span>
+                <span class="mission-desc" data-translate-key="missMassDesc">Školy, davy lidí.</span>
+            </div>
+
+            <div class="mission-card" onclick="runResearchMission('evolution')">
+                <span class="mission-icon">📈</span>
+                <span class="mission-title" data-translate-key="missEvo">Tvarová evoluce</span>
+                <span class="mission-desc" data-translate-key="missEvoDesc">Trendy tvarů v čase.</span>
+            </div>
+            <div class="mission-card" onclick="runResearchMission('deep_scan')">
                     <span class="mission-icon">🔎</span>
                     <span class="mission-title" data-translate-key="missScan">Sken oblasti</span>
                     <span class="mission-desc" data-translate-key="missScanDesc">Co vidím právě teď na mapě?</span>
                 </div>
+        </div> <hr style="border-color: #444; margin: 15px 0;">
+        <button class="custom-button" onclick="generateGrandReport()" style="background-color: #d32f2f; padding: 12px; font-size: 1em; width: 100%; border: 1px solid #ff5252;">
+            <i class="fas fa-file-pdf"></i> <span data-translate-key="btnGrandReport">SESTAVIT VELKOU ZPRÁVU (PDF)</span>
+        </button>
+                 
             </div>
     
             <div id="ai-status-output" style="margin-top: 10px; font-size: 0.85em; color: #ffeb3b; min-height: 20px; text-align: center;"></div>
