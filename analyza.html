@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pravděpodobnost a predikce: Fenomén UAP & inteligentní život</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        /* === SYSTÉM PŘEPÍNÁNÍ JAZYKŮ === */
+        body.lang-cs .lang-en { display: none !important; }
+        body.lang-en .lang-cs { display: none !important; }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon-text-cyan { text-shadow: 0 0 10px rgba(6, 182, 212, 0.7); }
+        .neon-text-magenta { text-shadow: 0 0 10px rgba(217, 70, 239, 0.7); }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 450px; 
+            min-height: 400px;
+        }
+        .metric-card {
+            background-color: #1e293b;
+            border-radius: 0.75rem;
+            border: 1px solid #334155;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+        }
+        .timeline-item {
+            border-left: 2px solid #8b5cf6;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -0.4rem;
+            top: 0;
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #8b5cf6;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #8b5cf6;
+        }
+        
+        .diagram-node {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid #d946ef;
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        .diagram-arrow {
+            text-align: center;
+            color: #06b6d4;
+            font-size: 2rem;
+            margin: 0.5rem 0;
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden lang-cs">
+
+    <nav class="fixed w-full z-50 top-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0 font-display text-xl text-cyan-400 font-bold tracking-widest neon-text-cyan">
+                    UAP.ANALYTICS 🌌
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-3">
+                        <a href="#astrobiologie" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-cyan-400 hover:border-cyan-400 transition-all text-sm font-medium">
+                            <span class="lang-cs">Astrobiologie</span><span class="lang-en">Astrobiology</span>
+                        </a>
+                        <a href="#hypotezy" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-magenta-400 hover:border-magenta-400 transition-all text-sm font-medium">
+                            <span class="lang-cs">Paradoxy</span><span class="lang-en">Paradoxes</span>
+                        </a>
+                        <a href="#uap-data" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-violet-400 hover:border-violet-400 transition-all text-sm font-medium">
+                            <span class="lang-cs">UFO/UAP data</span><span class="lang-en">UFO/UAP data</span>
+                        </a>
+                        <a href="#predikce" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-yellow-400 hover:border-yellow-400 transition-all text-sm font-medium">
+                            <span class="lang-cs">Predikce kontaktu</span><span class="lang-en">Contact prediction</span>
+                        </a>
+                        <button id="lang-toggle" class="bg-slate-700 border border-slate-500 text-white px-3 py-1.5 rounded hover:bg-slate-600 transition-all text-sm font-bold ml-4 shadow-lg">
+                            EN
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 from-0% via-violet-500 via-55% to-fuchsia-500 to-100% mb-6 uppercase tracking-tight">
+            <span class="lang-cs">Pravděpodobnost a predikce fenoménu UFO/UAP</span>
+            <span class="lang-en">Probability and Prediction of the UFO/UAP Phenomenon</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto font-light leading-relaxed">
+            <span class="lang-cs">Toto je hloubková datová analýza 323 729 validních záznamů optikou astrobiologie, Drakeovy rovnice a moderní kosmologie. Jde o stručnou syntézu dat pro odhad existence vyspělých civilizací a povahy možného prvního kontaktu. Dvě tlačítka níže nabízejí ke stažení odborné detailní studie. Třetí tlačítko otevře podstránku s vysvětlením a vizualizací Drakeovy rovnice ve vztahu k možným hvězdným civilizacím, podstránka obsahuje i přehled exoplanet nejbližších Slunci až do vzdálenosti cca 200 světelných let.</span>
+            <span class="lang-en">This is an in-depth data analysis of 323,729 valid records through the lens of astrobiology, the Drake equation, and modern cosmology. It is a concise synthesis of data to estimate the existence of advanced civilizations and the nature of potential first contact. The two buttons below offer detailed scientific studies for download. The third button opens a subpage with an explanation and visualization of the Drake equation in relation to possible stellar civilizations; the subpage also contains an overview of exoplanets closest to the Sun up to a distance of approx. 200 light-years.</span>
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center flex-wrap" id="pdf-downloads">
+            <a id="pdf-btn-1" href="01_prvni_civilizace_-_UFO_a_moznost_kontaktu.pdf" target="_blank" class="bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-violet-500/30 transition-all flex items-center justify-center border border-violet-400/50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span id="pdf-text-1">01_První civilizace a UFO</span>
+            </a>
+            <a id="pdf-btn-2" href="02_globalni_pruzkumna_analyza_UFO-UAP.pdf" target="_blank" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-cyan-500/30 transition-all flex items-center justify-center border border-cyan-400/50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span id="pdf-text-2">02_Globální analýza UAP</span>
+            </a>
+            <a id="btn-3" href="galactic_map.html" target="_blank" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-fuchsia-500/30 transition-all flex items-center justify-center border border-fuchsia-400/50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                <span id="btn-text-3">03_Drakeova rovnice a vesmírné civilizace</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-24">
+
+        <section id="astrobiologie" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-cyan-400 border-b-2 border-cyan-400/30 pb-3 inline-block neon-text-cyan">
+                    <span class="lang-cs">1. Kosmický kontext & vznik života</span>
+                    <span class="lang-en">1. Cosmic Context & Origin of Life</span>
+                </h2>
+                <p class="mt-4 text-slate-300 leading-relaxed">
+                    <span class="lang-cs">Abychom pochopili pravděpodobnost návštěvy cizí inteligence, musíme začít u fundamentálních čísel našeho vesmíru. Nukleogeneze v prvních generacích hvězd vytvořila těžké prvky nezbytné pro vznik planet a biologického života. Naše Slunce je hvězdou populace I (třetí generace), zformovanou v galaktické obyvatelné zóně s ideální distribucí chemických prvků a přijatelnou úrovní radiace.</span>
+                    <span class="lang-en">To understand the probability of visitation by an alien intelligence, we must start with the fundamental numbers of our universe. Nucleogenesis in the first generations of stars created the heavy elements necessary for the formation of planets and biological life. Our Sun is a Population I star (third generation), formed in the galactic habitable zone with an ideal distribution of chemical elements and an acceptable level of radiation.</span>
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="metric-card p-6 text-center">
+                    <div class="text-4xl mb-2">⏱️</div>
+                    <div class="text-3xl font-display font-bold text-cyan-400">13,8 mld</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wider mt-1">
+                        <span class="lang-cs">Stáří vesmíru (v rocích)</span><span class="lang-en">Age of the Universe (Years)</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">
+                        <span class="lang-cs">Dostatek času pro vzestup a pád miliard civilizací napříč galaxiemi.</span><span class="lang-en">Sufficient time for the rise and fall of billions of civilizations across galaxies.</span>
+                    </p>
+                </div>
+                <div class="metric-card p-6 text-center border-l-magenta-500 hover:border-magenta-500">
+                    <div class="text-4xl mb-2">🌌</div>
+                    <div class="text-3xl font-display font-bold text-magenta-400">13,6 mld</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wider mt-1">
+                        <span class="lang-cs">Stáří Mléčné dráhy (v rocích)</span><span class="lang-en">Age of the Milky Way (Years)</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">
+                        <span class="lang-cs">Naše galaxie je stará a obsahuje až 400 miliard hvězd. Pravděpodobnost starších hvězdných sousedů je statisticky vysoká.</span><span class="lang-en">Our galaxy is old and contains up to 400 billion stars. The probability of older stellar neighbors is statistically high.</span>
+                    </p>
+                </div>
+                <div class="metric-card p-6 text-center border-l-yellow-400 hover:border-yellow-400">
+                    <div class="text-4xl mb-2">☀️</div>
+                    <div class="text-3xl font-display font-bold text-yellow-400">4,6 mld</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wider mt-1">
+                        <span class="lang-cs">Stáří Sluneční soustavy (v rocích)</span><span class="lang-en">Age of the Solar System (Years)</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">
+                        <span class="lang-cs">Slunce je hvězda 3. generace. Je zrozeno z trosek dávných supernov (bohaté na prvky pro organickou chemii).</span><span class="lang-en">The Sun is a 3rd generation star. It was born from the debris of ancient supernovae (rich in elements for organic chemistry).</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="text-2xl mr-2">🎯</span> 
+                        <span class="lang-cs">Galaktická obyvatelná zóna (GHZ)</span><span class="lang-en">Galactic Habitable Zone (GHZ)</span>
+                    </h3>
+                    <p class="text-slate-300 mb-4 text-sm leading-relaxed">
+                        <span class="lang-cs">Rozmístění života není náhodné. Extrémní centrum galaxie produkuje smrtící radiaci a časté kolize znemožňující stabilní orbity. Naopak okraje galaxie postrádají těžké chemické prvky pro tvorbu pevných planet. Střední pás (cca 25 000 až 30 000 světelných let od galaktického jádra) představuje ideální "vyváženou" zónu pro dlouhodobý biologický vývoj.</span>
+                        <span class="lang-en">The distribution of life is not random. The extreme center of the galaxy produces deadly radiation and frequent collisions preventing stable orbits. Conversely, the edges of the galaxy lack heavy chemical elements for the formation of solid planets. The middle belt (approx. 25,000 to 30,000 light-years from the galactic core) represents an ideal "balanced" zone for long-term biological evolution.</span>
+                    </p>
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                        <p class="text-sm text-slate-400">
+                            <strong><span class="lang-cs">Závěr pro mapování exoplanet:</span><span class="lang-en">Conclusion for exoplanet mapping:</span></strong> 
+                            <span class="lang-cs">Moderní astronomie se primárně zaměřuje na exoplanety v této střední zóně galaktického disku, kde jsou podmínky (metalicita a stabilita) nejvhodnější pro vznik vysoce organizované hmoty.</span>
+                            <span class="lang-en">Modern astronomy primarily focuses on exoplanets in this middle zone of the galactic disk, where conditions (metallicity and stability) are most suitable for the emergence of highly organized matter.</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                    <h4 class="text-center font-display text-slate-300 mb-4 text-sm tracking-widest uppercase">
+                        <span class="lang-cs">Zastoupení hvězd dle GHZ</span><span class="lang-en">Star Distribution by GHZ</span>
+                    </h4>
+                    <div class="chart-container">
+                        <canvas id="ghzChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="hypotezy" class="scroll-mt-24 bg-slate-800/30 rounded-3xl p-6 lg:p-10 border border-slate-700/50">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-magenta-400 border-b-2 border-magenta-400/30 pb-3 inline-block neon-text-magenta">
+                    <span class="lang-cs">2. Paradoxy & velké filtry</span><span class="lang-en">2. Paradoxes & Great Filters</span>
+                </h2>
+                <p class="mt-4 text-slate-300 leading-relaxed">
+                    <span class="lang-cs">Drakeova rovnice matematicky ukazuje, že naše galaxie by měla být plná civilizací. Přesto pozorujeme ticho (Fermiho paradox). Koncepty Velkých filtrů a Zoo hypotézy nabízejí analytické modely, proč je zjevný, masový mimozemský kontakt tak vzácný nebo úmyslně zakrývaný.</span>
+                    <span class="lang-en">The Drake equation mathematically indicates our galaxy should be full of civilizations. Yet we observe silence (the Fermi paradox). The concepts of Great Filters and the Zoo Hypothesis offer analytical models for why overt, mass extraterrestrial contact is so rare or intentionally concealed.</span>
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center">
+                        <span class="text-2xl mr-2">🧬</span> 
+                        <span class="lang-cs">Velké filtry vývoje</span><span class="lang-en">The Great Filters</span>
+                    </h3>
+                    <div class="space-y-0">
+                        <div class="timeline-item">
+                            <h4 class="text-violet-400 font-bold"><span class="lang-cs">Abiogeneze (vznik života)</span><span class="lang-en">Abiogenesis (Origin of Life)</span></h4>
+                            <p class="text-sm text-slate-400"><span class="lang-cs">Přechod od neživé chemie k replikujícím se molekulám (RNA/DNA).</span><span class="lang-en">Transition from non-living chemistry to replicating molecules (RNA/DNA).</span></p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="text-violet-400 font-bold"><span class="lang-cs">Eukaryotizace</span><span class="lang-en">Eukaryotization</span></h4>
+                            <p class="text-sm text-slate-400"><span class="lang-cs">Vznik komplexní buňky s jádrem (na Zemi trval tento skok 2 miliardy let).</span><span class="lang-en">The emergence of a complex cell with a nucleus (on Earth, this leap took 2 billion years).</span></p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="text-violet-400 font-bold"><span class="lang-cs">Inteligence a technologie</span><span class="lang-en">Intelligence and Technology</span></h4>
+                            <p class="text-sm text-slate-400"><span class="lang-cs">Vývoj mozků schopných abstraktního myšlení, nástrojů a radiokomunikace.</span><span class="lang-en">Development of brains capable of abstract thought, tools, and radiocommunication.</span></p>
+                        </div>
+                        <div class="timeline-item border-l-red-500 before:bg-red-500 before:shadow-[0_0_8px_#ef4444]">
+                            <h4 class="text-red-400 font-bold"><span class="lang-cs">Autodestrukce / Singularita</span><span class="lang-en">Self-destruction / Singularity</span></h4>
+                            <p class="text-sm text-slate-400"><span class="lang-cs">Schopnost civilizace nezničit samu sebe nukleární technologií, prostřednictvím AI, nebo zničením biosféry dříve, než se stane interstelární.</span><span class="lang-en">A civilization's ability not to destroy itself with nuclear technology, via AI, or by destroying its biosphere before becoming interstellar.</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 shadow-lg">
+                    <h4 class="text-center font-display text-slate-300 mb-4 text-sm tracking-widest uppercase">
+                        <span class="lang-cs">Teoretická pravděpodobnost přežití kritických fází</span><span class="lang-en">Theoretical Probability of Surviving Critical Phases</span>
+                    </h4>
+                    <div class="chart-container">
+                        <canvas id="filterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="metric-card p-6 border-l-4 border-yellow-400">
+                    <h3 class="text-lg font-bold text-yellow-400 mb-2">
+                        <span class="lang-cs">Zoo hypotéza 🌍👁️</span><span class="lang-en">Zoo Hypothesis 🌍👁️</span>
+                    </h3>
+                    <p class="text-sm text-slate-300">
+                        <span class="lang-cs">Vysvětlení Fermiho paradoxu, které předpokládá, že pokročilé civilizace existují, ale úmyslně se vyhýbají kontaktu s námi. Země je sledována jako přírodní rezervace z důvodu ochrany našeho přirozeného technologického i sociokulturního vývoje bez zničující psychosociální kontaminace cizími vlivy. To koreluje se statisíci vizuálních hlášení fenoménu UFO/UAP.</span>
+                        <span class="lang-en">An explanation of the Fermi paradox suggesting that advanced civilizations exist but intentionally avoid contact with us. Earth is monitored as a nature reserve to protect our natural technological and sociocultural development from destructive psychosocial contamination by foreign influences. This correlates with hundreds of thousands of visual UFO/UAP sightings.</span>
+                    </p>
+                </div>
+                <div class="metric-card p-6 border-l-4 border-cyan-400">
+                    <h3 class="text-lg font-bold text-cyan-400 mb-2">
+                        <span class="lang-cs">Nutnost pobývat mezi hvězdami 🚀</span><span class="lang-en">Necessity of Interstellar Existence 🚀</span>
+                    </h3>
+                    <p class="text-sm text-slate-300">
+                        <span class="lang-cs">Každá hvězda časem umírá. Vyspělá civilizace (Kardašovův typ I a výš) musí buď zaniknout se svou hvězdou, nebo expandovat do mezihvězdného prostoru. Velké mezihvězdné přesuny vyžadují manipulaci s časoprostorem (Warp pohony, vícerozměrná fyzika). Vlastnosti těchto technologií (okamžité zrychlení, absense aerodynamiky) exaktně odpovídají vlastnostem UAP hlášeným například našimi pozemskými piloty letadel.</span>
+                        <span class="lang-en">Every star eventually dies. An advanced civilization (Kardashev Type I and above) must either perish with its star or expand into interstellar space. Large interstellar transits require spacetime manipulation (Warp drives, multi-dimensional physics). The attributes of these technologies (instant acceleration, lack of aerodynamics) exactly match the UAP characteristics reported by our Earth pilots.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="uap-data" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-violet-400 border-b-2 border-violet-400/30 pb-3 inline-block neon-text-magenta">
+                    <span class="lang-cs">3. Analýza globálních UAP dat (1900 - 2026)</span><span class="lang-en">3. Global UAP Data Analysis (1900 - 2026)</span>
+                </h2>
+                <p class="mt-4 text-slate-300 leading-relaxed">
+                    <span class="lang-cs">Na základě databáze slučující NUFORC, GEIPAN, Projekt Záře a vládní reporty analyzujeme <strong class="text-white">323 729 validních záznamů</strong>. Tyto empirické záznamy nám umožňují definovat vzorce chování, technologickou morfologii a odhadnout procentuální zastoupení skutečných, vyspělých anomálií ze všech hlášení.</span>
+                    <span class="lang-en">Based on a database merging NUFORC, GEIPAN, Project Záře, and government reports, we analyze <strong class="text-white">323,729 valid records</strong>. These empirical records allow us to define behavioral patterns, technological morphology, and estimate the percentage of genuine, advanced anomalies out of all reports.</span>
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <div class="text-3xl font-bold text-cyan-400">323 729</div>
+                    <div class="text-xs text-slate-400 uppercase mt-1">
+                        <span class="lang-cs">Celkem validních hlášení</span><span class="lang-en">Total Valid Reports</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <div class="text-3xl font-bold text-magenta-400">2012 / 2013</div>
+                    <div class="text-xs text-slate-400 uppercase mt-1">
+                        <span class="lang-cs">Roky největší koncentrace pozorování (peak)</span><span class="lang-en">Peak Observation Years</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 border-b-4 border-b-violet-500">
+                    <div class="text-3xl font-bold text-violet-400">~ 4,6 %</div>
+                    <div class="text-xs text-slate-400 uppercase mt-1">
+                        <span class="lang-cs">Skutečné anomálie (vysoce kredibilní)</span><span class="lang-en">Genuine Anomalies (Highly Credible)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                    <h4 class="text-center font-display text-slate-300 mb-4 text-sm tracking-widest uppercase">
+                        <span class="lang-cs">Morfologie objektů (historická evoluce tvarů)</span><span class="lang-en">Object Morphology (Shape Evolution)</span>
+                    </h4>
+                    <p class="text-xs text-slate-400 text-center mb-4">
+                        <span class="lang-cs">Nejčastější hlášené geometrické útvary anomálních těles vykazují technologický design převyšující běžné aerodynamické potřeby.</span><span class="lang-en">The most frequently reported geometric shapes of anomalous bodies exhibit technological design exceeding conventional aerodynamic needs.</span>
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="shapeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                    <h4 class="text-center font-display text-slate-300 mb-4 text-sm tracking-widest uppercase">
+                        <span class="lang-cs">Vliv denní doby na pozorování</span><span class="lang-en">Influence of Time of Day on Sightings</span>
+                    </h4>
+                    <p class="text-xs text-slate-400 text-center mb-4">
+                        <span class="lang-cs">Masivní převaha nočních pozorování souvisí s vysokou luminiscencí pohonných/energetických systémů UAP na pozadí noční oblohy.</span><span class="lang-en">The massive prevalence of night sightings correlates with the high luminescence of UAP propulsion/energy systems against the night sky background.</span>
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg mb-8">
+                <h4 class="text-center font-display text-slate-300 mb-4 text-sm tracking-widest uppercase">
+                    <span class="lang-cs">Kritické zájmové kategorie & kredibilní svědci</span><span class="lang-en">Critical Interest Categories & Credible Witnesses</span>
+                </h4>
+                <p class="text-xs text-slate-400 text-center mb-6">
+                    <span class="lang-cs">Analýza případů ze strategických zón. Korelace vojenských, jaderných (elektrárny a vojenské systémy) a blízkovodních pozorování ukazuje na průzkumný charakter chování. Tyto případy vykazují nejvyšší pravděpodobnost přítomnosti mimozemské inteligence.</span>
+                    <span class="lang-en">Analysis of cases from strategic zones. The correlation of military, nuclear (power plants and military systems), and near-water sightings points to exploratory behavior. These cases show the highest probability of extraterrestrial intelligence presence.</span>
+                </p>
+                <div class="chart-container" style="max-width: 900px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between bg-violet-900/30 border border-violet-500/50 p-6 rounded-xl">
+                <div class="mb-4 md:mb-0 md:mr-6 text-center md:text-left">
+                    <h4 class="text-lg font-bold text-violet-300 mb-2">
+                        <span class="lang-cs">Podíl skutečných anomálií</span><span class="lang-en">Proportion of Genuine Anomalies</span>
+                    </h4>
+                    <p class="text-sm text-slate-300">
+                        <span class="lang-cs">Na základě historických studií a našich agregovaných dat o jaderné stopě (1501), vojenství (3955), vodních světech (9055) a důvěryhodných svědcích (422) identifikujeme přibližně <strong>14 933 případů</strong> nejvyšší důležitosti. To tvoří zhruba <strong>4,6 %</strong> celkové databáze. I pouhý zlomek z tohoto procenta představuje statistický důkaz pro fyzickou přítomnost neznámých inteligentních civilizací.</span>
+                        <span class="lang-en">Based on historical studies and our aggregated data on nuclear traces (1501), military (3955), water worlds (9055), and credible witnesses (422), we identify approximately <strong>14,933 cases</strong> of supreme importance. This constitutes about <strong>4.6%</strong> of the total database. Even a mere fraction of this percentage represents statistical proof of the physical presence of unknown intelligent civilizations.</span>
+                    </p>
+                </div>
+                <div class="w-full md:w-1/3 flex-shrink-0">
+                    <div class="chart-container" style="height: 200px; min-height: 200px;">
+                         <canvas id="anomalyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="predikce" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-yellow-400 border-b-2 border-yellow-400/30 pb-3 inline-block neon-text-cyan">
+                    <span class="lang-cs">4. Instituce & predikce kontaktu</span><span class="lang-en">4. Institutions & Contact Prediction</span>
+                </h2>
+                <p class="mt-4 text-slate-300 leading-relaxed">
+                    <span class="lang-cs">Ačkoliv instituce jako <span class="text-cyan-400 font-bold">AARO</span> (Pentagon), <span class="text-cyan-400 font-bold">NASA</span>, <span class="text-cyan-400 font-bold">GEIPAN</span> či projekty Harvardovy univerzity přinášejí seriózní akademický rozměr výzkumu, povaha našeho sociologicky rozmanitého lidského druhu dělá oficiální diplomatický kontakt s vládami nepravděpodobným.</span>
+                    <span class="lang-en">Although institutions like <span class="text-cyan-400 font-bold">AARO</span> (Pentagon), <span class="text-cyan-400 font-bold">NASA</span>, <span class="text-cyan-400 font-bold">GEIPAN</span>, or Harvard University projects bring a serious academic dimension to the research, the nature of our sociologically diverse human species makes official diplomatic contact with governments unlikely.</span>
+                </p>
+            </div>
+
+            <div class="bg-slate-900/80 p-8 rounded-2xl border border-slate-700 shadow-2xl">
+                <h3 class="text-2xl font-bold text-center text-white mb-8">
+                    <span class="lang-cs">Teoretické scénáře prvního kontaktu</span><span class="lang-en">Theoretical First Contact Scenarios</span>
+                </h3>
+                
+                <div class="flex flex-col items-center max-w-3xl mx-auto">
+                    
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                        
+                        <div class="diagram-node border-slate-600 opacity-90">
+                            <h4 class="text-lg font-bold text-white mb-2">
+                                <span class="lang-cs">🏛️ Oficiální vládní kontakt</span><span class="lang-en">🏛️ Official Government Contact</span>
+                            </h4>
+                            <p class="text-sm text-slate-300 text-left">
+                                <span class="lang-cs">Přímá komunikace s představiteli OSN a světových mocností.</span>
+                                <span class="lang-en">Direct communication with UN representatives and world powers.</span>
+                            </p>
+                            <div class="mt-3 bg-red-900/60 text-red-300 font-bold text-xs px-2 py-1 rounded inline-block">
+                                <span class="lang-cs">Nízká pravděpodobnost</span><span class="lang-en">Low Probability</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2 text-left italic">
+                                <span class="lang-cs">Pudový strach, sociální panika, náboženský kolaps a politická roztříštěnost planety by vedly ke společenské destabilizaci.</span>
+                                <span class="lang-en">Primal fear, social panic, religious collapse, and the political fragmentation of the planet would lead to social destabilization.</span>
+                            </p>
+                        </div>
+
+                        <div class="diagram-node ring-2 ring-cyan-500">
+                            <h4 class="text-lg font-bold text-cyan-300 mb-2">
+                                <span class="lang-cs">🧠 Kulturní a pozvolný kontakt</span><span class="lang-en">🧠 Cultural and Gradual Contact</span>
+                            </h4>
+                            <p class="text-xs text-slate-300 text-left">
+                                <span class="lang-cs">Virální a kulturní příprava populace prostřednictvím masmédií, sci-fi, uniklých hlášení o UAP a postupného odtajňování.</span>
+                                <span class="lang-en">Viral and cultural preparation of the population through mass media, sci-fi, leaked UAP reports, and gradual declassification.</span>
+                            </p>
+                            <div class="mt-3 bg-green-900/50 text-green-400 text-xs px-2 py-1 rounded inline-block font-bold">
+                                <span class="lang-cs">Nejpravděpodobnější probíhající scénář</span><span class="lang-en">Most Likely Ongoing Scenario</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2 text-left italic">
+                                <span class="lang-cs">Civilizace se postupně adaptuje na realitu "nejsme tu sami" bez šoku. UAP chování je záměrně na hraně "věřit/pochybovat" (Zoo hypotéza).</span>
+                                <span class="lang-en">Civilization gradually adapts to the reality of "we are not alone" without shock. UAP behavior intentionally treads the line between "belief/doubt" (Zoo hypothesis).</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-arrow">↓</div>
+                    
+                    <div class="diagram-node w-full border-cyan-400">
+                        <h4 class="text-xl font-bold text-yellow-400 mb-2">
+                            <span class="lang-cs">Otevřená interakce (post-singularita Země)</span><span class="lang-en">Open Interaction (Post-Singularity Earth)</span>
+                        </h4>
+                        <p class="text-sm text-slate-300">
+                            <span class="lang-cs">Až lidstvo překoná vlastní "Velké filtry" (sjednocení, zvládnutí AI a fúzní energie bez sebezničení), stane se připraveným partnerem pro teoretické galaktické společenství. Do té doby zůstane kontakt omezen na pozorované UAP fenomény a na asymetrickou datovou manipulaci.</span>
+                            <span class="lang-en">Once humanity overcomes its own "Great Filters" (unification, mastering AI and fusion energy without self-destruction), it will become a prepared partner for a theoretical galactic community. Until then, contact will remain limited to observed UAP phenomena and asymmetrical data manipulation.</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-900/90 py-8 text-center text-sm text-slate-500">
+        <p>
+            <span class="lang-cs">Analýza generována UAP Interactive Map Data Engine & Astrobiological Heuristics.</span>
+            <span class="lang-en">Analysis generated by UAP Interactive Map Data Engine & Astrobiological Heuristics.</span>
+        </p>
+        <p class="mt-2 text-xs">Based on user-provided documentation (REF: AUTO-GEN-001, 323k+ records). Zpracováno/Processed: 2026.</p>
+    </footer>
+
+    <a href="index.html" class="fixed bottom-6 right-6 z-50 bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-full shadow-lg shadow-cyan-500/20 border border-slate-600 transition-all hover:scale-110 flex items-center justify-center group" title="Návrat na hlavní mapu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-0 sm:mr-2 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span class="hidden sm:inline font-bold">
+            <span class="lang-cs">Zpět na mapu</span><span class="lang-en">Back to Map</span>
+        </span>
+    </a>
+
+    <script>
+        // Logika pro přepínání jazyka (aktualizace textů + PDF tlačítek + Grafů)
+        const langToggleBtn = document.getElementById('lang-toggle');
+        const pdfBtn1 = document.getElementById('pdf-btn-1');
+        const pdfText1 = document.getElementById('pdf-text-1');
+        const pdfBtn2 = document.getElementById('pdf-btn-2');
+        const pdfText2 = document.getElementById('pdf-text-2');
+        const btn3 = document.getElementById('btn-3');
+        const btnText3 = document.getElementById('btn-text-3');
+
+        let currentLang = 'cs';
+
+        // Překladový slovník pouze pro popisky uvnitř Chart.js
+        const chartDict = {
+            cs: {
+                ghz: ['Galaktické jádro (vysoká radiace)', 'Obyvatelná zóna (ideální podmínky)', 'Okraj Galaxie (nízká metalicita)'],
+                filters: ['Základní planeta', 'Jednoduchý život', 'Komplexní život', 'Inteligentní druh', 'Cestování vesmírem (post-filtr)'],
+                shapes: ['Světlo (Light)', 'Trojúhelník (Triangle)', 'Disk (Disc)', 'Doutník/Tic-Tac (Cylinder)', 'Koule (Sphere)'],
+                time: ['Noc (19:00 - 05:59)', 'Den (06:00 - 18:59)', 'Neznámo (bez času)'],
+                cats: ['Vodní světy (vodní ponořování)', 'Letecká pozorování (piloti)', 'Vojenské a radarové potvrzení', 'Jaderná stopa (sila/zařízení)', 'Vysoce důvěryhodní svědci'],
+                anomaly: ['Identifikovatelné / šum (95,4 %)', 'Kredibilní anomálie (4,6 %)'],
+                yAxis: 'Pravděpodobnost % (logaritmický model)',
+                catYAxis: 'Počet validních záznamů'
+            },
+            en: {
+                ghz: ['Galactic Core (High Radiation)', 'Habitable Zone (Ideal Conditions)', 'Galactic Edge (Low Metallicity)'],
+                filters: ['Basic Planet', 'Simple Life', 'Complex Life', 'Intelligent Species', 'Space Travel (Post-filter)'],
+                shapes: ['Light', 'Triangle', 'Disc', 'Cylinder/Tic-Tac', 'Sphere'],
+                time: ['Night (19:00 - 05:59)', 'Day (06:00 - 18:59)', 'Unknown (No Time)'],
+                cats: ['Water Worlds (USO)', 'Aviation Sightings (Pilots)', 'Military & Radar Confirmed', 'Nuclear Trace (Silos/Bases)', 'Highly Credible Witnesses'],
+                anomaly: ['Identifiable / Noise (95.4%)', 'Credible Anomalies (4.6%)'],
+                yAxis: 'Probability % (Logarithmic Model)',
+                catYAxis: 'Number of Valid Records'
+            }
+        };
+
+        langToggleBtn.addEventListener('click', () => {
+            if (currentLang === 'cs') {
+                currentLang = 'en';
+                document.body.classList.remove('lang-cs');
+                document.body.classList.add('lang-en');
+                langToggleBtn.textContent = 'CZ';
+                
+                pdfBtn1.href = '01_first_civilization_-_UFOs_and_the_possibility_of_contact.pdf';
+                pdfText1.textContent = '01_First Civilization & UFOs';
+                
+                pdfBtn2.href = '02_global_exploratory_analysis_UFO-UAP.pdf';
+                pdfText2.textContent = '02_Global UAP Analysis';
+                
+                // Překlad třetího tlačítka do EN
+                btnText3.textContent = '03_Drake Equation & Space Civilizations';
+            } else {
+                currentLang = 'cs';
+                document.body.classList.remove('lang-en');
+                document.body.classList.add('lang-cs');
+                langToggleBtn.textContent = 'EN';
+                
+                pdfBtn1.href = '01_prvni_civilizace_-_UFO_a_moznost_kontaktu.pdf';
+                pdfText1.textContent = '01 První civilizace a UFO';
+                
+                pdfBtn2.href = '02_globalni_pruzkumna_analyza_UFO-UAP.pdf';
+                pdfText2.textContent = '02 Globální analýza UAP';
+                
+                // Překlad třetího tlačítka do CS
+                btnText3.textContent = '03_Drakeova rovnice a vesmírné civilizace';
+            }
+            updateChartLanguages();
+        });
+
+        // Nastavení Chart.js
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Inter';
+
+        function wrapText(text) {
+            if (typeof text !== 'string') return text;
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > 22) {
+                    if (currentLine.trim() !== '') lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            if (currentLine.trim() !== '') lines.push(currentLine.trim());
+            return lines.length > 1 ? lines : lines[0];
+        }
+
+        // OPRAVA: Ořezaného druhého řádku textu legendy
+        const globalTooltipPlugin = {
+            tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                titleColor: '#06b6d4',
+                bodyColor: '#e2e8f0',
+                borderColor: '#334155',
+                borderWidth: 1,
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        return Array.isArray(label) ? label.join(' ') : label;
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom',
+                align: 'start', /* ZMĚNA: Startovní zarovnání funguje u zalamování lépe než center */
+                labels: { 
+                    color: '#cbd5e1',
+                    padding: 20, /* Odstup legend od sebe */
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded', /* Kulatý obdélníček místo circle kvůli výpočtu řádků */
+                    font: { 
+                        size: 11 /* Mírné zmenšení písma, aby se to lépe vešlo */
+                        /* ZDE ZÁMĚRNĚ CHYBÍ lineHeight - ten způsoboval tu chybu s ořezem! */
+                    }
+                }
+            }
+        };
+
+        // 1. Chart: Galaktická obyvatelná zóna
+        const chartGhz = new Chart(document.getElementById('ghzChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: chartDict.cs.ghz.map(wrapText),
+                datasets: [{
+                    data: [30, 10, 60],
+                    backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(6, 182, 212, 0.8)', 'rgba(148, 163, 184, 0.5)'],
+                    borderColor: '#1e293b',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '70%',
+                layout: { padding: 10 },
+                plugins: {
+                    tooltip: globalTooltipPlugin.tooltip,
+                    legend: {
+                        position: 'right', /* PŘESUNUTO VPRAVO */
+                        labels: {
+                            color: '#cbd5e1',
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Chart: Velké Filtry Přežití
+        const chartFilter = new Chart(document.getElementById('filterChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: chartDict.cs.filters.map(wrapText),
+                datasets: [{
+                    label: chartDict.cs.yAxis,
+                    data: [100, 40, 5, 0.1, 0.001],
+                    borderColor: '#d946ef',
+                    backgroundColor: 'rgba(217, 70, 239, 0.2)',
+                    borderWidth: 3, fill: true, tension: 0.4,
+                    pointBackgroundColor: '#eab308', pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { type: 'logarithmic', min: 0.0001, max: 100, grid: { color: 'rgba(51, 65, 85, 0.5)' } },
+                    x: { grid: { color: 'rgba(51, 65, 85, 0.5)' } }
+                },
+                plugins: globalTooltipPlugin,
+                layout: { padding: { bottom: 10 } }
+            }
+        });
+
+        // 3. Chart: UAP Morfologie
+        const chartShape = new Chart(document.getElementById('shapeChart').getContext('2d'), {
+            type: 'polarArea',
+            data: {
+                labels: chartDict.cs.shapes.map(wrapText),
+                datasets: [{
+                    data: [40355, 20937, 19548, 8500, 12000],
+                    backgroundColor: ['rgba(6, 182, 212, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(217, 70, 239, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                    borderColor: '#1e293b'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: globalTooltipPlugin,
+                scales: { r: { ticks: { display: false }, grid: { color: 'rgba(51, 65, 85, 0.5)' } } },
+                layout: { padding: { bottom: 35 } }
+            }
+        });
+
+        // 4. Chart: UAP Den/Noc (Opravena fialová barva na jemnější)
+        const chartTime = new Chart(document.getElementById('timeChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: chartDict.cs.time.map(wrapText),
+                datasets: [{
+                    data: [166754, 58403, 15829],
+                    backgroundColor: ['rgba(139, 92, 246, 0.8)', '#06b6d4', '#475569'],
+                    borderColor: '#1e293b',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: 10 },
+                plugins: {
+                    tooltip: globalTooltipPlugin.tooltip,
+                    legend: {
+                        position: 'right', /* PŘESUNUTO VPRAVO */
+                        labels: {
+                            color: '#cbd5e1',
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+        // 5. Chart: Strategické Kategorie
+        const chartCategory = new Chart(document.getElementById('categoryChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: chartDict.cs.cats.map(wrapText),
+                datasets: [{
+                    label: chartDict.cs.catYAxis,
+                    data: [9055, 8476, 3955, 1501, 422],
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    borderColor: '#a78bfa',
+                    borderWidth: 1, borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(51, 65, 85, 0.5)' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: globalTooltipPlugin,
+                layout: { padding: { bottom: 35 } }
+            }
+        });
+
+        // 6. Chart: Podíl anomálií
+        const chartAnomaly = new Chart(document.getElementById('anomalyChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: chartDict.cs.anomaly.map(wrapText),
+                datasets: [{
+                    data: [308796, 14933],
+                    backgroundColor: ['rgba(51, 65, 85, 0.3)', 'rgba(234, 179, 8, 0.9)'],
+                    borderColor: '#1e293b', borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '80 %',
+                plugins: {
+                    tooltip: globalTooltipPlugin.tooltip,
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Funkce pro aktualizaci textů v grafech po přepnutí jazyka
+        function updateChartLanguages() {
+            const d = chartDict[currentLang];
+            
+            chartGhz.data.labels = d.ghz.map(wrapText);
+            chartGhz.update();
+            
+            chartFilter.data.labels = d.filters.map(wrapText);
+            chartFilter.data.datasets[0].label = d.yAxis;
+            chartFilter.update();
+            
+            chartShape.data.labels = d.shapes.map(wrapText);
+            chartShape.update();
+            
+            chartTime.data.labels = d.time.map(wrapText);
+            chartTime.update();
+            
+            chartCategory.data.labels = d.cats.map(wrapText);
+            chartCategory.data.datasets[0].label = d.catYAxis;
+            chartCategory.update();
+            
+            chartAnomaly.data.labels = d.anomaly.map(wrapText);
+            chartAnomaly.update();
+        }
+    </script>
+</body>
+</html>

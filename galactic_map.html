@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="cs" id="htmlTag">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">3D Galaktická mapa & Drakeova rovnice</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050505; color: #e0e0e0; margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* Plovouci tlacitko zpet */
+        .fab-back {
+            position: fixed; top: 20px; left: 20px; background-color: #1a1a24; color: #00ffcc;
+            padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 2000; border: 1px solid #00ffcc; transition: 0.3s;
+        }
+        .fab-back:hover { background-color: #00ffcc; color: #000; box-shadow: 0 4px 15px rgba(0,255,204,0.6); }
+
+        .header-bar {
+            width: 100%; max-width: 1500px; display: flex; justify-content: flex-end; margin-bottom: 10px;
+        }
+        #langBtn {
+            background-color: #333; color: #fff; border: 1px solid #555; padding: 8px 16px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        #langBtn:hover { background-color: #444; }
+        
+        .container {
+            display: flex; flex-direction: row; gap: 20px; max-width: 1500px; width: 100%; align-items: stretch; flex-wrap: wrap;
+        }
+        .panel {
+            flex: 1; min-width: 300px; background: #111; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8); border: 1px solid #333; display: flex; flex-direction: column;
+        }
+        .drake-panel {
+            background: #1a1a24; box-shadow: 0 4px 15px rgba(0,255,204,0.1); border: 1px solid #2a2a3a;
+        }
+        
+        h1, h2 { margin-top: 0; color: #00ffcc; }
+        h1 { font-size: 22px; }
+        h2 { font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        p { line-height: 1.6; font-size: 14.5px; }
+        
+        .drake-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
+        .drake-row label { flex: 1; }
+        .drake-row input[type=range] { flex: 1; margin: 0 15px; cursor: pointer; }
+        .drake-row span { width: 50px; text-align: right; font-weight: bold; color: #ffcc00; }
+        .drake-row input[type=number] { width: 90px; background: #222; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 4px; text-align: right;}
+
+        .result-box { background: #000; padding: 15px; border-radius: 8px; border: 1px solid #00ffcc; margin-top: auto; text-align: center; }
+        .result-box h3 { margin: 0 0 10px 0; color: #fff; }
+        .big-number { font-size: 32px; color: #00ffcc; font-weight: bold; }
+        
+        .action-btn {
+            background-color: #00ffcc; color: #000; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 255, 204, 0.4); margin-top: auto; width: 100%;
+        }
+        .action-btn:hover { background-color: #00ccaa; box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); transform: scale(1.02); }
+        
+        .clickable-title { cursor: pointer; color: #00ffcc; text-decoration: underline; text-decoration-style: dotted; transition: color 0.3s; }
+        .clickable-title:hover { color: #fff; }
+
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #1a1a24; margin: 10% auto; padding: 30px; border: 1px solid #00ffcc; width: 80%; max-width: 600px; border-radius: 10px; color: #fff; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; margin-top: -10px; }
+        .close-btn:hover { color: #fff; }
+
+        .table-container { overflow-y: auto; flex: 1; max-height: 420px; padding-right: 10px; }
+        .table-container::-webkit-scrollbar { width: 8px; }
+        .table-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+        th { position: sticky; top: 0; background: #222; padding: 10px; border-bottom: 2px solid #00ffcc; color: #00ffcc; }
+        td { padding: 8px 10px; border-bottom: 1px solid #333; cursor: pointer; transition: background-color 0.2s;}
+        tr:hover td { background-color: #2a2a3a; color: #00ffcc; }
+        .dist-col { text-align: right; color: #ffcc00; }
+
+        /* Kontejner pro mapu umoznuje okraje pro scrollovani na mobilech */
+        .map-wrapper {
+            width: 100%; max-width: 1500px;
+            padding: 0 2vw; /* okraje na PC */
+            box-sizing: border-box;
+            position: relative;
+            margin-top: 20px;
+        }
+        #map { width: 100%; height: 800px; background-color: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; touch-action: none; }
+        
+        .touch-hint { text-align: center; color: #888; font-size: 13px; margin-top: 15px; width: 100%; }
+
+        /* Vyskakovaci detail planety nad mapou */
+        .planet-popup {
+            display: none; position: absolute; top: 20px; right: 40px; background: rgba(10, 10, 15, 0.9);
+            border: 1px solid #00ffcc; border-radius: 8px; padding: 15px; color: #00ffcc; z-index: 10;
+            box-shadow: 0 0 20px rgba(0,255,204,0.4); min-width: 250px; font-family: monospace; font-size: 14px;
+        }
+        .planet-popup-close { position: absolute; top: 5px; right: 10px; cursor: pointer; color: #888; font-weight: bold; font-family: sans-serif; font-size: 18px; }
+        .planet-popup-close:hover { color: #fff; }
+        .tw-cursor { display: inline-block; width: 8px; height: 15px; background-color: #00ffcc; animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .map-wrapper { padding: 0 10vw; } /* Větší bezpečné okraje na mobilech pro posun stránky */
+            .planet-popup { right: 12vw; left: 12vw; min-width: unset; } /* Zmenseni modalu na mobilech */
+            .fab-back { padding: 8px 15px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="analyza.html" class="fab-back" id="fabBack">⬅ Zpět</a>
+
+    <div class="header-bar">
+        <button id="langBtn">EN</button>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h1 id="t_mainTitle">3D Galaktická mapa & Exoplanety</h1>
+            <p id="t_mainDesc">
+                Tato interaktivní mapa modeluje naší Galaxii ve 3D prostoru. Na pozadí vidíte procedurálně vygenerovanou ilustraci spirálních ramen Mléčné dráhy.<br><br>
+                • <strong>Zelený prstenec:</strong> Obyvatelná zóna (25 000 – 30 000 ly).<br>
+                • <strong>Modré body:</strong> Civilizace vygenerované z Drakeovy rovnice.<br>
+                • <strong>Žlutý bod:</strong> Naše Slunce (26 000 ly od jádra).<br>
+                • <strong>Barevný prach:</strong> Exoplanety odškálované od žluté (nejblíže k nám) přes oranžovou až po tmavě červenou barvu (při masivním přiblížení mapy ke Slunci).
+            </p>
+            <button id="zoomBtn" class="action-btn">🔎 Rychlý skok ke Sluneční soustavě</button>
+        </div>
+
+        <div class="panel drake-panel">
+            <h2 class="clickable-title" id="openModalBtn">ℹ️ Kalkulátor Drakeovy rovnice</h2>
+            <div class="drake-row">
+                <label id="l_r"><strong>R*</strong> (Vznik hvězd/rok):</label>
+                <input type="range" id="d_r" min="0.1" max="20" step="0.1" value="3">
+                <span id="val_r">3</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_fp"><strong>f_p</strong> (Hvězdy s planetami):</label>
+                <input type="range" id="d_fp" min="0" max="1" step="0.01" value="1.0">
+                <span id="val_fp">1.0</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_ne"><strong>n_e</strong> (Obyvatelné planety):</label>
+                <input type="range" id="d_ne" min="0" max="5" step="0.1" value="0.2">
+                <span id="val_ne">0.2</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_fl"><strong>f_l</strong> (Vznik života):</label>
+                <input type="range" id="d_fl" min="0" max="1" step="0.01" value="0.1">
+                <span id="val_fl">0.1</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_fi"><strong>f_i</strong> (Vznik inteligence):</label>
+                <input type="range" id="d_fi" min="0" max="1" step="0.01" value="0.1">
+                <span id="val_fi">0.1</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_fc"><strong>f_c</strong> (Schopnost komunikace):</label>
+                <input type="range" id="d_fc" min="0" max="1" step="0.01" value="0.1">
+                <span id="val_fc">0.1</span>
+            </div>
+            <div class="drake-row">
+                <label id="l_L"><strong>L</strong> (Doba trvání v letech):</label>
+                <input type="number" id="d_L" min="1" max="1000000000" step="100" value="1666666">
+            </div>
+
+            <div class="result-box">
+                <h3>N = R* × f_p × n_e × f_l × f_i × f_c × L</h3>
+                <div class="big-number" id="calc_N">1000</div>
+                <div style="color:#aaa; font-size:14px; margin-top:5px;" id="t_civCount">Počet současných civilizací v Galaxii</div>
+                <div style="color:#00ffcc; font-size:16px; margin-top:10px; font-weight:bold;" id="calc_dist">Průměrná vzdálenost: ~930 ly</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 id="t_tableTitle">Nejbližší zajímavé exoplanety</h2>
+            <div style="color: #888; font-size: 12px; margin-bottom: 5px; margin-top: -5px;" id="t_tableHint">Kliknutím na řádek vycentrujete mapu.</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="t_thName">Název planety</th>
+                            <th class="dist-col" id="t_thDist">Vzdálenost (ly)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exoTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="touch-hint" id="t_touchHint">
+        💡 Tip pro mobily: Pro posun stránky nahoru/dolů tahejte prstem za bezpečné okraje vedle mapy. 3D mapu lze zoomovat dvěma prsty a natáčet jedním prstem.
+    </div>
+
+    <div id="drakeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <h2 style="border:none; padding:0;" id="m_title">Co je to Drakeova rovnice?</h2>
+            <p style="font-size: 16px;" id="m_p1">
+                <strong>Drakeova rovnice</strong> je matematická formule (Frank Drake, 1961), jejímž cílem je stimulovat vědeckou diskusi o faktorech podmiňujících vznik inteligentního života schopného mezihvězdné komunikace v naší Galaxii.
+            </p>
+            <ul style="line-height: 1.8; color: #ccc;" id="m_list">
+                <li><strong>R*</strong> - Průměrný počet hvězd, které ročně vzniknou.</li>
+                <li><strong>f_p</strong> - Podíl hvězd, kolem kterých obíhají planety.</li>
+                <li><strong>n_e</strong> - Průměrný počet planet v systému vhodných pro život.</li>
+                <li><strong>f_l</strong> - Pravděpodobnost, že vznikne život.</li>
+                <li><strong>f_i</strong> - Pravděpodobnost, že se vyvine inteligence.</li>
+                <li><strong>f_c</strong> - Pravděpodobnost, že inteligence vyvine komunikaci.</li>
+                <li><strong>L</strong> - Doba trvání takové civilizace.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="map-wrapper">
+        <div id="planetPopup" class="planet-popup">
+            <div class="planet-popup-close" onclick="closePopup()">×</div>
+            <div id="popupContent"></div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        // --- 0. JAZYKOVÁ LOKALIZACE (CS / EN) ---
+        let currentLang = 'cs';
+        const dict = {
+            'cs': {
+                'backBtn': '⬅ Zpět',
+                'switchBtn': 'EN',
+                'title': '3D Galaktická mapa & Exoplanety',
+                'desc': 'Tato interaktivní mapa modeluje naší Galaxii ve 3D prostoru. Na pozadí vidíte procedurálně vygenerovanou ilustraci spirálních ramen Mléčné dráhy.<br><br>• <strong>Zelený prstenec:</strong> Obyvatelná zóna (25 000 – 30 000 ly).<br>• <strong>Modré body:</strong> Civilizace vygenerované z Drakeovy rovnice.<br>• <strong>Žlutý bod:</strong> Naše Slunce (26 000 ly od jádra).<br>• <strong>Barevný prach:</strong> Exoplanety odškálované od žluté (nejblíže) po červenou (při masivním přiblížení).',
+                'zoomIn': '🔎 Rychlý skok ke Sluneční soustavě',
+                'zoomOut': '🌌 Zpět na zobrazení celé Galaxie',
+                'drakeTitle': 'ℹ️ Kalkulátor Drakeovy rovnice',
+                'l_r': '<strong>R*</strong> (Vznik hvězd/rok):', 'l_fp': '<strong>f_p</strong> (Hvězdy s planetami):', 'l_ne': '<strong>n_e</strong> (Obyvatelné planety):', 'l_fl': '<strong>f_l</strong> (Vznik života):', 'l_fi': '<strong>f_i</strong> (Vznik inteligence):', 'l_fc': '<strong>f_c</strong> (Schopnost komunikace):', 'l_L': '<strong>L</strong> (Doba trvání v letech):',
+                'civCount': 'Počet současných civilizací v Galaxii',
+                'distLabel': 'Průměrná vzdálenost: ',
+                'alone': 'Jsme tu sami', 'none': 'Žádná nevznikla',
+                'tableTitle': 'Nejbližší zajímavé exoplanety', 'tableHint': 'Kliknutím na řádek vycentrujete mapu.', 'thName': 'Název planety', 'thDist': 'Vzdálenost (ly)',
+                'm_title': 'Co je to Drakeova rovnice?',
+                'm_p1': '<strong>Drakeova rovnice</strong> je matematická formule (Frank Drake, 1961), jejímž cílem je stimulovat vědeckou diskusi o faktorech podmiňujících vznik inteligentního života schopného mezihvězdné komunikace v naší Galaxii.',
+                'm_list': '<li><strong>R*</strong> - Průměrný počet hvězd, které ročně vzniknou.</li><li><strong>f_p</strong> - Podíl hvězd, kolem kterých obíhají planety.</li><li><strong>n_e</strong> - Průměrný počet planet v systému vhodných pro život.</li><li><strong>f_l</strong> - Pravděpodobnost, že vznikne život.</li><li><strong>f_i</strong> - Pravděpodobnost, že se vyvine inteligence.</li><li><strong>f_c</strong> - Pravděpodobnost, že inteligence vyvine komunikaci.</li><li><strong>L</strong> - Doba trvání takové civilizace.</li>',
+                'traceCore': 'Jádro', 'traceSun': 'Slunce', 'traceCiv': 'Civilizace', 'traceExo': 'Exoplanety', 'traceTarget': 'Vybraný cíl',
+                'touchHint': '💡 Tip pro mobily: Pro posun stránky nahoru/dolů tahejte prstem za bezpečné okraje vedle mapy. 3D mapu lze zoomovat dvěma prsty a natáčet jedním prstem.',
+                'scan': '[Skenování subsystému...]', 'scanTarget': 'Cíl:', 'scanDist': 'Vzdál.:', 'scanType': 'Typ: Obyvatelná zóna'
+            },
+            'en': {
+                'backBtn': '⬅ Back',
+                'switchBtn': 'CZ',
+                'title': '3D Galactic Map & Exoplanets',
+                'desc': 'This interactive map models our Galaxy in 3D space. The background features a procedurally generated illustration of the Milky Way\'s spiral arms.<br><br>• <strong>Green Ring:</strong> Galactic Habitable Zone (25,000 – 30,000 ly).<br>• <strong>Blue Dots:</strong> Civilizations generated by the Drake Equation.<br>• <strong>Yellow Dot:</strong> Our Sun (26,000 ly from the core).<br>• <strong>Colored Dust:</strong> Exoplanets scaled from yellow (closest) to red (visible when heavily zoomed in).',
+                'zoomIn': '🔎 Quick Jump to Solar System',
+                'zoomOut': '🌌 Back to Full Galaxy View',
+                'drakeTitle': 'ℹ️ Drake Equation Calculator',
+                'l_r': '<strong>R*</strong> (Star formation/yr):', 'l_fp': '<strong>f_p</strong> (Stars with planets):', 'l_ne': '<strong>n_e</strong> (Habitable planets):', 'l_fl': '<strong>f_l</strong> (Life emergence):', 'l_fi': '<strong>f_i</strong> (Intelligence emergence):', 'l_fc': '<strong>f_c</strong> (Communication capability):', 'l_L': '<strong>L</strong> (Lifespan in years):',
+                'civCount': 'Number of concurrent civilizations in the Galaxy',
+                'distLabel': 'Average distance: ',
+                'alone': 'We are alone', 'none': 'None emerged',
+                'tableTitle': 'Closest Interesting Exoplanets', 'tableHint': 'Click on a row to center the map.', 'thName': 'Planet Name', 'thDist': 'Distance (ly)',
+                'm_title': 'What is the Drake Equation?',
+                'm_p1': 'The <strong>Drake equation</strong> is a mathematical formula (Frank Drake, 1961) designed to stimulate scientific dialogue about the factors required for the emergence of communicative intelligent life in our Galaxy.',
+                'm_list': '<li><strong>R*</strong> - Average rate of star formation.</li><li><strong>f_p</strong> - Fraction of stars with planets.</li><li><strong>n_e</strong> - Average number of habitable planets per system.</li><li><strong>f_l</strong> - Probability that life emerges.</li><li><strong>f_i</strong> - Probability that intelligence emerges.</li><li><strong>f_c</strong> - Probability of developing interstellar communication.</li><li><strong>L</strong> - Lifespan of such civilization.</li>',
+                'traceCore': 'Galactic Core', 'traceSun': 'Sun', 'traceCiv': 'Civilization', 'traceExo': 'Exoplanets', 'traceTarget': 'Selected Target',
+                'touchHint': '💡 Mobile tip: Scroll the page using the safe margins next to the map. Use two fingers to zoom and one finger to rotate the 3D map.',
+                'scan': '[Scanning subsystem...]', 'scanTarget': 'Target:', 'scanDist': 'Dist.:', 'scanType': 'Type: Habitable zone'
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('htmlTag').lang = lang;
+            document.getElementById('fabBack').innerText = dict[lang].backBtn;
+            document.getElementById('langBtn').innerText = dict[lang].switchBtn;
+            document.getElementById('t_mainTitle').innerText = dict[lang].title;
+            document.getElementById('pageTitle').innerText = dict[lang].title;
+            document.getElementById('t_mainDesc').innerHTML = dict[lang].desc;
+            document.getElementById('zoomBtn').innerText = isZoomedIn ? dict[lang].zoomOut : dict[lang].zoomIn;
+            document.getElementById('openModalBtn').innerText = dict[lang].drakeTitle;
+            document.getElementById('l_r').innerHTML = dict[lang].l_r;
+            document.getElementById('l_fp').innerHTML = dict[lang].l_fp;
+            document.getElementById('l_ne').innerHTML = dict[lang].l_ne;
+            document.getElementById('l_fl').innerHTML = dict[lang].l_fl;
+            document.getElementById('l_fi').innerHTML = dict[lang].l_fi;
+            document.getElementById('l_fc').innerHTML = dict[lang].l_fc;
+            document.getElementById('l_L').innerHTML = dict[lang].l_L;
+            document.getElementById('t_civCount').innerText = dict[lang].civCount;
+            document.getElementById('t_tableTitle').innerText = dict[lang].tableTitle;
+            document.getElementById('t_tableHint').innerText = dict[lang].tableHint;
+            document.getElementById('t_thName').innerText = dict[lang].thName;
+            document.getElementById('t_thDist').innerText = dict[lang].thDist;
+            document.getElementById('m_title').innerText = dict[lang].m_title;
+            document.getElementById('m_p1').innerHTML = dict[lang].m_p1;
+            document.getElementById('m_list').innerHTML = dict[lang].m_list;
+            document.getElementById('t_touchHint').innerText = dict[lang].touchHint;
+
+            renderTable();
+            updateDrake(); 
+        }
+
+        document.getElementById('langBtn').addEventListener('click', () => {
+            setLanguage(currentLang === 'cs' ? 'en' : 'cs');
+        });
+
+        // --- 1. MATEMATIKA A GENERÁTORY ---
+        const R_inner = 25000, R_outer = 30000;
+        const ring_area = Math.PI * (Math.pow(R_outer, 2) - Math.pow(R_inner, 2));
+        const sun_x = 0, sun_y = -26000, sun_z = 0;
+
+        function randomGaussian(mean=0, stdev=1) {
+            let u = 1 - Math.random(), v = Math.random();
+            return mean + stdev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function generateGalaxyBackground() {
+            let gx=[], gy=[], gz=[];
+            let max_r = 45000; let arms = 4;
+            for(let i=0; i<3000; i++) {
+                let r = Math.abs(randomGaussian(0, 2000));
+                let theta = Math.random() * 2 * Math.PI;
+                gx.push(r * Math.cos(theta)); gy.push(r * Math.sin(theta)); gz.push(randomGaussian(0, 800));
+            }
+            for(let i=0; i<9000; i++) {
+                let r = Math.pow(Math.random(), 1.2) * max_r;
+                let arm_idx = Math.floor(Math.random() * arms);
+                let angle_offset = (arm_idx * 2 * Math.PI) / arms;
+                let twist = r * 0.00015;
+                let noise = randomGaussian(0, 800 + r * 0.05);
+                let final_angle = angle_offset + twist + (noise / (r+1000));
+                gx.push(r * Math.cos(final_angle)); gy.push(r * Math.sin(final_angle)); gz.push(randomGaussian(0, 300));
+            }
+            return {x: gx, y: gy, z: gz};
+        }
+
+        function generateCivs(count) {
+            let cx=[], cy=[], cz=[];
+            let render_count = Math.min(count, 15000); 
+            for(let i = 0; i < render_count; i++) {
+                let r = Math.sqrt(Math.random() * (Math.pow(R_outer, 2) - Math.pow(R_inner, 2)) + Math.pow(R_inner, 2));
+                let theta = Math.random() * 2 * Math.PI;
+                cx.push(r * Math.cos(theta)); cy.push(r * Math.sin(theta)); cz.push(randomGaussian(0, 500));
+            }
+            return {x: cx, y: cy, z: cz};
+        }
+
+        // --- 2. DATA ---
+        let exoplanets = [
+            ['Proxima Cen b',-1.5,-26001.2,-3.8,4.2], ['Barnard b',-0.1,-26005.9,0.5,6.0],
+            ['GJ 887 b',8.4,-26002.0,-6.3,10.7], ['Ross 128 b',-11.0,-25999.4,0.2,11.0],
+            ['Gl 725 A b',1.1,-26005.7,9.9,11.5], ['GJ 15 A b',8.3,-25999.3,8.1,11.6],
+            ['tau Cet e',10.2,-25995.0,-3.2,11.8], ['GJ 1061 c',5.0,-25993.1,-8.4,12.0],
+            ['Teegarden\'s Star b',9.4,-25996.3,-7.4,12.5], ['Wolf 1061 c',8.8,-26008.2,-5.9,14.0],
+            ['GJ 1002 b',15.7,-25999.5,-2.1,15.8], ['GJ 682 b',-1.2,-26011.6,-11.4,16.3],
+            ['GJ 3323 b',4.4,-25983.2,-2.1,17.5], ['GJ 251 b',-3.6,-25985.2,10.0,18.2],
+            ['GJ 411 b',-14.5,-25996.3,10.9,18.5], ['GJ 273 b',-7.2,-25982.1,1.8,19.3],
+            ['HD 20794 d',9.2,-25989.0,-13.4,19.6], ['GJ 625 b',-4.9,-26011.3,17.1,21.1],
+            ['HD 219134 b',11.3,-26002.3,17.9,21.3], ['GJ 393 b',-21.1,-25991.1,0.3,22.9],
+            ['GJ 4274 b',20.5,-26009.2,-7.1,23.6], ['GJ 667 C c',-3.4,-26019.0,-13.6,23.6],
+            ['GJ 514 b',-22.6,-26009.4,4.5,24.8], ['GJ 486 b',-25.4,-26005.4,4.5,26.3],
+            ['CD Cet b',18.6,-25979.1,2.3,28.1], ['GJ 367 b',-17.8,-25988.1,-22.0,30.7],
+            ['GJ 357 d',-23.2,-25983.2,-11.4,30.8], ['G 192-15 b',-0.2,-25980.0,23.8,31.1],
+            ['AU Mic d',17.9,-26020.3,-16.5,31.7], ['HD 260655 b',-5.0,-25969.3,9.8,32.6],
+            ['GJ 536 c',-29.3,-26017.1,-1.6,34.0], ['GJ 341 b',-13.0,-25989.2,-29.6,34.1],
+            ['G 261-6 b',3.1,-26008.1,33.6,34.7], ['GJ 740 b',9.0,-26034.9,3.7,36.2],
+            ['GJ 414 A b',-32.7,-25992.9,19.6,38.8], ['GJ 806 b',18.5,-26021.1,27.5,39.3],
+            ['Gliese 12 b',38.6,-25997.3,9.3,39.8], ['TRAPPIST-1 e',30.0,-25986.3,-21.8,40.7],
+            ['55 Cnc e',-24.7,-25973.6,19.5,41.0], ['GJ 1132 b',-25.1,-25987.6,-30.2,41.1],
+            ['HD 101581 b',-29.7,-25997.5,-29.2,41.7], ['HD 40307 b',0.5,-25978.9,-36.5,42.2],
+            ['TOI-1266 c',-34.9,-25981.6,23.4,46.0], ['HD 136352 b',-20.3,-26024.6,-35.8,47.9],
+            ['GJ 238 b',-3.8,-25974.4,-42.3,49.6], ['LHS 1140 b',-28.7,-26009.6,-40.0,50.1],
+            ['GJ 3929 b',-21.3,-26036.2,29.9,51.6], ['G 264-012 b',17.2,-26011.3,48.0,52.2],
+            ['HD 21749 c',14.7,-25981.3,-47.6,53.2], ['HD 48948 b',-5.9,-25973.4,47.9,55.1],
+            ['pi Men c',-13.6,-26004.8,-57.0,59.1], ['GJ 1252 b',22.1,-26029.3,-55.4,66.4],
+            ['HD 97658 b',-62.1,-25987.5,30.5,70.3], ['TOI-1468 b',11.1,-25936.5,-30.9,71.2],
+            ['HD 63433 d',-29.9,-25942.4,33.6,73.1], ['TOI-1452 b',-36.2,-25969.5,-54.6,73.7],
+            ['HD 156668 b',-12.7,-26068.1,38.8,79.4], ['HD 39194 d',2.0,-25970.8,-81.0,86.1],
+            ['LTT 1445 A c',49.9,-26050.2,-55.9,89.7], ['G 9-40 b',-59.8,-25939.6,32.8,91.1],
+            ['TOI-1201 b',-55.8,-25992.5,76.5,95.1], ['GJ 9827 c',95.7,-26013.8,-2.2,96.7],
+            ['LP 791-18 c',-47.5,-25973.8,-73.4,98.6], ['HD 73583 c',-64.0,-25922.9,-23.6,103.0],
+            ['HD 110067 e',-97.1,-26016.8,35.9,104.9], ['TOI-700 e',-41.9,-26038.5,-96.2,112.5],
+            ['HD 20781 b',66.1,-25921.2,-56.5,117.3], ['LTT 3780 b',-62.6,-25965.8,94.9,118.8],
+            ['HD 23472 d',33.0,-25952.0,-113.2,127.3], ['TOI-270 d',24.3,-26002.3,-128.8,131.0],
+            ['TOI-178 b',91.5,-26040.6,-88.2,136.6], ['TOI-244 b',-42.5,-25940.3,-121.3,139.7],
+            ['K2-18 b',-56.1,-25929.3,115.5,142.9], ['TOI-561 c',130.2,-25965.7,-43.3,143.5],
+            ['DMPP-3 A b',-1.3,-25955.7,-140.7,147.5], ['HD 15906 b',114.8,-25909.5,-26.7,148.6],
+            ['HIP 113103 b',105.7,-26031.2,-102.8,150.7], ['K2-3 c',-86.4,-25916.1,-95.8,152.6],
+            ['HD 3167 d',152.0,-25976.6,11.8,154.2], ['K2-116 b',144.3,-26063.8,-32.3,161.1],
+            ['TOI-1260 b',30.8,-25990.2,160.2,163.7], ['LP 890-9 c',28.2,-25914.8,-139.6,164.8],
+            ['K2-155 c',126.3,-25983.4,-106.6,165.8], ['HD 191939 d',36.5,-26058.3,160.8,174.8],
+            ['TOI-519 b',-141.7,-25916.5,-58.5,178.6], ['TOI-732 c',-2.8,-25939.9,169.1,179.9],
+            ['HD 93351 b',-173.8,-25942.4,-5.4,183.2], ['K2-180 b',-49.8,-25902.9,149.2,185.8],
+            ['TOI-2134 c',-147.8,-25936.5,-101.4,190.7], ['L 168-9 c',-31.5,-25875.0,-148.9,195.9],
+            ['K2-266 b',179.7,-25920.8,-79.8,203.4], ['DMPP-1 e',11.3,-25799.8,-37.6,204.0],
+            ['HD 108236 c',-130.7,-26015.1,-164.6,210.7]
+        ];
+
+        exoplanets.sort((a, b) => a[4] - b[4]);
+        
+        let selectedPlanet = null;
+
+        function renderTable() {
+            const tbody = document.getElementById('exoTableBody');
+            tbody.innerHTML = '';
+            exoplanets.forEach(p => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td>${p[0]}</td><td class="dist-col">${p[4].toFixed(1)}</td>`;
+                tr.onclick = () => focusOnPlanet(p);
+                tbody.appendChild(tr);
+            });
+        }
+        renderTable();
+
+        // --- 3. RENDEROVANI MAPY ---
+        let bgGalaxy = generateGalaxyBackground();
+        let customColorscale = [[0.0, '#ffffcc'], [0.1, '#ffcc00'], [0.3, '#ff5500'], [0.7, '#881100'], [1.0, '#330500']];
+        let isZoomedIn = false;
+        
+        // Globální proměnné pro rozsahy
+        let current_rx = [-35000, 35000], current_ry = [-35000, 35000], current_rz = [-15000, 15000];
+        let current_aspect = 0.4;
+
+        function renderPlot(N_civs) {
+            let exo_x=[], exo_y=[], exo_z=[], exo_dists=[], exo_names=[];
+            let dist_label = currentLang === 'cs' ? 'Vzdálenost' : 'Distance';
+            exoplanets.forEach(p => {
+                exo_x.push(p[1]); exo_y.push(p[2]); exo_z.push(p[3]); exo_dists.push(p[4]);
+                exo_names.push(`<b>${p[0]}</b><br>${dist_label}: ${p[4]} ly`);
+            });
+
+            let civs = generateCivs(N_civs);
+
+            let traces = [
+                { x: bgGalaxy.x, y: bgGalaxy.y, z: bgGalaxy.z, mode: 'markers', marker: {size: 1.5, color: '#aaccff', opacity: 0.15}, type: 'scatter3d', hoverinfo: 'skip', showlegend: false},
+                { x: [0], y: [0], z: [0], mode: 'markers', marker: {size: 10, color: 'white'}, type: 'scatter3d', name: dict[currentLang].traceCore, hoverinfo: 'name'},
+                { x: [sun_x], y: [sun_y], z: [sun_z], mode: 'markers+text', marker: {size: 5, color: '#ffcc00'}, type: 'scatter3d', text: [dict[currentLang].traceSun], textposition: 'bottom right', textfont: {color: '#ffcc00'}, name: dict[currentLang].traceSun},
+                { x: civs.x, y: civs.y, z: civs.z, mode: 'markers', marker: {size: 2, color: '#00ffcc', opacity: 0.8}, type: 'scatter3d', name: dict[currentLang].traceCiv, hoverinfo: 'none'},
+                { x: exo_x, y: exo_y, z: exo_z, mode: 'markers', marker: { size: 4, color: exo_dists, colorscale: customColorscale, cmin: 0, cmax: 215, opacity: 0.95 }, type: 'scatter3d', name: dict[currentLang].traceExo, text: exo_names, hoverinfo: 'text' }
+            ];
+
+            let z_x1=[], z_y1=[], z_x2=[], z_y2=[], zero_z=[];
+            for(let a=0; a<=360; a+=3) {
+                let r = a * Math.PI / 180;
+                z_x1.push(R_inner*Math.cos(r)); z_y1.push(R_inner*Math.sin(r)); zero_z.push(0);
+                z_x2.push(R_outer*Math.cos(r)); z_y2.push(R_outer*Math.sin(r));
+            }
+            traces.push({ x: z_x1, y: z_y1, z: zero_z, mode: 'lines', line: {color: 'rgba(0,255,204,0.4)', width: 2}, type: 'scatter3d', showlegend: false, hoverinfo: 'skip'});
+            traces.push({ x: z_x2, y: z_y2, z: zero_z, mode: 'lines', line: {color: 'rgba(0,255,204,0.4)', width: 2}, type: 'scatter3d', showlegend: false, hoverinfo: 'skip'});
+
+            // Přidání kroužku pro vybranou planetu
+            if (selectedPlanet) {
+                traces.push({
+                    x: [selectedPlanet[1]], y: [selectedPlanet[2]], z: [selectedPlanet[3]],
+                    mode: 'markers',
+                    marker: { size: 18, color: 'rgba(0,0,0,0)', line: {color: '#00ffcc', width: 3} },
+                    type: 'scatter3d', name: dict[currentLang].traceTarget, hoverinfo: 'skip'
+                });
+            }
+
+            let layout = {
+                paper_bgcolor: '#000000', font: { color: '#ffffff' }, margin: { t: 0, b: 0, l: 0, r: 0 },
+                scene: {
+                    xaxis: { title: '', range: current_rx, showgrid: false, zeroline: false, showbackground: false, showticklabels: false },
+                    yaxis: { title: '', range: current_ry, showgrid: false, zeroline: false, showbackground: false, showticklabels: false },
+                    zaxis: { title: '', range: current_rz, showgrid: false, zeroline: false, showbackground: false, showticklabels: false },
+                    camera: { eye: {x: 0, y: -0.5, z: 1.5} },
+                    aspectratio: { x: 1, y: 1, z: current_aspect } 
+                },
+                legend: { x: 0.02, y: 0.98, bgcolor: 'rgba(0,0,0,0.5)' }
+            };
+
+            Plotly.react('map', traces, layout, {responsive: true, scrollZoom: true});
+        }
+
+        // --- 4. LOGIKA VYSKAKOVACIHO OKNA K PLANETE ---
+        function closePopup() {
+            document.getElementById('planetPopup').style.display = 'none';
+        }
+
+        function typeWriterEffect(p) {
+            let popup = document.getElementById('planetPopup');
+            let content = document.getElementById('popupContent');
+            popup.style.display = 'block';
+            
+            let lines = [
+                dict[currentLang].scan,
+                dict[currentLang].scanTarget + ` <span style="color:#fff">${p[0]}</span>`,
+                dict[currentLang].scanDist + ` ${p[4]} ly`,
+                dict[currentLang].scanType
+            ];
+            
+            let l = 0, c = 0;
+            if(window.twInterval) clearInterval(window.twInterval);
+            content.innerHTML = '<div id="tw-cursor" class="tw-cursor"></div>';
+            
+            window.twInterval = setInterval(() => {
+                if(l >= lines.length) {
+                    clearInterval(window.twInterval);
+                    document.getElementById('tw-cursor').style.display = 'none';
+                    return;
+                }
+                if(c === 0) {
+                    let div = document.createElement('div');
+                    div.id = 'tw-line' + l;
+                    if(l === 1) div.style.color = '#ffcc00'; // Žluté zvýraznění jména cíle
+                    content.insertBefore(div, document.getElementById('tw-cursor'));
+                }
+                
+                // Psani cele HTML casti najednou pokud existuje tag (zjednodušený fix pro <span>)
+                if (lines[l].charAt(c) === '<') {
+                    document.getElementById('tw-line' + l).innerHTML = lines[l];
+                    c = lines[l].length;
+                } else {
+                    document.getElementById('tw-line' + l).innerHTML += lines[l].charAt(c);
+                    c++;
+                }
+
+                if(c >= lines[l].length) {
+                    c = 0; l++;
+                }
+            }, 30);
+        }
+
+        function focusOnPlanet(p) {
+            selectedPlanet = p;
+            let dist = p[4];
+            
+            // Stred mapy mezi Sluncem a exoplanetou, aby oboji zustalo ve vyrezu
+            let mid_x = (sun_x + p[1]) / 2;
+            let mid_y = (sun_y + p[2]) / 2;
+            let mid_z = (sun_z + p[3]) / 2;
+            
+            // Polomer pohledu vzdy minimalne 25 ly, nebo tak, aby bezpecne pojal Slunce i planetu
+            let radius = Math.max(25, (dist / 2) * 1.5); 
+
+            current_rx = [mid_x - radius, mid_x + radius];
+            current_ry = [mid_y - radius, mid_y + radius];
+            current_rz = [mid_z - radius, mid_z + radius];
+            current_aspect = 1;
+
+            isZoomedIn = true;
+            document.getElementById('zoomBtn').innerHTML = dict[currentLang].zoomOut;
+            document.getElementById('zoomBtn').style.backgroundColor = "#ff5500";
+            
+            updateDrake(); // Prekresli mapu i se zvyraznenim planety
+            
+            // Spusti efekt po 400ms zpozdeni
+            setTimeout(() => { typeWriterEffect(p); }, 400);
+        }
+
+        // --- 5. LOGIKA DRAKEOVY ROVNICE ---
+        const inputs = ['d_r', 'd_fp', 'd_ne', 'd_fl', 'd_fi', 'd_fc'];
+        const numL = document.getElementById('d_L');
+
+        function updateDrake() {
+            let r = parseFloat(document.getElementById('d_r').value);
+            let fp = parseFloat(document.getElementById('d_fp').value);
+            let ne = parseFloat(document.getElementById('d_ne').value);
+            let fl = parseFloat(document.getElementById('d_fl').value);
+            let fi = parseFloat(document.getElementById('d_fi').value);
+            let fc = parseFloat(document.getElementById('d_fc').value);
+            let L = parseFloat(numL.value);
+
+            document.getElementById('val_r').innerText = r.toFixed(1);
+            document.getElementById('val_fp').innerText = fp.toFixed(2);
+            document.getElementById('val_ne').innerText = ne.toFixed(1);
+            document.getElementById('val_fl').innerText = fl.toFixed(2);
+            document.getElementById('val_fi').innerText = fi.toFixed(2);
+            document.getElementById('val_fc').innerText = fc.toFixed(2);
+
+            let N = Math.round(r * fp * ne * fl * fi * fc * L);
+            document.getElementById('calc_N').innerText = N.toLocaleString('cs-CZ');
+
+            let dist_text = dict[currentLang].none;
+            if(N > 1) {
+                let dist = Math.round(Math.sqrt(ring_area / N));
+                dist_text = dist.toLocaleString('cs-CZ') + " ly";
+            } else if (N === 1) {
+                dist_text = dict[currentLang].alone;
+            }
+            document.getElementById('calc_dist').innerText = dict[currentLang].distLabel + dist_text;
+
+            renderPlot(N);
+        }
+
+        inputs.forEach(id => { document.getElementById(id).addEventListener('input', updateDrake); });
+        numL.addEventListener('input', updateDrake);
+
+        // --- 6. LOGIKA ZOOMU ---
+        const zoomBtn = document.getElementById('zoomBtn');
+        zoomBtn.addEventListener('click', () => {
+            isZoomedIn = !isZoomedIn;
+            if (isZoomedIn) {
+                // Rychlý zoom na celkové okolí Slunce
+                current_rx = [sun_x - 200, sun_x + 200];
+                current_ry = [sun_y - 200, sun_y + 200];
+                current_rz = [sun_z - 200, sun_z + 200];
+                current_aspect = 1;
+            } else {
+                // Návrat na galaxii
+                current_rx = [-35000, 35000];
+                current_ry = [-35000, 35000];
+                current_rz = [-15000, 15000];
+                current_aspect = 0.4;
+                selectedPlanet = null; // Zrusi zvyrazneni
+                closePopup();
+            }
+            
+            zoomBtn.innerHTML = isZoomedIn ? dict[currentLang].zoomOut : dict[currentLang].zoomIn;
+            zoomBtn.style.backgroundColor = isZoomedIn ? "#ff5500" : "#00ffcc"; 
+            updateDrake(); 
+        });
+
+        // --- 7. MODÁLNÍ OKNO ---
+        const modal = document.getElementById("drakeModal");
+        document.getElementById("openModalBtn").onclick = function() { modal.style.display = "block"; }
+        document.getElementById("closeModalBtn").onclick = function() { modal.style.display = "none"; }
+        window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
+
+        // Start
+        updateDrake();
+
+        // --- 8. VLASTNÍ IMPLEMENTACE PINCH-TO-ZOOM PRO MOBILY ---
+        const mapDiv = document.getElementById('map');
+        let previousPinchDistance = 0;
+
+        mapDiv.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                // Skrytí gesta dvou prstů před interní logikou Plotly
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                previousPinchDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+            }
+        }, { passive: false, capture: true }); // capture: true zaručí, že událost odchytíme dřív než Plotly
+
+        mapDiv.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && previousPinchDistance > 0) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                const currentDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+                const zoomDelta = previousPinchDistance / currentDistance;
+                previousPinchDistance = currentDistance;
+
+                // 1. Získání skutečné "živé" pozice kamery z hlubin WebGL scény, nikoliv ze statického layoutu
+                let liveCam = null;
+                if (mapDiv._fullLayout && mapDiv._fullLayout.scene) {
+                    let scene = mapDiv._fullLayout.scene._scene;
+                    if (scene && typeof scene.getCamera === 'function') {
+                        liveCam = scene.getCamera();
+                    } else {
+                        liveCam = mapDiv._fullLayout.scene.camera;
+                    }
+                }
+
+                if (liveCam && liveCam.eye) {
+                    // Normalize Plotly's data format arrays vs objects
+                    let ex = liveCam.eye.x !== undefined ? liveCam.eye.x : liveCam.eye[0];
+                    let ey = liveCam.eye.y !== undefined ? liveCam.eye.y : liveCam.eye[1];
+                    let ez = liveCam.eye.z !== undefined ? liveCam.eye.z : liveCam.eye[2];
+
+                    let cx = liveCam.center ? (liveCam.center.x !== undefined ? liveCam.center.x : liveCam.center[0]) : 0;
+                    let cy = liveCam.center ? (liveCam.center.y !== undefined ? liveCam.center.y : liveCam.center[1]) : 0;
+                    let cz = liveCam.center ? (liveCam.center.z !== undefined ? liveCam.center.z : liveCam.center[2]) : 0;
+
+                    let ux = liveCam.up ? (liveCam.up.x !== undefined ? liveCam.up.x : liveCam.up[0]) : 0;
+                    let uy = liveCam.up ? (liveCam.up.y !== undefined ? liveCam.up.y : liveCam.up[1]) : 0;
+                    let uz = liveCam.up ? (liveCam.up.z !== undefined ? liveCam.up.z : liveCam.up[2]) : 1;
+                    
+                    // Omezení maximálního přiblížení/oddálení
+                    let radius = Math.hypot(ex, ey, ez);
+                    if ((radius < 0.05 && zoomDelta < 1) || (radius > 6.0 && zoomDelta > 1)) return;
+
+                    // 2. Aplikování zoomu POUZE na vzdálenost (eye), s fixací aktuálního úhlu a rotace
+                    let newCam = {
+                        eye: { x: ex * zoomDelta, y: ey * zoomDelta, z: ez * zoomDelta },
+                        center: { x: cx, y: cy, z: cz },
+                        up: { x: ux, y: uy, z: uz }
+                    };
+
+                    Plotly.relayout(mapDiv, { 'scene.camera': newCam });
+                }
+            }
+        }, { passive: false, capture: true });
+
+        mapDiv.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) {
+                previousPinchDistance = 0;
+            }
+        }, { passive: false, capture: true });
+
+    </script>
+</body>
+</html>
