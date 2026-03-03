@@ -122,10 +122,10 @@
             <span class="lang-en">Probability and Prediction of the UFO/UAP Phenomenon</span>
         </h1>
         <p class="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto font-light leading-relaxed">
-            <span class="lang-cs">Toto je hloubková datová analýza 323 729 validních záznamů optikou astrobiologie, Drakeovy rovnice a moderní kosmologie. Jde o stručnou syntézu dat pro odhad existence vyspělých civilizací a povahy možného prvního kontaktu. Dvě tlačítka níže nabízejí ke stažení odborné detailní studie.</span>
-            <span class="lang-en">This is an in-depth data analysis of 323,729 valid records through the lens of astrobiology, the Drake equation, and modern cosmology. It is a concise synthesis of data to estimate the existence of advanced civilizations and the nature of potential first contact. The two buttons below offer detailed scientific studies for download.</span>
+            <span class="lang-cs">Toto je hloubková datová analýza 323 729 validních záznamů optikou astrobiologie, Drakeovy rovnice a moderní kosmologie. Jde o stručnou syntézu dat pro odhad existence vyspělých civilizací a povahy možného prvního kontaktu. Dvě tlačítka níže nabízejí ke stažení odborné detailní studie. Třetí tlačítko otevře podstránku s vysvětlením a vizualizací Drakeovy rovnice ve vztahu k možným hvězdným civilizacím, podstránka obsahuje i přehled exoplanet nejbližších Slunci až do vzdálenosti cca 200 světelných let.</span>
+            <span class="lang-en">This is an in-depth data analysis of 323,729 valid records through the lens of astrobiology, the Drake equation, and modern cosmology. It is a concise synthesis of data to estimate the existence of advanced civilizations and the nature of potential first contact. The two buttons below offer detailed scientific studies for download. The third button opens a subpage with an explanation and visualization of the Drake equation in relation to possible stellar civilizations; the subpage also contains an overview of exoplanets closest to the Sun up to a distance of approx. 200 light-years.</span>
         </p>
-        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center" id="pdf-downloads">
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center flex-wrap" id="pdf-downloads">
             <a id="pdf-btn-1" href="01_prvni_civilizace_-_UFO_a_moznost_kontaktu.pdf" target="_blank" class="bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-violet-500/30 transition-all flex items-center justify-center border border-violet-400/50">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span id="pdf-text-1">01_První civilizace a UFO</span>
@@ -133,6 +133,10 @@
             <a id="pdf-btn-2" href="02_globalni_pruzkumna_analyza_UFO-UAP.pdf" target="_blank" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-cyan-500/30 transition-all flex items-center justify-center border border-cyan-400/50">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 <span id="pdf-text-2">02_Globální analýza UAP</span>
+            </a>
+            <a id="btn-3" href="galactic_map.html" target="_blank" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-fuchsia-500/30 transition-all flex items-center justify-center border border-fuchsia-400/50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                <span id="btn-text-3">03_Drakeova rovnice a vesmírné civilizace</span>
             </a>
         </div>
     </header>
@@ -469,6 +473,8 @@
         const pdfText1 = document.getElementById('pdf-text-1');
         const pdfBtn2 = document.getElementById('pdf-btn-2');
         const pdfText2 = document.getElementById('pdf-text-2');
+        const btn3 = document.getElementById('btn-3');
+        const btnText3 = document.getElementById('btn-text-3');
 
         let currentLang = 'cs';
 
@@ -508,6 +514,9 @@
                 
                 pdfBtn2.href = '02_global_exploratory_analysis_UFO-UAP.pdf';
                 pdfText2.textContent = '02_Global UAP Analysis';
+                
+                // Překlad třetího tlačítka do EN
+                btnText3.textContent = '03_Drake Equation & Space Civilizations';
             } else {
                 currentLang = 'cs';
                 document.body.classList.remove('lang-en');
@@ -519,6 +528,9 @@
                 
                 pdfBtn2.href = '02_globalni_pruzkumna_analyza_UFO-UAP.pdf';
                 pdfText2.textContent = '02 Globální analýza UAP';
+                
+                // Překlad třetího tlačítka do CS
+                btnText3.textContent = '03_Drakeova rovnice a vesmírné civilizace';
             }
             updateChartLanguages();
         });
