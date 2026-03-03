@@ -626,55 +626,74 @@
 
         mapDiv.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
-                // Výpočet počáteční vzdálenosti mezi dvěma prsty
+                // Skrytí gesta dvou prstů před interní logikou Plotly
+                e.preventDefault();
+                e.stopPropagation();
+                
                 const t1 = e.touches[0];
                 const t2 = e.touches[1];
                 previousPinchDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
             }
-        }, { passive: false });
+        }, { passive: false, capture: true }); // capture: true zaručí, že událost odchytíme dřív než Plotly
 
         mapDiv.addEventListener('touchmove', function(e) {
             if (e.touches.length === 2 && previousPinchDistance > 0) {
-                e.preventDefault(); // Zabrání přiblížení/scrollování celé stránky
-                e.stopPropagation(); // Odstíní Plotly, aby gesto nezpracovalo chybně po svém
+                e.preventDefault();
+                e.stopPropagation();
 
                 const t1 = e.touches[0];
                 const t2 = e.touches[1];
                 const currentDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
 
-                // Zjištění poměru (o kolik se prsty přiblížily/oddálily)
                 const zoomDelta = previousPinchDistance / currentDistance;
                 previousPinchDistance = currentDistance;
 
-                // Vytažení aktuální pozice 3D kamery přímo z interního layoutu Plotly
-                let sceneLayout = mapDiv._fullLayout ? mapDiv._fullLayout.scene : null;
-                if (sceneLayout && sceneLayout.camera && sceneLayout.camera.eye) {
-                    let eye = sceneLayout.camera.eye;
-                    
-                    // Ochrana, aby kamera neproletěla středem Galaxie do inverzního světa, nebo neodlétla mimo mapu
-                    let radius = Math.hypot(eye.x, eye.y, eye.z);
-                    if ((radius < 0.05 && zoomDelta < 1) || (radius > 6.0 && zoomDelta > 1)) {
-                        return; 
+                // 1. Získání skutečné "živé" pozice kamery z hlubin WebGL scény, nikoliv ze statického layoutu
+                let liveCam = null;
+                if (mapDiv._fullLayout && mapDiv._fullLayout.scene) {
+                    let scene = mapDiv._fullLayout.scene._scene;
+                    if (scene && typeof scene.getCamera === 'function') {
+                        liveCam = scene.getCamera();
+                    } else {
+                        liveCam = mapDiv._fullLayout.scene.camera;
                     }
+                }
 
-                    // Výpočet nové pozice kamery
-                    let newEye = {
-                        x: eye.x * zoomDelta,
-                        y: eye.y * zoomDelta,
-                        z: eye.z * zoomDelta
+                if (liveCam && liveCam.eye) {
+                    // Normalize Plotly's data format arrays vs objects
+                    let ex = liveCam.eye.x !== undefined ? liveCam.eye.x : liveCam.eye[0];
+                    let ey = liveCam.eye.y !== undefined ? liveCam.eye.y : liveCam.eye[1];
+                    let ez = liveCam.eye.z !== undefined ? liveCam.eye.z : liveCam.eye[2];
+
+                    let cx = liveCam.center ? (liveCam.center.x !== undefined ? liveCam.center.x : liveCam.center[0]) : 0;
+                    let cy = liveCam.center ? (liveCam.center.y !== undefined ? liveCam.center.y : liveCam.center[1]) : 0;
+                    let cz = liveCam.center ? (liveCam.center.z !== undefined ? liveCam.center.z : liveCam.center[2]) : 0;
+
+                    let ux = liveCam.up ? (liveCam.up.x !== undefined ? liveCam.up.x : liveCam.up[0]) : 0;
+                    let uy = liveCam.up ? (liveCam.up.y !== undefined ? liveCam.up.y : liveCam.up[1]) : 0;
+                    let uz = liveCam.up ? (liveCam.up.z !== undefined ? liveCam.up.z : liveCam.up[2]) : 1;
+                    
+                    // Omezení maximálního přiblížení/oddálení
+                    let radius = Math.hypot(ex, ey, ez);
+                    if ((radius < 0.05 && zoomDelta < 1) || (radius > 6.0 && zoomDelta > 1)) return;
+
+                    // 2. Aplikování zoomu POUZE na vzdálenost (eye), s fixací aktuálního úhlu a rotace
+                    let newCam = {
+                        eye: { x: ex * zoomDelta, y: ey * zoomDelta, z: ez * zoomDelta },
+                        center: { x: cx, y: cy, z: cz },
+                        up: { x: ux, y: uy, z: uz }
                     };
 
-                    // Plynulý update kamery přes WebGL (bez znovunačítání 15 000 bodů)
-                    Plotly.relayout(mapDiv, { 'scene.camera.eye': newEye });
+                    Plotly.relayout(mapDiv, { 'scene.camera': newCam });
                 }
             }
-        }, { passive: false });
+        }, { passive: false, capture: true });
 
         mapDiv.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) {
-                previousPinchDistance = 0; // Konec gesta
+                previousPinchDistance = 0;
             }
-        });
+        }, { passive: false, capture: true });
 
     </script>
 </body>
