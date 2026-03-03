@@ -620,6 +620,62 @@
         // Start
         updateDrake();
 
+        // --- 8. VLASTNÍ IMPLEMENTACE PINCH-TO-ZOOM PRO MOBILY ---
+        const mapDiv = document.getElementById('map');
+        let previousPinchDistance = 0;
+
+        mapDiv.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                // Výpočet počáteční vzdálenosti mezi dvěma prsty
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                previousPinchDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+            }
+        }, { passive: false });
+
+        mapDiv.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && previousPinchDistance > 0) {
+                e.preventDefault(); // Zabrání přiblížení/scrollování celé stránky
+                e.stopPropagation(); // Odstíní Plotly, aby gesto nezpracovalo chybně po svém
+
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                const currentDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+                // Zjištění poměru (o kolik se prsty přiblížily/oddálily)
+                const zoomDelta = previousPinchDistance / currentDistance;
+                previousPinchDistance = currentDistance;
+
+                // Vytažení aktuální pozice 3D kamery přímo z interního layoutu Plotly
+                let sceneLayout = mapDiv._fullLayout ? mapDiv._fullLayout.scene : null;
+                if (sceneLayout && sceneLayout.camera && sceneLayout.camera.eye) {
+                    let eye = sceneLayout.camera.eye;
+                    
+                    // Ochrana, aby kamera neproletěla středem Galaxie do inverzního světa, nebo neodlétla mimo mapu
+                    let radius = Math.hypot(eye.x, eye.y, eye.z);
+                    if ((radius < 0.05 && zoomDelta < 1) || (radius > 6.0 && zoomDelta > 1)) {
+                        return; 
+                    }
+
+                    // Výpočet nové pozice kamery
+                    let newEye = {
+                        x: eye.x * zoomDelta,
+                        y: eye.y * zoomDelta,
+                        z: eye.z * zoomDelta
+                    };
+
+                    // Plynulý update kamery přes WebGL (bez znovunačítání 15 000 bodů)
+                    Plotly.relayout(mapDiv, { 'scene.camera.eye': newEye });
+                }
+            }
+        }, { passive: false });
+
+        mapDiv.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) {
+                previousPinchDistance = 0; // Konec gesta
+            }
+        });
+
     </script>
 </body>
 </html>
