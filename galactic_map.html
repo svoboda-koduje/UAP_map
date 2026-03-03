@@ -86,7 +86,7 @@
             position: relative;
             margin-top: 20px;
         }
-        #map { width: 100%; height: 800px; background-color: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        #map { width: 100%; height: 800px; background-color: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; touch-action: none; }
         
         .touch-hint { text-align: center; color: #888; font-size: 13px; margin-top: 15px; width: 100%; }
 
@@ -469,7 +469,7 @@
                 legend: { x: 0.02, y: 0.98, bgcolor: 'rgba(0,0,0,0.5)' }
             };
 
-            Plotly.react('map', traces, layout, {responsive: true});
+            Plotly.react('map', traces, layout, {responsive: true, scrollZoom: true});
         }
 
         // --- 4. LOGIKA VYSKAKOVACIHO OKNA K PLANETE ---
