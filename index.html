@@ -1583,6 +1583,25 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání:</label>
         <input type="text" id="comment-search" placeholder="Hledat text..." >
+        <fieldset style="margin-top: 15px; border: 1px solid #444; border-radius: 4px; padding: 10px;">
+            <legend style="color: #aaa; font-size: 0.85em; padding: 0 5px;">Kategorie:</legend>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-a" style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatA">Kategorie A (Vysvětlené IFO)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-b" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatB">Kategorie B (Málo dat)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-c" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatC">Kategorie C (UFO/UAP)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center;">
+                <input type="checkbox" id="show-cat-unanalyzed" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatUnanalyzed">Neanalyzováno</span>
+            </label>
+        </fieldset>
         <button class="reset-data-btn" style="background-color: #607d8b; margin-top: 15px;" onclick="updateMapWithLoader(() => resetFilters(), 'Resetuji filtry a text...')">
     Resetovat filtry a hledání
 </button>
@@ -1990,6 +2009,10 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 filterShapeOptionAll: "-- Všechny tvary --",
                 filterSearch: "Fulltextové vyhledávání v komentářích:",
                 filterSearchPlaceholder: "Hledat např. 'Nimitz', 'triangle', 'červený'",
+                filterCatA: "Kategorie A (Vysvětlené IFO)",
+                filterCatB: "Kategorie B (Málo dat)",
+                filterCatC: "Kategorie C (UFO/UAP)",
+                filterCatUnanalyzed: "Neanalyzováno",
                 filterApply: "Aplikovat manuální filtry",
                 filterReset: "Resetovat filtry",
                 analysisTitle: "📊 Analýza a export dat",
@@ -2439,6 +2462,10 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 filterShapeOptionAll: "-- All shapes --",
                 filterSearch: "Full-text search in comments:",
                 filterSearchPlaceholder: "Search e.g. 'Nimitz', 'triangle', 'red'",
+                filterCatA: "Category A (Explained IFOs)",
+                filterCatB: "Category B (Insufficient data)",
+                filterCatC: "Category C (UFO/UAP)",
+                filterCatUnanalyzed: "Unanalyzed",
                 filterApply: "Apply Manual Filters",
                 filterReset: "Reset Filters",
                 analysisTitle: "📊 Data Analysis & Export",
@@ -3871,6 +3898,8 @@ function loadDataWithPapaParse() {
                         // Záchranná brzda pro USA
                         if (finalCountryCode === 'usa' || finalCountryCode === 'united states') finalCountryCode = 'us';
 
+                        const category_val = columns[12] ? columns[12].trim() : 'Neanalyzováno';
+
                         const dataObject = {
                             dt: datetimeStr,
                             lat: lat,
@@ -3883,7 +3912,8 @@ function loadDataWithPapaParse() {
                             year: year,
                             month: month,
                             hour: hour,
-                            archive_id: archive_id
+                            archive_id: archive_id,
+                            category: category_val
                         };
 
                         if (archive_id) archiveIdLookup[archive_id] = { lat: lat, lon: lon, city: dataObject.city };
@@ -4267,6 +4297,10 @@ if (applyBtnNew) {
 document.getElementById('shape-filter').addEventListener('change', () => updateMapWithLoader());
 document.getElementById('season-filter').addEventListener('change', () => updateMapWithLoader());
 document.getElementById('timeofday-filter').addEventListener('change', () => updateMapWithLoader());
+['show-cat-a', 'show-cat-b', 'show-cat-c', 'show-cat-unanalyzed'].forEach(id => {
+    const cb = document.getElementById(id);
+    if(cb) cb.addEventListener('change', () => updateMapWithLoader());
+});
 
                 // Přepínač zobrazení (Body/Heatmapa) s vizuální indikací práce
                 // Přepínač zobrazení (Body/Heatmapa) s animací
@@ -4541,6 +4575,10 @@ function updateMarkers(data, skipFilters = false) {
         const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
         const selectedSeason = document.getElementById('season-filter').value;
         const selectedTimeOfDay = document.getElementById('timeofday-filter').value;
+        const showCatA = document.getElementById('show-cat-a') ? document.getElementById('show-cat-a').checked : false;
+        const showCatB = document.getElementById('show-cat-b') ? document.getElementById('show-cat-b').checked : true;
+        const showCatC = document.getElementById('show-cat-c') ? document.getElementById('show-cat-c').checked : true;
+        const showCatUnanalyzed = document.getElementById('show-cat-unanalyzed') ? document.getElementById('show-cat-unanalyzed').checked : true;
 
         // Filtr regionu
         let regionCodes = null;
@@ -4560,6 +4598,12 @@ function updateMarkers(data, skipFilters = false) {
                 }
             }
             if (!item || !item.lat || !item.lon) return false;
+            // Filtrace podle kategorií
+            const cat = item.category || 'Neanalyzováno';
+            if (!showCatA && cat === 'A') return false;
+            if (!showCatB && cat === 'B') return false;
+            if (!showCatC && cat === 'C') return false;
+            if (!showCatUnanalyzed && cat === 'Neanalyzováno') return false;
             if (item.year < yearMin || item.year > yearMax) return false;
             if (selectedShape !== 'all' && (item.shape || '').toLowerCase() !== selectedShape) return false;
 
@@ -6042,6 +6086,14 @@ if (resetMtnBtn) {
                 document.getElementById('season-filter').value = "all";
                 document.getElementById('timeofday-filter').value = "all";
                 document.getElementById('shape-filter').value = "all";
+                const cbA = document.getElementById('show-cat-a');
+                if(cbA) cbA.checked = false;
+                const cbB = document.getElementById('show-cat-b');
+                if(cbB) cbB.checked = true;
+                const cbC = document.getElementById('show-cat-c');
+                if(cbC) cbC.checked = true;
+                const cbUn = document.getElementById('show-cat-unanalyzed');
+                if(cbUn) cbUn.checked = true;
 
                 // 2. Resetovat posuvníky roků (Range)
                 const minYear = 1900;
