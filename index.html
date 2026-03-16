@@ -5344,38 +5344,76 @@ async function searchLocationAndZoom(query) {
 }
 
 // C) Připraví vyfiltrovaná data pro Graf/Report (Volá se při kliknutí na tlačítka)
-// === PROFESIONÁLNÍ GEOPROSTOROVÝ FILTR (POINT IN POLYGON) ===
+// C) Připraví vyfiltrovaná data pro Graf/Report (Volá se při kliknutí na tlačítka)
+// === PROFESIONÁLNÍ GEOPROSTOROVÝ FILTR S LOKÁLNÍ CACHE A PODPOROU STÁTŮ ===
 async function getFilteredDataForAnalysis(query) {
-    // 1. Získáme informace o lokaci včetně přesných hranic (GeoJSON)
-    const locInfo = await resolveLocation(query);
-    
-    const bbox = (locInfo && locInfo.found && locInfo.bbox) ? locInfo.bbox : null;
-    const geoShape = (locInfo && locInfo.found && locInfo.geojson) ? locInfo.geojson : null;
-    const fallbackText = query.toLowerCase();
-
-    // Načteme nastavení filtrů (čas, rok)
+    const fallbackText = query.toLowerCase().trim();
     const yearMin = parseInt(document.getElementById('year-min').value);
     const yearMax = parseInt(document.getElementById('year-max').value);
 
-    // Pokud nemáme ani obdélník, musíme spoléhat na text (fallback)
+    // === KROK 1: RYCHLÝ LOKÁLNÍ FILTR PRO ZEMĚ A STÁTY ===
+    // Pokud uživatel zadal známý stát nebo region (např. "cz", "Nevada", "USA")
+    if (typeof countryNameMap !== 'undefined' && countryNameMap[fallbackText]) {
+        const targetCode = countryNameMap[fallbackText];
+        
+        const localFiltered = allData.filter(item => {
+            if (item.year < yearMin || item.year > yearMax) return false;
+            
+            // Pokud kód obsahuje pomlčku (např. 'us-nv' pro Nevadu nebo 'ca-ab' pro Albertu)
+            if (targetCode.includes('-')) {
+                const parts = targetCode.split('-');
+                const cCode = parts[0]; // např. 'us'
+                const sCode = parts[1]; // např. 'nv'
+                // Musí přesně sedět jak země, tak konkrétní stát
+                return item.country === cCode && item.state === sCode;
+            } else {
+                // Pro celé státy jako je Česká republika ('cz'), Francie ('fr') atd.
+                return item.country === targetCode || item.state === targetCode;
+            }
+        });
+
+        // Pokusíme se najít hezký název pro výstupní report (s velkým počátečním písmenem)
+        let niceName = query;
+        if (fallbackText === targetCode || targetCode.includes('-')) {
+           const humanName = Object.keys(countryNameMap).find(key => countryNameMap[key] === targetCode && key.length > 3);
+           if (humanName) niceName = humanName.charAt(0).toUpperCase() + humanName.slice(1);
+        }
+
+        // Aby mapa i ukázala, co analyzujeme, posuneme pohled (zoom)
+        if (localFiltered.length > 0 && map) {
+            const latLngs = localFiltered.map(p => [p.lat, p.lon]);
+            // Vezmeme každý desátý bod pro rychlejší výpočet hranic u velkých území
+            const sample = latLngs.filter((_, i) => i % 10 === 0); 
+            map.fitBounds(L.latLngBounds(sample.length > 0 ? sample : latLngs), { padding: [50, 50], maxZoom: 6 });
+        }
+
+        return { data: localFiltered, name: niceName };
+    }
+
+    // === KROK 2: EXTERNÍ API (PRO MĚSTA, KRAJE A SPECIFICKÉ OBLASTI) ===
+    const locInfo = await resolveLocation(query);
+    const bbox = (locInfo && locInfo.found && locInfo.bbox) ? locInfo.bbox : null;
+    const geoShape = (locInfo && locInfo.found && locInfo.geojson) ? locInfo.geojson : null;
+
+    // Pokud nemáme ani obdélník z API, spoléháme na bezpečný fulltext
     if (!bbox) {
         const textFiltered = allData.filter(item => {
              if (item.year < yearMin || item.year > yearMax) return false;
-             return (item.city || "").toLowerCase().includes(fallbackText);
+             
+             const cityMatch = (item.city || "").toLowerCase().includes(fallbackText);
+             const exactCountryMatch = (item.country || "").toLowerCase() === fallbackText;
+             const exactStateMatch = (item.state || "").toLowerCase() === fallbackText;
+             
+             return cityMatch || exactCountryMatch || exactStateMatch;
         });
         return { data: textFiltered, name: query };
     }
 
     // === KROK A: RYCHLÁ ELIMINACE (BOUNDING BOX) ===
-    // Nejprve vybereme body, které jsou v "obdélníku" kolem státu.
-    // To zredukuje 300 000 bodů na např. 5 000, což už lze zpracovat detailně.
-    // bbox z Nominatim je: [minLat, maxLat, minLon, maxLon]
     const [minLat, maxLat, minLon, maxLon] = bbox;
 
     let candidates = allData.filter(item => {
-        // Filtr času
         if (item.year < yearMin || item.year > yearMax) return false;
-        // Filtr souřadnic (hrubý obdélník)
         if (item.lat && item.lon) {
             return (item.lat >= minLat && item.lat <= maxLat &&
                     item.lon >= minLon && item.lon <= maxLon);
@@ -5383,40 +5421,24 @@ async function getFilteredDataForAnalysis(query) {
         return false;
     });
 
-    console.log(`Krok A (Obdélník): Nalezeno ${candidates.length} kandidátů.`);
-
     // === KROK B: PŘESNÁ ANALÝZA (POINT IN POLYGON) ===
-    // Pokud máme přesný tvar (GeoJSON) a máme knihovnu Turf, provedeme detailní řez.
     let finalData = [];
-    
     if (geoShape && typeof turf !== 'undefined') {
-        // Převedeme shape na Turf Feature
-        // Nominatim vrací geometrii, Turf potřebuje Feature
         const searchPolygon = {
             type: "Feature",
             properties: {},
             geometry: geoShape
         };
 
-        // Projdeme kandidáty a zjistíme, zda leží přesně uvnitř hranic
         finalData = candidates.filter(item => {
-            // Turf očekává [lon, lat] !!!
             const pt = turf.point([item.lon, item.lat]);
-            
-            // Funkce booleanPointInPolygon vrací true/false
-            // Zvládá i MultiPolygon (ostrovy, jako má NZ)
             return turf.booleanPointInPolygon(pt, searchPolygon);
         });
-        
-        console.log(`Krok B (Přesné hranice): Nalezeno ${finalData.length} bodů.`);
     } else {
-        // Pokud nemáme přesný tvar (nebo chybí Turf), vrátíme alespoň ten obdélník
         finalData = candidates;
     }
 
-    // Aktualizace UI - pokud jsme našli hodně bodů, zazoomujeme mapu
     if (map && bbox) {
-         // Leaflet chce [SouthWest, NorthEast] -> [minLat, minLon], [maxLat, maxLon]
          map.fitBounds([[minLat, minLon], [maxLat, maxLon]]);
     }
 
