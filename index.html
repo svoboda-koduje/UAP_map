@@ -1905,8 +1905,8 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <strong>Konkrétní rok:</strong> Zadejte přesný rok pro rychlé vyhledání.<br>
                     <strong>Roční období a denní doba:</strong> Zjistěte, zda je více pozorování v létě nebo v zimě, ve dne nebo v noci.</p>
 
-                    <h4>4. Panel: 🔍 Hledání podle tvaru objektu a v komentářích pozorování</h4>
-                    <p>Umožňuje filtrovat pozorování podle nahlášeného tvaru objektu.<br>
+                    <h4>4. Panel: 🔍 Filtrování podle tvaru objektu a ve fulltextu</h4>
+                    <p>Umožňuje filtrovat pozorování podle nahlášeného tvaru objektu. Také umožňuje filtrovat pozorování dle kategorií A, B, C a Neanalyzováno, přičemž jsou A (Vysvětlené IFO), B (Málo dat), C (UFO/UAP).<br>
                     <strong>Tvar (Shape) objektu:</strong> Vyberte např. "Triangle" (Trojúhelník), "Disk" (Talíř), "Light" (Světlo) a další (Tic-tac).<br>
                     <strong>Fulltext:</strong> Pole pro textové vyhledávání v popisech (komentářích) pozorování. Zkuste hledat klíčová slova jako "pilot", "nuclear", "school", "tic-tac" atd.</p>
 
@@ -2340,7 +2340,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <h4>Floating panel: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px; color: #00bcd4;"> 
 <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
 <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
-</svg> IN-DEPTH ANALYSIS</h4>
+</svg> DEEP ANALYSIS</h4>
 <p>Allows in-depth analysis for more specific types of occurrences.<br>These features allow uncover detailed patterns of behavior of UFO/UAP phenomena.</p>
 
                     <h4>1. Panel: ⭐ Famous cases of UFO/UAP sightings</h4>
@@ -2359,7 +2359,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <br><em>Tip: Use the <strong>🔴 REC</strong> button to record the animation. Select "This Tab" for best quality.</em></p>
 
                     <h4>4. Panel: 🔍 Filtering by object shape & by fulltext in comments</h4>
-                    <p>Allows filtering sightings by the reported shape of the object.<br>
+                    <p>Allows filtering sightings by the reported shape of the object. It also allows you to filter observations by categories A, B, C and Unanalyzed, where are A (Explained IFOs), B (Insufficient data), C (UFO/UAP).<br>
                     <strong>Object shape:</strong> Filter observations by reported shape (e.g. Triangle, Disk, Cigar, Light, tic-tac etc.).<br>
                     <strong>Fulltext search:</strong> Text search field for descriptions (comments) of sightings. Try searching for keywords like "pilot", "tic-tac", "school", etc.</p>
 
@@ -5837,7 +5837,7 @@ function renderReport(stats, locationName, rawData) {
     const actions = document.querySelector('.report-actions');
     actions.innerHTML = `
         <button id="download-report-img-btn" onclick="downloadReportAsImage()">💾 Stáhnout jako obrázek</button>
-        <button id="close-report-btn" onclick="document.getElementById('report-modal').style.display='none'">ZAVŘÍT</button>
+        <button id="close-report-btn" onclick="window.closeAndResetReport()">ZAVŘÍT</button>
     `;
 }
 
@@ -5845,17 +5845,7 @@ function renderReport(stats, locationName, rawData) {
             document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.getElementById('generate-geo-report');
                 if (btn) btn.addEventListener('click', generateGeoReport);
-
-                const closeBtn = document.getElementById('close-report-btn');
-                if (closeBtn) closeBtn.addEventListener('click', () => {
-                    document.getElementById('report-modal').style.display = 'none';
-                });
-                
-                // Zavření klikem mimo papír
-                const modal = document.getElementById('report-modal');
-                window.addEventListener('click', (e) => {
-                    if (e.target === modal) modal.style.display = 'none';
-                });
+                // (Zavírání reportů už je řešeno centrálně přes window.closeAndResetReport)
             });
 
             // =========================================================================
@@ -8066,7 +8056,7 @@ async function generateGrandReport() {
             <button onclick="window.print()" class="custom-button" style="background: #e91e63; font-weight:bold;">
                 ${t.grandReportPrint}
             </button>
-            <button onclick="document.getElementById('report-modal').style.display='none'" class="custom-button" style="background: #333;">
+            <button onclick="window.closeAndResetReport()" class="custom-button" style="background: #333;">
                 ${t.grandReportClose}
             </button>
         `;
@@ -8697,52 +8687,36 @@ Odpověz česky, stručně a formou odrážek.`;
             });
         }
     }
-    // === 1. RESETOVÁNÍ MAPY PO ZAVŘENÍ REPORTU (Fix bodů 3, 4, 5) ===
-    document.addEventListener('DOMContentLoaded', () => {
-        const closeReportBtn = document.getElementById('close-report-btn');
+    // === 1. RESETOVÁNÍ MAPY PO ZAVŘENÍ REPORTU (Globální funkce pro všechna okna) ===
+    window.closeAndResetReport = function() {
         const reportModal = document.getElementById('report-modal');
-
-        // Funkce pro reset mapy a UI s animací
-        function closeAndResetReport() {
-            const reportModal = document.getElementById('report-modal');
+        
+        // Zobrazíme loader a vyresetujeme mapu do původního stavu
+        updateMapWithLoader(() => {
+            // 1. Zavřít okno
+            if(reportModal) reportModal.style.display = 'none';
             
-            // Pokud nebyla aktivní mise, jen zavřeme okno (rychlé)
-            if (!window.isMissionActive) {
-                reportModal.style.display = 'none';
-                return;
-            }
+            // 2. Resetovat mapu (těžká operace pro 300k+ bodů)
+            console.log("Zavírám report a plně resetuji mapu...");
+            resetFilters(); 
+            window.isMissionActive = false; 
 
-            // Pokud byla mise aktivní, bude to trvat -> ZAPNOUT LOADER
-            // Použijeme updateMapWithLoader, který zajistí zobrazení točícího se kolečka
-            updateMapWithLoader(() => {
-                // 1. Zavřít okno
-                reportModal.style.display = 'none';
-                
-                // 2. Resetovat mapu (těžká operace)
-                console.log("Mise ukončena, resetuji mapu...");
-                resetFilters(); 
-                window.isMissionActive = false; 
-
-                // 3. Vymazat text v panelu
-                const aiStatus = document.getElementById('ai-status-output');
-                if(aiStatus) aiStatus.innerHTML = "";
-                
-            }, "Obnovuji původní data mapy..."); // Text, který uvidí uživatel
-        }
-
-        // Listener na tlačítko "Zavřít"
-        if (closeReportBtn) {
-            // Odstraníme staré listenery (pomocí klonování, pro jistotu)
-            const newBtn = closeReportBtn.cloneNode(true);
-            closeReportBtn.parentNode.replaceChild(newBtn, closeReportBtn);
+            // 3. Vymazat stavové texty v AI panelu a hledání států
+            const aiStatus = document.getElementById('ai-status-output');
+            if(aiStatus) aiStatus.innerHTML = "";
+            const analysisStatus = document.getElementById('analysis-search-status');
+            if(analysisStatus) analysisStatus.innerHTML = "";
             
-            newBtn.addEventListener('click', closeAndResetReport);
-        }
+        }, "Obnovuji původní data mapy..."); 
+    };
 
-        // Listener na kliknutí mimo okno (šedé pozadí)
+    document.addEventListener('DOMContentLoaded', () => {
+        const reportModal = document.getElementById('report-modal');
+        
+        // Vylepšený listener na kliknutí mimo okno (na šedé pozadí)
         window.addEventListener('click', (e) => {
-            if (e.target === reportModal) {
-                closeAndResetReport();
+            if (e.target === reportModal && reportModal.style.display !== 'none') {
+                window.closeAndResetReport();
             }
         });
     });
