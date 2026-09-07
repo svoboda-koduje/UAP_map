@@ -1854,6 +1854,14 @@ function updateMapWithLoader(customAction = null, customText = null) {
         let geocoderControl = null;
 
         // =========================================================================
+        // === VLASTNÍ BACKEND / PROXY (Cloudflare Worker) ===
+        // Nahrazuje veřejné bezplatné služby corsproxy.io, rss2json.com a
+        // counterapi.dev jedním vlastním, spolehlivým endpointem (viz worker.js
+        // a NAVOD.md v repozitáři). Po nasazení sem vlož svou skutečnou URL.
+        // =========================================================================
+        const WORKER_BASE_URL = 'https://uap-map-proxy.jarsvoboda-js.workers.dev';
+
+        // =========================================================================
         // === BEZPEČNOSTNÍ POMOCNÉ FUNKCE (ochrana proti XSS) ===
         // Použij VŽDY, když se do stránky vkládá text pocházející odjinud než
         // z pevně daného textu v kódu - tedy z CSV/JSON databáze, z badatelského
@@ -5440,17 +5448,13 @@ async function resolveLocation(query) {
         statusEl.style.color = '#ffeb3b'; 
     }
     
+    let serviceError = false;
     try {
-        // 1. Odstraněna hlavička User-Agent (zakázáno v prohlížeči)
-        // 2. Přidána CORS Proxy (corsproxy.io)
-        const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&polygon_geojson=1&polygon_threshold=0.005&accept-language=${currentLanguage}&email=demo@uapmap.com`;
-        
-        // Obalíme URL do proxy
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
-        
-        // DŮLEŽITÉ: Odstraněn parametr headers s User-Agent!
-        const response = await fetch(proxyUrl);
-        
+        // Geokódování přes vlastní proxy (Cloudflare Worker) místo cizí
+        // veřejné CORS proxy - viz WORKER_BASE_URL výše.
+        const geocodeUrl = `${WORKER_BASE_URL}/geocode?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(currentLanguage)}&detail=1`;
+        const response = await fetch(geocodeUrl);
+
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
         const data = await response.json();
@@ -5467,12 +5471,20 @@ async function resolveLocation(query) {
             }
             return { found: true, code: countryCode, name: result.display_name, bbox: bbox, geojson: geojson };
         }
-    } catch (e) { 
-        console.error("Chyba při hledání lokace:", e); 
+    } catch (e) {
+        serviceError = true;
+        console.error("Chyba při hledání lokace:", e);
     }
 
-    if (statusEl) { statusEl.innerHTML = "❌ Území nenalezeno (zkuste anglický název)."; statusEl.style.color = "#ff9800"; }
-    return { found: false, name: query };
+    // Rozlišíme, zda hledaná lokace skutečně nebyla nalezena, nebo zda je
+    // problém na straně geokódovací služby - uživatel pak ví, co má dělat.
+    if (statusEl) {
+        statusEl.innerHTML = serviceError
+            ? "⚠️ Geokódovací služba je momentálně nedostupná, zkuste to prosím za chvíli znovu."
+            : "❌ Území nenalezeno (zkuste anglický název).";
+        statusEl.style.color = "#ff9800";
+    }
+    return { found: false, name: query, serviceError: serviceError };
 }
 // B) Pouze zazoomuje mapu (Volá se při ENTER)
 async function searchLocationAndZoom(query) {
@@ -6019,9 +6031,9 @@ function renderReport(stats, locationName, rawData) {
                 const counterElement = document.getElementById('visit-counter');
                 if (!counterElement) return;
 
-                // Použijeme službu counterapi.dev (náhrada za nefunkční countapi.xyz).
-                // Namespace 'uap-map-svoboda-v1' zajistí unikátnost pro tvůj projekt.
-                const apiUrl = 'https://api.counterapi.dev/v1/uap-map-svoboda-v1/visits/up';
+                // Počítadlo nyní jede přes vlastní proxy (Cloudflare Worker +
+                // Workers KV) místo veřejné counterapi.dev - viz WORKER_BASE_URL výše.
+                const apiUrl = `${WORKER_BASE_URL}/counter`;
 
                 fetch(apiUrl)
                     .then(response => {
@@ -6430,8 +6442,9 @@ async function loadLiveData() {
         statusEl.innerHTML = `<strong style='color: #ff5722;'>${translations[currentLanguage].newsDownloading}</strong>`;
     }
 
-    const googleNewsUrl = 'https://news.google.com/rss/search?q=UFO+sighting&hl=en-US&gl=US&ceid=US:en';
-    const rssUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(googleNewsUrl);
+    // Živé zprávy nyní jdou přes vlastní proxy (Cloudflare Worker), která
+    // stahuje a parsuje Google News RSS přímo - viz WORKER_BASE_URL výše.
+    const rssUrl = `${WORKER_BASE_URL}/news`;
 
     try {
         const response = await fetch(rssUrl);
@@ -6532,10 +6545,9 @@ async function loadLiveData() {
 }
             // Robustní funkce pro přímé geokódování s ošetřením chyb
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
-    // Použijeme veřejnou CORS proxy pro obejití restrikcí během vývoje
-    const proxyUrl = "https://corsproxy.io/?";
-    const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
-    const url = proxyUrl + encodeURIComponent(targetUrl);
+    // Geokódování přes vlastní proxy (Cloudflare Worker) místo cizí veřejné
+    // CORS proxy - viz WORKER_BASE_URL výše.
+    const url = `${WORKER_BASE_URL}/geocode?q=${encodeURIComponent(locationQuery)}&lang=${encodeURIComponent(currentLanguage)}`;
 
     try {
         const response = await fetch(url, {
