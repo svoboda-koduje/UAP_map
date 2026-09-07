@@ -1853,6 +1853,47 @@ function updateMapWithLoader(customAction = null, customText = null) {
         let currentLanguage = 'cs';
         let geocoderControl = null;
 
+        // =========================================================================
+        // === BEZPEČNOSTNÍ POMOCNÉ FUNKCE (ochrana proti XSS) ===
+        // Použij VŽDY, když se do stránky vkládá text pocházející odjinud než
+        // z pevně daného textu v kódu - tedy z CSV/JSON databáze, z badatelského
+        // archivu (včetně souboru nahraného uživatelem), z živých zpráv (RSS) nebo
+        // z odpovědí geokódovací/překladové služby. Bez escapování by takový text
+        // mohl být prohlížečem vykonán jako HTML/JS (XSS).
+        // =========================================================================
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        // Pro hodnoty vkládané dovnitř jednoduše uvozeného JS řetězce v inline
+        // event handleru (např. onclick="fn('${id}')"): nejprve escapuje pro JS
+        // kontext (zpětné lomítko, apostrof), teprve poté pro HTML atribut.
+        function escapeJsAttr(value) {
+            const jsEscaped = String(value === null || value === undefined ? '' : value)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'");
+            return escapeHtml(jsEscaped);
+        }
+        // Vrátí URL jen pokud je to bezpečný http(s) odkaz, jinak "#"
+        // (ochrana proti javascript: apod. v href pocházejícím z externích dat).
+        function safeUrl(value) {
+            const s = String(value === null || value === undefined ? '' : value).trim();
+            if (/^https?:\/\//i.test(s)) return escapeHtml(s);
+            return '#';
+        }
+        // Bezpečně převede hodnotu na číslo pro vložení do inline JS (bez uvozovek).
+        // Když hodnota není platné číslo, vrátí 0 - zabrání to injekci libovolného
+        // JS kódu přes needatovaná pole jako rok/souřadnice.
+        function safeNum(value) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : 0;
+        }
+
         const translations = {
             cs: {
                 menuHelp: "❓ Nápověda",
@@ -4013,7 +4054,7 @@ function loadDataWithPapaParse() {
                     if (detekovanyJazyk.toLowerCase() === targetLanguage) {
                         translationContainer.innerHTML = langData.fetchTranslationAlreadyInLang(targetLanguage.toUpperCase());
                     } else {
-                        translationContainer.innerHTML = langData.fetchTranslationSuccess(detekovanyJazyk, targetLanguage.toUpperCase(), preklad);
+                        translationContainer.innerHTML = langData.fetchTranslationSuccess(escapeHtml(detekovanyJazyk), targetLanguage.toUpperCase(), escapeHtml(preklad));
                     }
                 }).catch(error => {
                     console.error("Chyba při překladu:", error);
@@ -4493,8 +4534,8 @@ if (commentSearchInput) {
                             // 4. Sestavení obsahu Popup (stejné jako dříve)
                             const langData = translations[currentLanguage];
                             const popupIconSvg = `<div class="popup-icon-wrapper ${iconDetails.className}">${iconDetails.svgPopup}</div>`;
-                            const commentText = item.comment || langData.noComment;
-                            
+                            const commentText = escapeHtml(item.comment || langData.noComment);
+
                             let extraLink = "";
                             if (manualCase) {
                                 const caseTitle = manualCase.title[currentLanguage] || manualCase.title['en'];
@@ -4502,7 +4543,7 @@ if (commentSearchInput) {
                                 <hr>
                                 <p style="margin-bottom: 0; margin-top: 10px;">
                                     <strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong>
-                                    <a href="${manualCase.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>
+                                    <a href="${safeUrl(manualCase.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>
                                 </p>`;
                             }
 
@@ -4510,16 +4551,16 @@ if (commentSearchInput) {
                             let archiveBtn = "";
                             if (item.archive_id) {
                                 archiveBtn = `
-                                <button class="custom-button" style="background-color: #f4b400; margin-top: 10px;" 
-                                        onclick="openArchiveDetail('${item.archive_id}', ${item.year})">
+                                <button class="custom-button" style="background-color: #f4b400; margin-top: 10px;"
+                                        onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">
                                     📖 Otevřít zprávu z archivu
                                 </button>`;
                             }
 
                             const popupContent = `
-                                ${popupIconSvg}<strong>${langData.popupDate}</strong> ${item.dt}<br>
-                                <strong>${langData.popupCity}</strong> ${item.city}<br>
-                                <strong>${langData.popupShape}</strong> ${item.shape || 'Neznámý'}<br>
+                                ${popupIconSvg}<strong>${langData.popupDate}</strong> ${escapeHtml(item.dt)}<br>
+                                <strong>${langData.popupCity}</strong> ${escapeHtml(item.city)}<br>
+                                <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || 'Neznámý')}<br>
                                 ${archiveBtn}
                                 <hr style="clear: both;">
                                 <div><strong>${langData.popupComment}</strong> ${commentText}</div>
@@ -4696,12 +4737,12 @@ function updateMarkers(data, skipFilters = false) {
                         const commentId = `comment-original-${uniqueId}`;
                         const translationId = `translation-output-${uniqueId}`;
                         const safeComment = (item.comment || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                        const commentText = item.comment || langData.noComment;
+                        const commentText = escapeHtml(item.comment || langData.noComment);
 
                         // 3. Tlačítko archiv (pokud existuje)
                         let archiveBtn = "";
                         if (item.archive_id) {
-                             archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${item.archive_id}', ${item.year})">📖 Archiv</button>`;
+                             archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">📖 Archiv</button>`;
                         }
 
                         // 4. Odkaz na známý případ
@@ -4709,19 +4750,19 @@ function updateMarkers(data, skipFilters = false) {
                         if (item.dt && famousCases[item.dt.trim()]) {
                              const caseInfo = famousCases[item.dt.trim()];
                              const caseTitle = caseInfo.title[currentLanguage] || caseInfo.title['en'];
-                             extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${caseInfo.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>`;
+                             extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${safeUrl(caseInfo.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>`;
                         }
 
                         // === SESTAVENÍ POPUPU (PŮVODNÍ VZHLED) ===
                         const content = `
                             ${popupIconSvg}
-                            <strong>${langData.popupDate}</strong> ${item.dt || langData.unknown}<br>
-                            <strong>${langData.popupCity}</strong> ${item.city || langData.unknown}<br>
-                            <strong>${langData.popupShape}</strong> ${item.shape || langData.unknown}<br>
+                            <strong>${langData.popupDate}</strong> ${escapeHtml(item.dt || langData.unknown)}<br>
+                            <strong>${langData.popupCity}</strong> ${escapeHtml(item.city || langData.unknown)}<br>
+                            <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || langData.unknown)}<br>
                             ${archiveBtn}
-                            
+
                             <hr style="clear: both; border-color: #555;">
-                            
+
                             <div id="${commentId}" data-original-comment="${safeComment}">
                                 <strong>${langData.popupComment}</strong> ${commentText}
                             </div>
@@ -4790,30 +4831,30 @@ function updateMarkers(data, skipFilters = false) {
                             const commentId = `comment-original-${uniqueId}`;
                             const translationId = `translation-output-${uniqueId}`;
                             const safeComment = (item.comment || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                            const commentText = item.comment || langData.noComment;
+                            const commentText = escapeHtml(item.comment || langData.noComment);
 
                             let archiveBtn = "";
                             if (item.archive_id) {
-                                archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${item.archive_id}', ${item.year})">📖 Archiv</button>`;
+                                archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">📖 Archiv</button>`;
                             }
-                            
+
                             let extraLink = "";
                             if (item.dt && famousCases[item.dt.trim()]) {
                                  const caseInfo = famousCases[item.dt.trim()];
                                  const caseTitle = caseInfo.title[currentLanguage] || caseInfo.title['en'];
-                                 extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${caseInfo.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>`;
+                                 extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${safeUrl(caseInfo.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>`;
                             }
 
                             // === SESTAVENÍ POPUPU (PŮVODNÍ VZHLED) ===
                             const content = `
                                 ${popupIconSvg}
-                                <strong>${langData.popupDate}</strong> ${item.dt || langData.unknown}<br>
-                                <strong>${langData.popupCity}</strong> ${item.city || langData.unknown}<br>
-                                <strong>${langData.popupShape}</strong> ${item.shape || langData.unknown}<br>
+                                <strong>${langData.popupDate}</strong> ${escapeHtml(item.dt || langData.unknown)}<br>
+                                <strong>${langData.popupCity}</strong> ${escapeHtml(item.city || langData.unknown)}<br>
+                                <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || langData.unknown)}<br>
                                 ${archiveBtn}
 
                                 <hr style="clear: both; border-color: #555;">
-                                
+
                                 <div id="${commentId}" data-original-comment="${safeComment}">
                                     <strong>${langData.popupComment}</strong> ${commentText}
                                 </div>
@@ -4888,7 +4929,7 @@ function updateMarkers(data, skipFilters = false) {
                             },
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties && feature.properties.name) {
-                                    layer.bindPopup(translations[currentLanguage].popupMountain + feature.properties.name);
+                                    layer.bindPopup(translations[currentLanguage].popupMountain + escapeHtml(feature.properties.name));
                                 }
                             }
                         });
@@ -5119,7 +5160,7 @@ function updateMarkers(data, skipFilters = false) {
                     const archive = await ensureArchiveLoaded(year);
                     
                     if (!archive) {
-                        results.innerHTML = `<p style='color:red;'>Soubor pro rok ${year} nebyl nalezen.</p>`;
+                        results.innerHTML = `<p style='color:red;'>Soubor pro rok ${escapeHtml(year)} nebyl nalezen.</p>`;
                         return;
                     }
                     // Zkusíme najít znovu v čerstvě načtených datech
@@ -5129,17 +5170,18 @@ function updateMarkers(data, skipFilters = false) {
                 // 3. POKUD ZÁZNAM MÁME, VYKRESLÍME HO
                 if (entry) {
                     const transId = "trans-archive-" + String(archiveId).replace(/[^a-zA-Z0-9]/g, '-');
-                    
+
                     // Příprava textu
                     const archiveText = entry.description || entry.full_text || "Text nebyl nalezen.";
                     // Bezpečný text pro atribut (překladač)
                     const safeText = archiveText.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const safeArchiveText = escapeHtml(archiveText);
 
                     // Tlačítko: Odkaz na původní článek (pokud existuje)
                     let linkButtonHtml = "";
                     if (entry.link) {
                         linkButtonHtml = `
-                        <a href="${entry.link}" target="_blank" class="custom-button" style="display:block; text-align:center; text-decoration:none; background-color: #00bcd4; margin-top:10px; line-height: 20px;">
+                        <a href="${safeUrl(entry.link)}" target="_blank" class="custom-button" style="display:block; text-align:center; text-decoration:none; background-color: #00bcd4; margin-top:10px; line-height: 20px;">
                             ${langData.archiveLinkBtn}
                         </a>`;
                     }
@@ -5148,15 +5190,15 @@ function updateMarkers(data, skipFilters = false) {
                     let mapButtonHtml = "";
                     if (entry.lat && entry.lon && entry.lat !== 0 && entry.lon !== 0) {
                          mapButtonHtml = `
-                        <button class="custom-button" style="margin-top:5px; background-color: #2a9f62;" 
-                                onclick="window.map.flyTo([${entry.lat}, ${entry.lon}], 12); window.zoomToArchivePoint('${entry.id}');">
-                            ${langData.newsShowOnMap} 
+                        <button class="custom-button" style="margin-top:5px; background-color: #2a9f62;"
+                                onclick="window.map.flyTo([${safeNum(entry.lat)}, ${safeNum(entry.lon)}], 12); window.zoomToArchivePoint('${escapeJsAttr(entry.id)}');">
+                            ${langData.newsShowOnMap}
                         </button>`;
                     } else {
                         const aiStatusId = `ai-status-${String(archiveId).replace(/[^a-zA-Z0-9]/g, '')}`;
                         mapButtonHtml = `
-                        <button class="custom-button" style="margin-top:5px; background-color: #673ab7; border: 1px solid #9575cd;" 
-                                onclick="analyzeLocationFromText('${archiveId}', '${aiStatusId}')">
+                        <button class="custom-button" style="margin-top:5px; background-color: #673ab7; border: 1px solid #9575cd;"
+                                onclick="analyzeLocationFromText('${escapeJsAttr(archiveId)}', '${aiStatusId}')">
                             ${langData.archiveAiBtn}
                         </button>
                         <div id="${aiStatusId}" style="margin-top: 5px; font-size: 0.85em; color: #bbb;"></div>
@@ -5166,10 +5208,10 @@ function updateMarkers(data, skipFilters = false) {
                     // Tlačítko: ZPĚT (Klíčová úprava)
                     let backBtnHtml = "";
                     if (lastRenderedArchiveEvents && lastRenderedArchiveEvents.length > 0) {
-                        const btnLabel = currentLanguage === 'cs' ? 
-                            `⬅ Zpět na seznam (${lastRenderedArchiveEvents.length})` : 
+                        const btnLabel = currentLanguage === 'cs' ?
+                            `⬅ Zpět na seznam (${lastRenderedArchiveEvents.length})` :
                             `⬅ Back to list (${lastRenderedArchiveEvents.length})`;
-                        
+
                         // Zde voláme renderArchiveList s uloženými daty
                         backBtnHtml = `<button class="custom-button" style="margin-top:15px; background-color: #607d8b;" onclick="renderArchiveList(lastRenderedArchiveEvents)">${btnLabel}</button>`;
                     }
@@ -5177,32 +5219,32 @@ function updateMarkers(data, skipFilters = false) {
                     // FINÁLNÍ VYKRESLENÍ (Vše najednou)
                     results.innerHTML = `
                         <div class="archive-entry" style="cursor:default; border:none;">
-                            <h4 style="margin:0; color:var(--primary-color);">${entry.location || langData.unknown}</h4>
-                            <small>${entry.date || entry.datetime || langData.unknown}</small>
+                            <h4 style="margin:0; color:var(--primary-color);">${escapeHtml(entry.location || langData.unknown)}</h4>
+                            <small>${escapeHtml(entry.date || entry.datetime || langData.unknown)}</small>
                         </div>
-                        
+
                         <div id="archive-orig-text" data-original-comment="${safeText}" class="archive-full-text">
-                            ${archiveText}
+                            ${safeArchiveText}
                         </div>
 
                         ${linkButtonHtml}
                         ${mapButtonHtml}
 
-                        <button class="custom-button" style="margin-top:10px; background-color:#3f51b5;" 
+                        <button class="custom-button" style="margin-top:10px; background-color:#3f51b5;"
                                 onclick="fetchTranslation('${transId}', 'cs')">
                             ${langData.archiveTranslateBtn}
                         </button>
                         <div id="${transId}" style="margin-top:10px; font-style:italic; color:#00bcd4; background: #222; padding: 10px; border-radius: 5px;"></div>
-                        
+
                         <p style="font-size:0.8em; margin-top:15px; color:#888;">
-                            ID: ${entry.id}<br>
-                            ${langData.archiveSource} ${entry.source || entry.source_id || langData.unknown}
+                            ID: ${escapeHtml(entry.id)}<br>
+                            ${langData.archiveSource} ${escapeHtml(entry.source || entry.source_id || langData.unknown)}
                         </p>
 
                         ${backBtnHtml} `;
                 } else {
                     // Pokud se záznam nepodařilo najít
-                    results.innerHTML = `<p style='color:orange;'>Záznam s ID <strong>${archiveId}</strong> nebyl nalezen v načtených datech.</p>`;
+                    results.innerHTML = `<p style='color:orange;'>Záznam s ID <strong>${escapeHtml(archiveId)}</strong> nebyl nalezen v načtených datech.</p>`;
                 }
             };
 
@@ -5225,10 +5267,10 @@ function updateMarkers(data, skipFilters = false) {
                         if (event.full_text.toLowerCase().includes(query) || event.location.toLowerCase().includes(query)) {
                             found = true;
                             html += `
-                    <div class="archive-entry" onclick="openArchiveDetail('${event.id}', ${archive.year})">
-                        <strong>${event.datetime}</strong><br>
-                        <small>${event.location}</small>
-                        <p style="font-size:0.8em; margin:5px 0;">${event.full_text.substring(0, 80)}...</p>
+                    <div class="archive-entry" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                        <strong>${escapeHtml(event.datetime)}</strong><br>
+                        <small>${escapeHtml(event.location)}</small>
+                        <p style="font-size:0.8em; margin:5px 0;">${escapeHtml(event.full_text.substring(0, 80))}...</p>
                     </div>`;
                         }
                     });
@@ -5320,7 +5362,7 @@ async function resolveLocation(query) {
             const geojson = result.geojson;
 
             if (statusEl) {
-                statusEl.innerHTML = `✅ Zaměřeno: <strong>${result.display_name.split(',')[0]}</strong>`;
+                statusEl.innerHTML = `✅ Zaměřeno: <strong>${escapeHtml(result.display_name.split(',')[0])}</strong>`;
                 statusEl.style.color = "#4caf50";
             }
             return { found: true, code: countryCode, name: result.display_name, bbox: bbox, geojson: geojson };
@@ -6307,14 +6349,14 @@ async function loadLiveData() {
                 listHtml += `
                 <div style="margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${dateStr}</span>
+                        <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${escapeHtml(dateStr)}</span>
                     </div>
-                    <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${item.title}</div>
+                    <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${escapeHtml(item.title)}</div>
                     <div style="display:flex; justify-content:space-between; margin-top:8px;">
                         <button onclick="focusOnLiveMarker(${index})" style="background:transparent; border:1px solid #2a9f62; color:#2a9f62; border-radius:3px; cursor:pointer; padding:2px 6px; font-size:0.85em;">
                             ${translations[currentLanguage].newsShowOnMap}
                         </button>
-                        <a href="${item.link}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
+                        <a href="${safeUrl(item.link)}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
                             ${translations[currentLanguage].newsReadArticle}
                         </a>
                     </div>
@@ -6361,7 +6403,7 @@ async function loadLiveData() {
                 }
 
                 if (newsStatusEl) {
-                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationCandidate}</strong>"</span>`;
+                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${escapeHtml(locationCandidate)}</strong>"</span>`;
                 }
 
                 await new Promise(r => setTimeout(r, 3000));
@@ -6437,10 +6479,10 @@ async function loadLiveData() {
 
                         const popupContent = `
                 <div style="text-align:center;">
-                    <h3 style="color: #ff5722; margin: 0; font-size:1.1em;">LIVE: ${bestResult.display_name.split(',')[0]}</h3>
+                    <h3 style="color: #ff5722; margin: 0; font-size:1.1em;">LIVE: ${escapeHtml(bestResult.display_name.split(',')[0])}</h3>
                     <hr style="border-color: #555; margin:5px 0;">
-                    <div style="margin:5px 0; font-style:italic; font-size:0.9em;">"${rssItem.title}"</div>
-                    <a href="${rssItem.link}" target="_blank" style="color: #00bcd4;">${translations[currentLanguage].newsPopupOpen}</a>
+                    <div style="margin:5px 0; font-style:italic; font-size:0.9em;">"${escapeHtml(rssItem.title)}"</div>
+                    <a href="${safeUrl(rssItem.link)}" target="_blank" style="color: #00bcd4;">${translations[currentLanguage].newsPopupOpen}</a>
                 </div>
             `;
 
@@ -6560,8 +6602,8 @@ if (resetBtn) {
                         const locationToSearch = (event.location || "").toLowerCase();
 
                         if (textToSearch.includes(query) || locationToSearch.includes(query)) {
-                            html += `<div class="archive-entry" onclick="openArchiveDetail('${event.id}', ${archive.year})">
-                                 <strong>${event.date || event.datetime}</strong>: ${event.location || 'Neznámé místo'}</div>`;
+                            html += `<div class="archive-entry" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                                 <strong>${escapeHtml(event.date || event.datetime)}</strong>: ${escapeHtml(event.location || 'Neznámé místo')}</div>`;
                             }
                         });
                     });
@@ -6693,13 +6735,13 @@ function populateArchiveYears() {
                     const hasGeo = (event.lat && event.lon) ? "📍" : "";
 
                     html += `
-                    <div class="archive-entry" onclick="zoomToArchivePoint('${event.id}')">
+                    <div class="archive-entry" onclick="zoomToArchivePoint('${escapeJsAttr(event.id)}')">
                         <div style="display:flex; justify-content:space-between;">
-                            <strong>${date}</strong>
+                            <strong>${escapeHtml(date)}</strong>
                             <span>${hasGeo}</span>
                         </div>
-                        <div style="color:var(--primary-color); font-weight:bold;">${loc}</div>
-                        <div style="font-size:0.85em; color:#ccc; margin-top:4px;">${shortDesc}</div>
+                        <div style="color:var(--primary-color); font-weight:bold;">${escapeHtml(loc)}</div>
+                        <div style="font-size:0.85em; color:#ccc; margin-top:4px;">${escapeHtml(shortDesc)}</div>
                     </div>`;
                 });
                 resultsContainer.innerHTML = html || `<p>${translations[currentLanguage].archiveNothingFound}</p>`;
@@ -6745,12 +6787,12 @@ function populateArchiveYears() {
                     // Popup
                     const popupContent = `
             <strong style="color:#9c27b0">${langData.archiveMapPopupTitle}</strong><br>
-            <b>${langData.archiveMapPlace}</b> ${event.location}<br>
-            <b>${langData.archiveMapDate}</b> ${event.date || event.datetime}<br>
+            <b>${langData.archiveMapPlace}</b> ${escapeHtml(event.location)}<br>
+            <b>${langData.archiveMapDate}</b> ${escapeHtml(event.date || event.datetime)}<br>
             <hr>
-            ${(event.description || event.full_text || "").substring(0, 200)}...
+            ${escapeHtml((event.description || event.full_text || "").substring(0, 200))}...
             <br>
-            <button class="custom-button" style="margin-top:5px; font-size:0.8em; padding:5px;" onclick="openArchiveDetail('${event.id}', document.getElementById('archive-year-input').value)">
+            <button class="custom-button" style="margin-top:5px; font-size:0.8em; padding:5px;" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', document.getElementById('archive-year-input').value)">
                 ${langData.archiveDetailBtn}
             </button>
         `;
@@ -6910,7 +6952,7 @@ window.resetArchivePanel = function() {
                             console.error("Chyba při čtení souboru:", err);
                             statusText.innerText = "Error";
                             statusText.style.color = "red";
-                            resultsContainer.innerHTML = `<p style='color:red;'>${langData.archiveFileError} ${err.message}</p>`;
+                            resultsContainer.innerHTML = `<p style='color:red;'>${langData.archiveFileError} ${escapeHtml(err.message)}</p>`;
                         }
                     };
 
@@ -7026,7 +7068,7 @@ window.resetArchivePanel = function() {
 
                 // === 4. PROVÁDĚNÍ DOTAZŮ ===
                 for (const query of searchQueries) {
-                    statusEl.innerHTML = `<div class="ai-loader"></div> <span style='color:#00bcd4'>Zkouším: "<b>${query}</b>"</span>`;
+                    statusEl.innerHTML = `<div class="ai-loader"></div> <span style='color:#00bcd4'>Zkouším: "<b>${escapeHtml(query)}</b>"</span>`;
                     
                     try {
                         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
@@ -7056,7 +7098,7 @@ window.resetArchivePanel = function() {
 
                     let shortName = successResult.display_name.split(',').slice(0, 3).join(',');
 
-                    statusEl.innerHTML = `<span style='color:#4caf50'>✅ Nalezeno: ${shortName}</span>`;
+                    statusEl.innerHTML = `<span style='color:#4caf50'>✅ Nalezeno: ${escapeHtml(shortName)}</span>`;
 
                     const aiIcon = L.divIcon({
                         className: 'custom-div-icon',
@@ -7067,7 +7109,7 @@ window.resetArchivePanel = function() {
                     });
 
                     const marker = L.marker([lat, lon], { icon: aiIcon })
-                        .bindPopup(`<strong style="color:#673ab7">AI NALEZENÁ POZICE</strong><br>Dotaz: ${usedQuery}<br>${shortName}`);
+                        .bindPopup(`<strong style="color:#673ab7">AI NALEZENÁ POZICE</strong><br>Dotaz: ${escapeHtml(usedQuery)}<br>${escapeHtml(shortName)}`);
                     
                     if (archiveLayerGroup) {
                         archiveLayerGroup.addLayer(marker);
@@ -8624,11 +8666,11 @@ function renderGlobalTrendChart() {
                 <span class="stat-label">Případů v pohledu</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">${topShape[0].toUpperCase()}</span>
+                <span class="stat-value">${escapeHtml(topShape[0].toUpperCase())}</span>
                 <span class="stat-label">Top tvar (${Math.round((topShape[1]/datasetToAnalyze.length)*100)}%)</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">${topYear[0]}</span>
+                <span class="stat-value">${escapeHtml(topYear[0])}</span>
                 <span class="stat-label">Top rok</span>
             </div>
             <div class="stat-box">
@@ -8645,7 +8687,7 @@ function renderGlobalTrendChart() {
         if (topShape[1] > 0 && (topShape[1] / datasetToAnalyze.length) > 0.40) {
             anomaliesHTML += `<div class="anomaly-item">
                 <i class="fas fa-exclamation-triangle anomaly-icon"></i> 
-                <div><strong>Dominance tvaru '${topShape[0]}'.</strong><br>Tento tvar tvoří přes 40 % pozorování v této oblasti.</div>
+                <div><strong>Dominance tvaru '${escapeHtml(topShape[0])}'.</strong><br>Tento tvar tvoří přes 40 % pozorování v této oblasti.</div>
             </div>`;
         }
 
