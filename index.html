@@ -1428,7 +1428,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <span id="title" data-translate-key="mapTitle">Interaktivní mapa UAP</span>
         </div>
 
-        <button class="hamburger" onclick="toggleMobileMenu()">
+        <button class="hamburger" onclick="toggleMobileMenu()" data-translate-key-aria="ariaMenuToggle" aria-label="Otevřít/zavřít menu">
     <span class="hamburger-icon">☰</span>
     <span class="hamburger-loader ai-loader" style="display: none; margin: 0;"></span>
 </button>
@@ -1451,7 +1451,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <li><button class="nav-btn" onclick="togglePanel('info-dropdown-bottom-left')" data-translate-key="menuInfo">ℹ️ Info o mapě</button></li>
         </ul>
         <button id="header-help-btn" onclick="togglePanel('help-panel')" data-translate-key="menuHelp">❓ Nápověda / Help</button>
-        <button id="lang-switcher">EN</button>
+        <button id="lang-switcher" data-translate-key-aria="ariaLangSwitch" aria-label="Přepnout jazyk / Switch language">EN</button>
     </div>
 
     <div id="map"></div>
@@ -1482,7 +1482,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-famous" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-famous')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-famous')">✕</button>
         <h3 data-translate-key="filterYears">Seznam známých případů</h3>
         <div class="filter-container" id="famous-cases-container"
             style="padding: 10px; background: rgba(6,129,195,0.8); margin: 5px 0 0 0; border-radius: 5px;">
@@ -1496,7 +1496,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-time" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-time')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-time')">✕</button>
         <h3 data-translate-key="filterTime">Filtry času</h3>
         
         <label for="season-filter" data-translate-key="filterSeason">Roční období:</label>
@@ -1535,7 +1535,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </div>
     </div>
     <div id="panel-timeline" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-timeline')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-timeline')">✕</button>
         <h3 data-translate-key="timelineTitle" style="color: #ff9800;">🎬 Přehrávač historie</h3>
 
         <div style="text-align: center; margin-bottom: 15px;">
@@ -1560,21 +1560,21 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         
         <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Od roku (Start):</div>
         <div class="year-stepper-container">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', -1)">−</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearDecrease" onclick="adjustTimelineYear('timeline-start-year', -1)">−</button>
             <input type="number" id="timeline-start-year" class="year-input-styled" value="1900" min="1400" max="2026">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', 1)">+</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearIncrease" onclick="adjustTimelineYear('timeline-start-year', 1)">+</button>
         </div>
 
         <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Do roku (End):</div>
         <div class="year-stepper-container">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', -1)">−</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearDecrease" onclick="adjustTimelineYear('timeline-end-year', -1)">−</button>
             <input type="number" id="timeline-end-year" class="year-input-styled" value="2026" min="1400" max="2026">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', 1)">+</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearIncrease" onclick="adjustTimelineYear('timeline-end-year', 1)">+</button>
         </div>
     </div>
 
     <div id="panel-data" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-data')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-data')">✕</button>
         <h3 data-translate-key="filterData">Filtry dat a textu</h3>
         <label for="shape-filter" data-translate-key="filterShape">Tvar objektu (Shape):</label>
         <select id="shape-filter">
@@ -1608,7 +1608,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </div>
 
     <div id="panel-view" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-view')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-view')">✕</button>
         <h3 data-translate-key="viewOptions" style="color: var(--primary-color);">Nastavení zobrazení</h3>
         <div id="view-toggle" style="display: flex; justify-content: space-around;">
             <label style="width: 48%; cursor: pointer;">
@@ -1624,7 +1624,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-analysis" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-analysis')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-analysis')">✕</button>
         <h3 data-translate-key="analysisTitle" style="color: #03a9f4;">📊 Analýza a export</h3>
         
         <label style="font-size: 0.85em; color: #aaa;" data-translate-key="analysisQuickArea">Rychlý výběr oblasti:</label>
@@ -1666,7 +1666,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-spatial" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-spatial')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-spatial')">✕</button>
         <h3 data-translate-key="spatialTitle" style="color: #4caf50;">🗺️ Prostorová analýza</h3>
         <label style="cursor: pointer; display: flex; align-items: center;">
             <input type="checkbox" id="toggle-mountains-layer" style="width: auto; margin-right: 10px;">
@@ -1684,7 +1684,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="sources-panel" class="sidebar-panel" style="top: 360px; right: 330px; width: 220px; height: auto; bottom: auto; background-color: rgba(33, 33, 33, 0.95); border: 2px solid #b0bec5;">
-        <button class="panel-close-btn" onclick="togglePanel('sources-panel'); event.stopPropagation();">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('sources-panel'); event.stopPropagation();">✕</button>
         <h3 style="color: #b0bec5; cursor: move;" data-translate-key="externalSourcesTitle">Další zdroje</h3>
         
         <a href="https://www.ufostalker.com/?mufon=true" target="_blank" class="custom-button">
@@ -1706,13 +1706,13 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
     </div>
 <div id="help-panel" class="sidebar-panel" style="display: none;">
-        <button class="panel-close-btn" onclick="togglePanel('help-panel')" style="z-index: 10; background-color: var(--background-dark); border-radius: 4px;">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('help-panel')" style="z-index: 10; background-color: var(--background-dark); border-radius: 4px;">✕</button>
         <div id="help-content-container" style="overflow-y: auto; max-height: 70vh; padding-right: 21px; margin-top: 15px;">
             <span data-translate-key="helpContent"></span>
         </div>
     </div>
     <div id="news-panel">
-        <button class="panel-close-btn" onclick="togglePanel('news-panel')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('news-panel')">✕</button>
         
         <h3 style="color: #ff5722; cursor: move; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 10px;" data-translate-key="newsTitle">
             📡 Nejnovější hlášení
@@ -1733,7 +1733,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     <div id="archive-panel">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0; color: var(--primary-color); cursor: move;" data-translate-key="archiveTitle">Badatelský archiv</h3>
-        <span class="archive-close" onclick="document.getElementById('archive-panel').style.display='none'" style="font-size: 1.5em; cursor: pointer;">✕</span>
+        <span class="archive-close" role="button" tabindex="0" data-translate-key-aria="ariaClosePanel" onclick="document.getElementById('archive-panel').style.display='none'" style="font-size: 1.5em; cursor: pointer;">✕</span>
     </div>
 
     <div class="archive-controls-wrapper">
@@ -1894,8 +1894,31 @@ function updateMapWithLoader(customAction = null, customText = null) {
             return Number.isFinite(n) ? n : 0;
         }
 
+        // =========================================================================
+        // === PŘÍSTUPNOST: klávesová aktivace klikatelných div/span prvků ===
+        // Prvky s role="button" (viz mission-card, archive-entry, ai-btn-inner atd.)
+        // mají tabindex="0", ale div/span nativně nereaguje na Enter/mezerník jako
+        // <button>. Tento delegovaný listener to dorovnává pro klávesnicové ovládání
+        // a čtečky obrazovky, a to i pro prvky vykreslené dynamicky později.
+        // =========================================================================
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            const target = e.target;
+            if (!target || target.getAttribute('role') !== 'button') return;
+            const tag = target.tagName;
+            if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA') return;
+            e.preventDefault();
+            target.click();
+        });
+
         const translations = {
             cs: {
+                // Popisky pro čtečky obrazovky (aria-label) u ikonových ovládacích prvků
+                ariaClosePanel: "Zavřít panel",
+                ariaMenuToggle: "Otevřít/zavřít menu",
+                ariaLangSwitch: "Přepnout jazyk",
+                ariaYearDecrease: "Snížit rok",
+                ariaYearIncrease: "Zvýšit rok",
                 menuHelp: "❓ Nápověda",
                 helpContent: `
                     <h3>Uživatelský manuál: Interaktivní mapa UAP/UFO</h3>
@@ -2347,6 +2370,12 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 reportCopyright: "© Jaroslav Svoboda - Interaktivní mapa UAP",
             },
             en: {
+                // Screen-reader labels (aria-label) for icon-only controls
+                ariaClosePanel: "Close panel",
+                ariaMenuToggle: "Open/close menu",
+                ariaLangSwitch: "Switch language",
+                ariaYearDecrease: "Decrease year",
+                ariaYearIncrease: "Increase year",
                 menuHelp: "❓ Help",
                 helpContent: `
                     <h3>User Manual: Interactive UAP/UFO Map</h3>
@@ -2840,6 +2869,14 @@ document.querySelectorAll('[data-translate-key-title]').forEach(el => {
     const key = el.getAttribute('data-translate-key-title');
     if (langData[key]) {
         el.setAttribute('title', langData[key]);
+    }
+});
+
+// Aktualizace aria-label (přístupnost - popisky pro čtečky obrazovky u ikonových tlačítek)
+document.querySelectorAll('[data-translate-key-aria]').forEach(el => {
+    const key = el.getAttribute('data-translate-key-aria');
+    if (langData[key]) {
+        el.setAttribute('aria-label', langData[key]);
     }
 });
 
@@ -5330,7 +5367,7 @@ function updateMarkers(data, skipFilters = false) {
                         if (event.full_text.toLowerCase().includes(query) || event.location.toLowerCase().includes(query)) {
                             found = true;
                             html += `
-                    <div class="archive-entry" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                    <div class="archive-entry" role="button" tabindex="0" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
                         <strong>${escapeHtml(event.datetime)}</strong><br>
                         <small>${escapeHtml(event.location)}</small>
                         <p style="font-size:0.8em; margin:5px 0;">${escapeHtml(event.full_text.substring(0, 80))}...</p>
@@ -6665,7 +6702,7 @@ if (resetBtn) {
                         const locationToSearch = (event.location || "").toLowerCase();
 
                         if (textToSearch.includes(query) || locationToSearch.includes(query)) {
-                            html += `<div class="archive-entry" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                            html += `<div class="archive-entry" role="button" tabindex="0" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
                                  <strong>${escapeHtml(event.date || event.datetime)}</strong>: ${escapeHtml(event.location || 'Neznámé místo')}</div>`;
                             }
                         });
@@ -6798,7 +6835,7 @@ function populateArchiveYears() {
                     const hasGeo = (event.lat && event.lon) ? "📍" : "";
 
                     html += `
-                    <div class="archive-entry" onclick="zoomToArchivePoint('${escapeJsAttr(event.id)}')">
+                    <div class="archive-entry" role="button" tabindex="0" onclick="zoomToArchivePoint('${escapeJsAttr(event.id)}')">
                         <div style="display:flex; justify-content:space-between;">
                             <strong>${escapeHtml(date)}</strong>
                             <span>${hasGeo}</span>
@@ -8459,7 +8496,7 @@ function renderGlobalTrendChart() {
     </div>
 
     <div id="panel-ai" class="sidebar-panel" style="width: 340px; max-height: 85vh; top: 80px; right: 80px; display: none;">
-        <button class="panel-close-btn" onclick="togglePanel('panel-ai')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-ai')">✕</button>
         
         <div class="panel-header" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-robot" style="font-size: 1.4em; color: #00bcd4;"></i>
@@ -8475,98 +8512,98 @@ function renderGlobalTrendChart() {
             </p>
     
             <div class="mission-grid">
-                <div class="mission-card" onclick="runResearchMission('water')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('water')">
                     <span class="mission-icon">🌊</span>
                     <span class="mission-title" data-translate-key="missWater">Vodní světy</span>
                     <span class="mission-desc" data-translate-key="missWaterDesc">USO nad oceány a jezery.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('nuclear')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('nuclear')">
                     <span class="mission-icon">☢️</span>
                     <span class="mission-title" data-translate-key="missNuke">Jaderná stopa</span>
                     <span class="mission-desc" data-translate-key="missNukeDesc">Výskyt u základen a elektráren.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('swarm')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('swarm')">
                     <span class="mission-icon">🐝</span>
                     <span class="mission-title" data-translate-key="missSwarm">Roj / Flap</span>
                     <span class="mission-desc" data-translate-key="missSwarmDesc">Dny s extrémní aktivitou.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('strangeness')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('strangeness')">
                     <span class="mission-icon">👽</span>
                     <span class="mission-title" data-translate-key="missStrange">Kontakt</span>
                     <span class="mission-desc" data-translate-key="missStrangeDesc">Entity, únosy a přistání.</span>
                 </div>
-                 <div class="mission-card" onclick="runResearchMission('triangle_wave')">
+                 <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('triangle_wave')">
                     <span class="mission-icon">🔺</span>
                     <span class="mission-title" data-translate-key="missTriangle">Trojúhelníky</span>
                     <span class="mission-desc" data-translate-key="missTriangleDesc">Velké tiché objekty.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('tictac')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('tictac')">
                     <span class="mission-icon">💊</span>
                     <span class="mission-title" data-translate-key="missTicTac">Tic-Tac / Doutník</span>
                     <span class="mission-desc" data-translate-key="missTicTacDesc">Objekty tvaru válce či kapsle.</span>
                 </div>
 
-                 <div class="mission-card" onclick="runResearchMission('fast_mover')">
+                 <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('fast_mover')">
                     <span class="mission-icon">⚡</span>
                     <span class="mission-title" data-translate-key="missFast">Extrémní rychlost</span>
                     <span class="mission-desc" data-translate-key="missFastDesc">Okamžité zrychlení a manévry.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('pilot')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('pilot')">
                     <span class="mission-icon">✈️</span>
                     <span class="mission-title" data-translate-key="missPilot">Letecká pozorování</span>
                     <span class="mission-desc" data-translate-key="missPilotDesc">Hlášení pilotů a posádek.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('military')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('military')">
                     <span class="mission-icon">🎖️</span>
                     <span class="mission-title" data-translate-key="missMilitary">Vojenské / Radar</span>
                     <span class="mission-desc" data-translate-key="missMilitaryDesc">Armáda a radarová data.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('silent')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('silent')">
                     <span class="mission-icon">🤫</span>
                     <span class="mission-title" data-translate-key="missSilent">Tichý let</span>
                     <span class="mission-desc" data-translate-key="missSilentDesc">Objekty bez hluku.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('em_effect')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('em_effect')">
                     <span class="mission-icon">⚡</span>
                     <span class="mission-title" data-translate-key="missEM">EM Efekty</span>
                     <span class="mission-desc" data-translate-key="missEMDesc">Výpadky proudu a motorů.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('credible')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('credible')">
                 <span class="mission-icon">👮</span>
                 <span class="mission-title" data-translate-key="missCredible">Důvěryhodný svědek</span>
                 <span class="mission-desc" data-translate-key="missCredibleDesc">Piloti, policie + radar.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('long_duration')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('long_duration')">
                 <span class="mission-icon">⏱️</span>
                 <span class="mission-title" data-translate-key="missDuration">Dlouhé trvání</span>
                 <span class="mission-desc" data-translate-key="missDurationDesc">> 30 minut.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('psycho')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('psycho')">
                 <span class="mission-icon">🧠</span>
                 <span class="mission-title" data-translate-key="missPsycho">Psychologický dopad</span>
                 <span class="mission-desc" data-translate-key="missPsychoDesc">Strach, klid, telepatie.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('mass')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('mass')">
                 <span class="mission-icon">👥</span>
                 <span class="mission-title" data-translate-key="missMass">Hromadná pozorování</span>
                 <span class="mission-desc" data-translate-key="missMassDesc">Školy, davy lidí.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('evolution')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('evolution')">
                 <span class="mission-icon">📈</span>
                 <span class="mission-title" data-translate-key="missEvo">Tvarová evoluce</span>
                 <span class="mission-desc" data-translate-key="missEvoDesc">Trendy tvarů v čase.</span>
             </div>
-            <div class="mission-card" onclick="runResearchMission('deep_scan')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('deep_scan')">
                     <span class="mission-icon">🔎</span>
                     <span class="mission-title" data-translate-key="missScan">Sken oblasti</span>
                     <span class="mission-desc" data-translate-key="missScanDesc">Co vidím právě teď na mapě?</span>
@@ -8641,7 +8678,7 @@ function renderGlobalTrendChart() {
         <hr class="custom-hr">
 
 <div id="ai-assistant-widget" title="Kliknutím otevřete nabídku hloubkových tematických analýz">
-    <div id="ai-btn-inner" onclick="togglePanel('panel-ai')">
+    <div id="ai-btn-inner" role="button" tabindex="0" onclick="togglePanel('panel-ai')">
         <i class="fas fa-brain"></i>
         <span data-translate-key="aiWidgetText">Hloubková<br>analýza</span>
     </div>
