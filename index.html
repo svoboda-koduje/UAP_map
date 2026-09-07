@@ -3716,15 +3716,57 @@ function loadDataWithPapaParse() {
     if(infoOutput) infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
     if(preloaderText) preloaderText.innerText = "Stahuji databázi (300 000+ záznamů)... / Downloading database...";
 
+    // === Cachování 59MB databáze přes Cache Storage API, aby se nestahovala znovu při každé návštěvě ===
+    const DB_URL = 'databaze.txt';
+    const DB_CACHE_NAME = 'uap-db-cache-v1';
+    const DB_TS_KEY = 'uap_databaze_cached_at';
+    const DB_TTL_MS = 6 * 60 * 60 * 1000; // 6 hodin - poté se zkusí stáhnout čerstvá data
+
+    function getFreshBlob() {
+        return fetch(DB_URL).then(function (resp) {
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            return resp.blob();
+        }).then(function (blob) {
+            if ('caches' in window) {
+                caches.open(DB_CACHE_NAME).then(function (cache) {
+                    cache.put(DB_URL, new Response(blob));
+                }).catch(function () {});
+            }
+            try { localStorage.setItem(DB_TS_KEY, String(Date.now())); } catch (e) {}
+            return blob;
+        });
+    }
+
+    function getDatabaseBlob() {
+        if (!('caches' in window)) return getFreshBlob();
+        return caches.open(DB_CACHE_NAME).then(function (cache) {
+            return cache.match(DB_URL);
+        }).then(function (cachedResponse) {
+            let cachedAt = 0;
+            try { cachedAt = parseInt(localStorage.getItem(DB_TS_KEY) || '0', 10); } catch (e) {}
+            const isFresh = cachedAt && (Date.now() - cachedAt < DB_TTL_MS);
+            if (cachedResponse && isFresh) {
+                return cachedResponse.blob();
+            }
+            return getFreshBlob().catch(function (err) {
+                if (cachedResponse) {
+                    if (preloaderText) preloaderText.innerText = "Síť nedostupná, používám uloženou databázi... / Network unavailable, using cached database...";
+                    return cachedResponse.blob();
+                }
+                throw err;
+            });
+        });
+    }
+
     // Krátká pauza, aby se vykreslil text a roztočil spinner
     setTimeout(() => {
-        Papa.parse('databaze.txt', {
-            download: true,
+        getDatabaseBlob().then(function (dbBlob) {
+        Papa.parse(dbBlob, {
             header: false,
             skipEmptyLines: true,
             delimiter: ',',
             quoteChar: '"',
-            worker: false, // Worker false blokuje UI, proto musíme text změnit PŘEDTÍM pomocí setTimeout
+            worker: true, // Blob se parsuje ve Web Workeru, hlavní vlákno UI se neblokuje
             
             complete: function (results) {
                 // 2. FÁZE: Data jsou stažena, začíná zpracování
@@ -3984,9 +4026,30 @@ function loadDataWithPapaParse() {
             error: function (error) {
                 if(infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(error.message);
                 if(preloaderText) preloaderText.innerText = "Chyba načítání / Error loading";
+                showDatabaseFatalError(error);
             }
         });
+        }).catch(function (err) {
+            if (infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(err.message);
+            if (preloaderText) preloaderText.innerText = "Chyba načítání / Error loading";
+            showDatabaseFatalError(err);
+        });
     }, 100); // Úvodní timeout pro zobrazení spinneru
+}
+
+// Zobrazí chybový stav s tlačítkem pro nový pokus, pokud selže stažení i cache databáze
+function showDatabaseFatalError(err) {
+    const preloader = document.getElementById('preloader');
+    if (!preloader || preloader.querySelector('.db-retry-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'db-retry-btn';
+    btn.textContent = (typeof currentLanguage !== 'undefined' && currentLanguage === 'en') ? 'Retry loading data' : 'Zkusit znovu načíst data';
+    btn.style.cssText = 'margin-top:16px;padding:10px 22px;font-size:1em;cursor:pointer;border-radius:6px;border:none;background:#2d7dd2;color:#fff;';
+    btn.onclick = function () {
+        btn.remove();
+        loadDataWithPapaParse();
+    };
+    preloader.appendChild(btn);
 }
         // =========================================================================
         // 2. MAPA A INICIALIZACE
