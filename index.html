@@ -1613,14 +1613,18 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     <div id="panel-view" class="sidebar-panel">
         <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-view')">✕</button>
         <h3 data-translate-key="viewOptions" style="color: var(--primary-color);">Nastavení zobrazení</h3>
-        <div id="view-toggle" style="display: flex; justify-content: space-around;">
-            <label style="width: 48%; cursor: pointer;">
+        <div id="view-toggle" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="cursor: pointer;">
                 <input type="radio" name="view-mode" value="markers" checked style="width: auto; margin-right: 5px;">
                 <span data-translate-key="viewMarkers">Body</span>
             </label>
-            <label style="width: 48%; cursor: pointer;">
+            <label style="cursor: pointer;">
                 <input type="radio" name="view-mode" value="heatmap" style="width: auto; margin-right: 5px;">
                 <span data-translate-key="viewHeatmap">Heatmapa</span>
+            </label>
+            <label style="cursor: pointer;">
+                <input type="radio" name="view-mode" value="webgl" style="width: auto; margin-right: 5px;">
+                <span data-translate-key="viewWebgl">Rychlé tečky (GPU, bez tvarů)</span>
             </label>
         </div>
         <p style="font-size: 0.8em; margin-bottom:0; color:#aaa;" data-translate-key="viewHint">Pro hledání země použijte lupu vpravo nahoře.</p>
@@ -2157,7 +2161,8 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 filterTimeOfDayNight: "Noc (19:00 - 5:59)",
                 filterTimeOfDayUnknown: "Neznámý čas",
                 viewOptions: "Nastavení zobrazení",
-                viewMarkers: "Body (Clustery)",
+                viewMarkers: "Body s ikonami tvarů (Clustery)",
+                viewWebgl: "Rychlé tečky (GPU, bez tvarů)",
                 viewHeatmap: "Heatmapa (Hustota)",
                 spatialTitle: "🗺️ Prostorová analýza (Hory)",
                 spatialShowLayer: "Zobrazit vrstvu pohoří (GeoJSON)",
@@ -2621,7 +2626,8 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 filterTimeOfDayNight: "Night (7:00 PM - 5:59 AM)",
                 filterTimeOfDayUnknown: "Unknown time",
                 viewOptions: "View Options",
-                viewMarkers: "Points (Clusters)",
+                viewMarkers: "Points with shape icons (Clusters)",
+                viewWebgl: "Fast dots (GPU, no shapes)",
                 viewHeatmap: "Heatmap (Density)",
                 spatialTitle: "🗺️ Spatial analysis (Mountains)",
                 spatialShowLayer: "Show mountain layer (GeoJSON)",
@@ -4469,7 +4475,7 @@ document.getElementById('timeofday-filter').addEventListener('change', () => upd
 document.querySelectorAll('input[name="view-mode"]').forEach(radio => {
     radio.addEventListener('change', () => {
         // Změníme text podle toho, co uživatel vybral
-        const modeText = (radio.value === 'heatmap') ? "Generuji heatmapu..." : "Vykresluji body...";
+        const modeText = (radio.value === 'heatmap') ? "Generuji heatmapu..." : (radio.value === 'webgl' ? "Vykresluji rychlé tečky..." : "Vykresluji body...");
         
         updateMapWithLoader(() => {
             updateMarkers(allData);
@@ -4810,6 +4816,7 @@ function updateMarkers(data, skipFilters = false) {
             // v poli pointsInstances (únik paměti při každém překreslení mapy).
             if (glLayer.layer && glLayer.layer._frame) { L.Util.cancelAnimFrame(glLayer.layer._frame); glLayer.layer._frame = null; }
             glLayer.remove();
+            map.getContainer().style.cursor = '';
             if (L.glify && Array.isArray(L.glify.pointsInstances)) {
                 const gi = L.glify.pointsInstances.indexOf(glLayer);
                 if (gi >= 0) L.glify.pointsInstances.splice(gi, 1);
@@ -4824,18 +4831,15 @@ function updateMarkers(data, skipFilters = false) {
         if (!map.hasLayer(heatmapLayer)) map.addLayer(heatmapLayer);
         heatmapLayer.setLatLngs(heatPoints);
     }
-    // B) BODY (Hybridní režim)
+    // B) BODY
+    // Výchozí je KLASICKÝ režim: clustery + ikony podle pozorovaného tvaru (disk, válec, trojúhelník...).
+    // Rychlé WebGL tečky se zapnou jen tehdy, když si je uživatel sám zvolí v panelu "Zobrazení".
     else {
-        // Detekce mobilu pro výkonnostní limit
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-        const USE_WEBGL_LIMIT = isMobile ? 1500 : 5000;
-
-        if (filteredData.length > USE_WEBGL_LIMIT && L.glify) {
-            // --- REŽIM VYSOKÉHO VÝKONU (WebGL) ---
+        if (viewMode === 'webgl' && L.glify) {
+            // --- REŽIM VYSOKÉHO VÝKONU (WebGL tečky bez tvarů) ---
             renderWebGLPoints(filteredData);
-            if (infoOutput) infoOutput.innerHTML += ` <span style="color:#00ffcc">(Režim GPU Akcelerace zapnut)</span>`;
         } else {
-            // --- KLASICKÝ REŽIM (Detailní ikony) ---
+            // --- KLASICKÝ REŽIM (Detailní ikony podle tvaru) ---
             renderClassicMarkers(filteredData);
         }
     }
@@ -4849,6 +4853,7 @@ function updateMarkers(data, skipFilters = false) {
 }
 
             // Pomocná funkce pro klasické markery (Hezké ikony + Původní vzhled Popup)
+            const _iconDetailsCache = {};
             function renderClassicMarkers(data) {
                 if (!map.hasLayer(markerClusterGroup)) map.addLayer(markerClusterGroup);
                 
@@ -4857,7 +4862,8 @@ function updateMarkers(data, skipFilters = false) {
 
                 data.forEach((item, index) => {
                     try {
-                        const iconDetails = getIconDetails(item.shape || 'other');
+                        const shapeKey = item.shape || 'other';
+                        const iconDetails = _iconDetailsCache[shapeKey] || (_iconDetailsCache[shapeKey] = getIconDetails(shapeKey));
                         const icon = (window.KP && window.KP.colorModeActive())
                             ? window.KP.classicIcon(item, iconDetails)
                             : (iconCache[iconDetails.category] || iconCache.other);
@@ -4865,6 +4871,9 @@ function updateMarkers(data, skipFilters = false) {
                         const m = L.marker([item.lat, item.lon], { icon: icon });
                         
                         // === PŘÍPRAVA HTML OBSAHU ===
+                        // ZRYCHLENÍ: obsah bubliny se skládá až ve chvíli kliknutí na bod (dříve se předem
+                        // vytvářelo HTML pro všech ~300 000 bodů při každém překreslení mapy).
+                        const makeContent = () => {
                         
                         // 1. Ikonka vpravo nahoře (s původní třídou popup-icon-wrapper)
                         const popupIconSvg = `<div class="popup-icon-wrapper ${iconDetails.className}">${iconDetails.svgPopup}</div>`;
@@ -4913,7 +4922,10 @@ function updateMarkers(data, skipFilters = false) {
                             <div id="${translationId}" style="margin-top: 5px; font-style: italic; color: #00bcd4;"></div>
                         `;
                         
-                        m.bindPopup(content);
+                        return content;
+                        };
+                        
+                        m.bindPopup(makeContent);
                         markers.push(m);
                     } catch (e) { return null; }
                 });
@@ -5031,6 +5043,19 @@ function updateMarkers(data, skipFilters = false) {
                             tooltip.style.left = (px + 15) + 'px';
                             tooltip.style.top = (py + 15) + 'px';
                             tooltip.innerHTML = `UAP záznam`; 
+                        }
+                        // Kurzor nad bodem = ukazováček (bod je klikatelný). Knihovna glify volá hover jen nad bodem
+                        // (se zpožděním po zastavení myši) a nemá "hoverOff", proto návrat řeší listener níže.
+                        map.getContainer().style.cursor = 'pointer';
+                        window._glifyHoverAt = Date.now();
+                        if (!window._glifyCursorResetBound) {
+                            window._glifyCursorResetBound = true;
+                            map.on('mousemove', () => {
+                                if (Date.now() - (window._glifyHoverAt || 0) < 120) return; // právě proběhl hover nad bodem
+                                if (map.getContainer().style.cursor === 'pointer') map.getContainer().style.cursor = '';
+                                const tip = document.getElementById('glify-tooltip');
+                                if (tip) tip.style.display = 'none';
+                            });
                         }
                     }
                 });
