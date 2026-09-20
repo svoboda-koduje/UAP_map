@@ -93,18 +93,19 @@
                 <div class="flex-shrink-0 font-display text-xl text-cyan-400 font-bold tracking-widest neon-text-cyan">
                     UAP.ANALYTICS 🌌
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-3">
-                        <a href="#astrobiologie" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-cyan-400 hover:border-cyan-400 transition-all text-sm font-medium">
+                <!-- OPRAVA: kontejner byl na mobilu celý skrytý (hidden md:block), takže nešel přepnout jazyk; nyní se na mobilu skrývají jen odkazy na kapitoly -->
+                <div class="block">
+                    <div class="ml-2 md:ml-10 flex items-baseline space-x-3">
+                        <a href="#astrobiologie" class="hidden md:inline-block bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-cyan-400 hover:border-cyan-400 transition-all text-sm font-medium">
                             <span class="lang-cs">Astrobiologie</span><span class="lang-en">Astrobiology</span>
                         </a>
-                        <a href="#hypotezy" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-magenta-400 hover:border-magenta-400 transition-all text-sm font-medium">
+                        <a href="#hypotezy" class="hidden md:inline-block bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-fuchsia-400 hover:border-fuchsia-400 transition-all text-sm font-medium">
                             <span class="lang-cs">Paradoxy</span><span class="lang-en">Paradoxes</span>
                         </a>
-                        <a href="#uap-data" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-violet-400 hover:border-violet-400 transition-all text-sm font-medium">
+                        <a href="#uap-data" class="hidden md:inline-block bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-violet-400 hover:border-violet-400 transition-all text-sm font-medium">
                             <span class="lang-cs">UFO/UAP data</span><span class="lang-en">UFO/UAP data</span>
                         </a>
-                        <a href="#predikce" class="bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-yellow-400 hover:border-yellow-400 transition-all text-sm font-medium">
+                        <a href="#predikce" class="hidden md:inline-block bg-white/5 border border-slate-600 text-slate-300 px-3 py-1.5 rounded hover:bg-slate-800 hover:text-yellow-400 hover:border-yellow-400 transition-all text-sm font-medium">
                             <span class="lang-cs">Predikce kontaktu</span><span class="lang-en">Contact prediction</span>
                         </a>
                         <button id="lang-toggle" class="bg-slate-700 border border-slate-500 text-white px-3 py-1.5 rounded hover:bg-slate-600 transition-all text-sm font-bold ml-4 shadow-lg">
@@ -166,9 +167,9 @@
                         <span class="lang-cs">Dostatek času pro vzestup a pád miliard civilizací napříč galaxiemi.</span><span class="lang-en">Sufficient time for the rise and fall of billions of civilizations across galaxies.</span>
                     </p>
                 </div>
-                <div class="metric-card p-6 text-center border-l-magenta-500 hover:border-magenta-500">
+                <div class="metric-card p-6 text-center border-l-fuchsia-500 hover:border-fuchsia-500">
                     <div class="text-4xl mb-2">🌌</div>
-                    <div class="text-3xl font-display font-bold text-magenta-400">13,6 mld</div>
+                    <div class="text-3xl font-display font-bold text-fuchsia-400">13,6 mld</div>
                     <div class="text-sm text-slate-400 uppercase tracking-wider mt-1">
                         <span class="lang-cs">Stáří Mléčné dráhy (v rocích)</span><span class="lang-en">Age of the Milky Way (Years)</span>
                     </div>
@@ -219,7 +220,7 @@
 
         <section id="hypotezy" class="scroll-mt-24 bg-slate-800/30 rounded-3xl p-6 lg:p-10 border border-slate-700/50">
             <div class="mb-10 text-center md:text-left">
-                <h2 class="text-3xl font-bold text-magenta-400 border-b-2 border-magenta-400/30 pb-3 inline-block neon-text-magenta">
+                <h2 class="text-3xl font-bold text-fuchsia-400 border-b-2 border-fuchsia-400/30 pb-3 inline-block neon-text-magenta">
                     <span class="lang-cs">2. Paradoxy & velké filtry</span><span class="lang-en">2. Paradoxes & Great Filters</span>
                 </h2>
                 <p class="mt-4 text-slate-300 leading-relaxed">
@@ -305,7 +306,7 @@
                     </div>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                    <div class="text-3xl font-bold text-magenta-400">2012 / 2013</div>
+                    <div class="text-3xl font-bold text-fuchsia-400">2012 / 2013</div>
                     <div class="text-xs text-slate-400 uppercase mt-1">
                         <span class="lang-cs">Roky největší koncentrace pozorování (peak)</span><span class="lang-en">Peak Observation Years</span>
                     </div>
@@ -524,10 +525,10 @@
                 langToggleBtn.textContent = 'EN';
                 
                 pdfBtn1.href = '01_prvni_civilizace_-_UFO_a_moznost_kontaktu.pdf';
-                pdfText1.textContent = '01 První civilizace a UFO';
+                pdfText1.textContent = '01_První civilizace a UFO';
                 
                 pdfBtn2.href = '02_globalni_pruzkumna_analyza_UFO-UAP.pdf';
-                pdfText2.textContent = '02 Globální analýza UAP';
+                pdfText2.textContent = '02_Globální analýza UAP';
                 
                 // Překlad třetího tlačítka do CS
                 btnText3.textContent = '03_Drakeova rovnice a vesmírné civilizace';

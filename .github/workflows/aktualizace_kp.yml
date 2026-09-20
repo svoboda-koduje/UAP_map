@@ -1,0 +1,44 @@
+name: Automatická aktualizace Kp indexu (GFZ Potsdam)
+
+on:
+  schedule:
+    # Každý den v 05:40 UTC (GFZ doplňuje nové hodnoty průběžně)
+    - cron: '40 5 * * *'
+  workflow_dispatch:
+    # Ruční spuštění tlačítkem "Run workflow" na GitHubu
+  push:
+    # Spustí se i samo, jakmile do repozitáře poprvé nahraješ (nebo změníš) tyto soubory
+    branches: [main]
+    paths:
+      - 'kp_update.py'
+      - '.github/workflows/aktualizace_kp.yml'
+
+# Nikdy nepouštět dvě aktualizace Kp zároveň
+concurrency:
+  group: aktualizace-kp
+  cancel-in-progress: false
+
+jobs:
+  update-kp:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Stáhnutí repozitáře
+        uses: actions/checkout@v4
+
+      - name: Příprava prostředí Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Stažení Kp indexu a vytvoření kp_data.json
+        run: python kp_update.py
+
+      - name: Uložení kp_data.json do repozitáře
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automatická aktualizace Kp indexu (GFZ Potsdam)"
+          file_pattern: "kp_data.json"
