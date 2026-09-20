@@ -1978,6 +1978,8 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <p>Slouží k animaci dat. Nastavte rozsah let (např. 1950–1960), rychlost přehrávání a stiskněte <strong>▶ Přehrát</strong>. 
                     <br><em>Tip: Pro záznam animace použijte tlačítko <strong>🔴 REC</strong>. Pro nejlepší kvalitu vyberte při nahrávání možnost "Tato karta" (This Tab).</em></p>
 
+                    <p><strong>Rozšířený přehrávač:</strong> Krok přehrávání lze zvolit po letech, měsících nebo dnech; body se mohou zobrazovat jen pro aktuální krok, kumulativně, nebo v klouzavém okně. <strong>Časová podmínka</strong> vybere jen určité dny – např. dny s vysokým Kp indexem, dny kolem nástupu geomagnetické bouře, dny s vlnou hlášení, okolí úplňku či novu, maxima meteorických rojů, víkendy, nebo naopak vyloučí dny ohňostrojů. Graf pod ovládáním ukazuje počty pozorování (sloupce) a Kp index (čára); kliknutím do grafu nebo posuvníkem skočíte na zvolený čas. Přehrávač respektuje všechny ostatní zapnuté filtry (tvar, kategorie, stát, fulltext…).</p>
+
                     <h4>3. Panel: 📅 Filtrování podle času a období</h4>
                     <p>Zde můžete omezit zobrazená data na konkrétní časový úsek.<br>
                     <strong>Roky:</strong> Posuvníky let (range slider) nastavte rozmezí let (např. 1950–2000).<br>
@@ -2446,6 +2448,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <strong>Season and Time of Day:</strong> Find out if there are more sightings in summer or winter, day or night.</p>
 
                     <h4>3. Panel: 🎬 Timeline Player</h4>
+                    <p><strong>Extended player:</strong> Playback can step by years, months or days; points can be shown for the current step only, cumulatively, or in a sliding window. The <strong>time condition</strong> selects only certain days – e.g. days with a high Kp index, days around a geomagnetic storm onset, report-wave days, days around full or new moon, meteor shower maxima, weekends, or it can exclude fireworks dates. The chart below the controls shows sighting counts (bars) and the Kp index (line); click the chart or use the slider to seek. The player respects all other active filters (shape, category, country, full text…).</p>
                     <p>Used for data animation. Set the year range (e.g., 1950–1960), speed, and press <strong>▶ Play</strong>. 
                     <br><em>Tip: Use the <strong>🔴 REC</strong> button to record the animation. Select "This Tab" for best quality.</em></p>
 
@@ -4729,16 +4732,14 @@ if (commentSearchInput) {
             // === KROK 3: OPTIMALIZOVANÁ FUNKCE VYKRESLOVÁNÍ (Hybridní: WebGL + Klasika) ===
 let glLayer = null; // Proměnná pro WebGL vrstvu
 
-function updateMarkers(data, skipFilters = false) {
-    if (!map) return;
-
-    // 1. FILTROVÁNÍ DAT
+// Aplikuje všechny aktuálně nastavené filtry (čas, tvar, kategorie, region, fulltext, Kp) a vrátí
+// vyfiltrované pole BEZ překreslení mapy. opts.yearMin / opts.yearMax umožní přepsat rozsah let
+// (používá rozšířený přehrávač, aby nemusel hýbat posuvníky roků).
+function applyAllFilters(data, opts) {
     let filteredData;
-    if (skipFilters) {
-        filteredData = data;
-    } else {
-        const yearMin = parseInt(document.getElementById('year-min').value);
-        const yearMax = parseInt(document.getElementById('year-max').value);
+    {
+        const yearMin = (opts && opts.yearMin != null) ? opts.yearMin : parseInt(document.getElementById('year-min').value);
+        const yearMax = (opts && opts.yearMax != null) ? opts.yearMax : parseInt(document.getElementById('year-max').value);
         const selectedShape = document.getElementById('shape-filter').value;
         const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
         const selectedSeason = document.getElementById('season-filter').value;
@@ -4796,6 +4797,14 @@ function updateMarkers(data, skipFilters = false) {
             return true;
         });
     }
+    return filteredData;
+}
+
+function updateMarkers(data, skipFilters = false) {
+    if (!map) return;
+
+    // 1. FILTROVÁNÍ DAT
+    const filteredData = skipFilters ? data : applyAllFilters(data);
 
     window.currentlyFilteredData = filteredData; // Uložit pro analýzy
 
@@ -8969,6 +8978,8 @@ Odpověz česky, stručně a formou odrážek.`;
     });
 </script>
 <!-- Analytická vrstva: geomagnetická aktivita (Kp index) - viz kp_layer.js, kp_update.py, kp_data.json -->
-<script src="kp_layer.js?v=1"></script>
+<script src="kp_layer.js?v=2"></script>
+<!-- Rozšířený badatelský přehrávač (krok rok/měsíc/den, kumulace, časové podmínky vč. Kp, časová osa) -->
+<script src="timeline_pro.js?v=1"></script>
 </body>
 </html>

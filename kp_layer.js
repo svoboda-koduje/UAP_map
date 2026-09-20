@@ -943,7 +943,7 @@
     root.KP = {
         core: core, state: state, ensureLoaded: ensureLoaded, passesFilter: passesFilter, colorModeActive: colorModeActive,
         glColor: glColor, classicIcon: classicIcon, popupHtml: popupHtml, exportFields: exportFields,
-        resetFilter: resetFilter, runAnalysis: runAnalysis, valueFor: valueFor
+        resetFilter: resetFilter, runAnalysis: runAnalysis, valueFor: valueFor, locateItem: locateItem
     };
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
