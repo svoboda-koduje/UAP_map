@@ -27,7 +27,7 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-    <script src="https://unpkg.com/compromise"></script>
+    <script src="https://unpkg.com/compromise@14.12.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
@@ -1428,7 +1428,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <span id="title" data-translate-key="mapTitle">Interaktivní mapa UAP</span>
         </div>
 
-        <button class="hamburger" onclick="toggleMobileMenu()">
+        <button class="hamburger" onclick="toggleMobileMenu()" data-translate-key-aria="ariaMenuToggle" aria-label="Otevřít/zavřít menu">
     <span class="hamburger-icon">☰</span>
     <span class="hamburger-loader ai-loader" style="display: none; margin: 0;"></span>
 </button>
@@ -1451,7 +1451,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
             <li><button class="nav-btn" onclick="togglePanel('info-dropdown-bottom-left')" data-translate-key="menuInfo">ℹ️ Info o mapě</button></li>
         </ul>
         <button id="header-help-btn" onclick="togglePanel('help-panel')" data-translate-key="menuHelp">❓ Nápověda / Help</button>
-        <button id="lang-switcher">EN</button>
+        <button id="lang-switcher" data-translate-key-aria="ariaLangSwitch" aria-label="Přepnout jazyk / Switch language">EN</button>
     </div>
 
     <div id="map"></div>
@@ -1482,7 +1482,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-famous" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-famous')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-famous')">✕</button>
         <h3 data-translate-key="filterYears">Seznam známých případů</h3>
         <div class="filter-container" id="famous-cases-container"
             style="padding: 10px; background: rgba(6,129,195,0.8); margin: 5px 0 0 0; border-radius: 5px;">
@@ -1496,7 +1496,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-time" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-time')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-time')">✕</button>
         <h3 data-translate-key="filterTime">Filtry času</h3>
         
         <label for="season-filter" data-translate-key="filterSeason">Roční období:</label>
@@ -1535,7 +1535,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         </div>
     </div>
     <div id="panel-timeline" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-timeline')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-timeline')">✕</button>
         <h3 data-translate-key="timelineTitle" style="color: #ff9800;">🎬 Přehrávač historie</h3>
 
         <div style="text-align: center; margin-bottom: 15px;">
@@ -1560,21 +1560,21 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
         
         <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Od roku (Start):</div>
         <div class="year-stepper-container">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', -1)">−</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearDecrease" onclick="adjustTimelineYear('timeline-start-year', -1)">−</button>
             <input type="number" id="timeline-start-year" class="year-input-styled" value="1900" min="1400" max="2026">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-start-year', 1)">+</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearIncrease" onclick="adjustTimelineYear('timeline-start-year', 1)">+</button>
         </div>
 
         <div style="font-size: 0.85em; color: #aaa; margin-bottom: 2px;">Do roku (End):</div>
         <div class="year-stepper-container">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', -1)">−</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearDecrease" onclick="adjustTimelineYear('timeline-end-year', -1)">−</button>
             <input type="number" id="timeline-end-year" class="year-input-styled" value="2026" min="1400" max="2026">
-            <button class="stepper-btn" onclick="adjustTimelineYear('timeline-end-year', 1)">+</button>
+            <button class="stepper-btn" data-translate-key-aria="ariaYearIncrease" onclick="adjustTimelineYear('timeline-end-year', 1)">+</button>
         </div>
     </div>
 
     <div id="panel-data" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-data')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-data')">✕</button>
         <h3 data-translate-key="filterData">Filtry dat a textu</h3>
         <label for="shape-filter" data-translate-key="filterShape">Tvar objektu (Shape):</label>
         <select id="shape-filter">
@@ -1583,13 +1583,32 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
 
         <label for="comment-search" style="margin-top: 15px;" data-translate-key="filterSearch">Fulltextové vyhledávání:</label>
         <input type="text" id="comment-search" placeholder="Hledat text..." >
+        <fieldset style="margin-top: 15px; border: 1px solid #444; border-radius: 4px; padding: 10px;">
+            <legend style="color: #aaa; font-size: 0.85em; padding: 0 5px;">Kategorie:</legend>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-a" style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatA">Kategorie A (Vysvětlené IFO)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-b" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatB">Kategorie B (Málo dat)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
+                <input type="checkbox" id="show-cat-c" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatC">Kategorie C (UFO/UAP)</span>
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center;">
+                <input type="checkbox" id="show-cat-unanalyzed" checked style="width: auto; margin-right: 10px; margin-top: 0;">
+                <span data-translate-key="filterCatUnanalyzed">Neanalyzováno</span>
+            </label>
+        </fieldset>
         <button class="reset-data-btn" style="background-color: #607d8b; margin-top: 15px;" onclick="updateMapWithLoader(() => resetFilters(), 'Resetuji filtry a text...')">
     Resetovat filtry a hledání
 </button>
         </div>
 
     <div id="panel-view" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-view')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-view')">✕</button>
         <h3 data-translate-key="viewOptions" style="color: var(--primary-color);">Nastavení zobrazení</h3>
         <div id="view-toggle" style="display: flex; justify-content: space-around;">
             <label style="width: 48%; cursor: pointer;">
@@ -1605,7 +1624,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-analysis" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-analysis')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-analysis')">✕</button>
         <h3 data-translate-key="analysisTitle" style="color: #03a9f4;">📊 Analýza a export</h3>
         
         <label style="font-size: 0.85em; color: #aaa;" data-translate-key="analysisQuickArea">Rychlý výběr oblasti:</label>
@@ -1647,7 +1666,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="panel-spatial" class="sidebar-panel">
-        <button class="panel-close-btn" onclick="togglePanel('panel-spatial')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-spatial')">✕</button>
         <h3 data-translate-key="spatialTitle" style="color: #4caf50;">🗺️ Prostorová analýza</h3>
         <label style="cursor: pointer; display: flex; align-items: center;">
             <input type="checkbox" id="toggle-mountains-layer" style="width: auto; margin-right: 10px;">
@@ -1665,7 +1684,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
 
     <div id="sources-panel" class="sidebar-panel" style="top: 360px; right: 330px; width: 220px; height: auto; bottom: auto; background-color: rgba(33, 33, 33, 0.95); border: 2px solid #b0bec5;">
-        <button class="panel-close-btn" onclick="togglePanel('sources-panel'); event.stopPropagation();">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('sources-panel'); event.stopPropagation();">✕</button>
         <h3 style="color: #b0bec5; cursor: move;" data-translate-key="externalSourcesTitle">Další zdroje</h3>
         
         <a href="https://www.ufostalker.com/?mufon=true" target="_blank" class="custom-button">
@@ -1687,13 +1706,13 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     </div>
     </div>
 <div id="help-panel" class="sidebar-panel" style="display: none;">
-        <button class="panel-close-btn" onclick="togglePanel('help-panel')" style="z-index: 10; background-color: var(--background-dark); border-radius: 4px;">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('help-panel')" style="z-index: 10; background-color: var(--background-dark); border-radius: 4px;">✕</button>
         <div id="help-content-container" style="overflow-y: auto; max-height: 70vh; padding-right: 21px; margin-top: 15px;">
             <span data-translate-key="helpContent"></span>
         </div>
     </div>
     <div id="news-panel">
-        <button class="panel-close-btn" onclick="togglePanel('news-panel')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('news-panel')">✕</button>
         
         <h3 style="color: #ff5722; cursor: move; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 10px;" data-translate-key="newsTitle">
             📡 Nejnovější hlášení
@@ -1714,7 +1733,7 @@ button, .nav-btn, .sidebar-panel, .custom-button, label {
     <div id="archive-panel">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0; color: var(--primary-color); cursor: move;" data-translate-key="archiveTitle">Badatelský archiv</h3>
-        <span class="archive-close" onclick="document.getElementById('archive-panel').style.display='none'" style="font-size: 1.5em; cursor: pointer;">✕</span>
+        <span class="archive-close" role="button" tabindex="0" data-translate-key-aria="ariaClosePanel" onclick="document.getElementById('archive-panel').style.display='none'" style="font-size: 1.5em; cursor: pointer;">✕</span>
     </div>
 
     <div class="archive-controls-wrapper">
@@ -1834,8 +1853,80 @@ function updateMapWithLoader(customAction = null, customText = null) {
         let currentLanguage = 'cs';
         let geocoderControl = null;
 
+        // =========================================================================
+        // === VLASTNÍ BACKEND / PROXY (Cloudflare Worker) ===
+        // Nahrazuje veřejné bezplatné služby corsproxy.io, rss2json.com a
+        // counterapi.dev jedním vlastním, spolehlivým endpointem (viz worker.js
+        // a NAVOD.md v repozitáři). Po nasazení sem vlož svou skutečnou URL.
+        // =========================================================================
+        const WORKER_BASE_URL = 'https://uap-map-proxy.jarsvoboda-js.workers.dev';
+
+        // =========================================================================
+        // === BEZPEČNOSTNÍ POMOCNÉ FUNKCE (ochrana proti XSS) ===
+        // Použij VŽDY, když se do stránky vkládá text pocházející odjinud než
+        // z pevně daného textu v kódu - tedy z CSV/JSON databáze, z badatelského
+        // archivu (včetně souboru nahraného uživatelem), z živých zpráv (RSS) nebo
+        // z odpovědí geokódovací/překladové služby. Bez escapování by takový text
+        // mohl být prohlížečem vykonán jako HTML/JS (XSS).
+        // =========================================================================
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        // Pro hodnoty vkládané dovnitř jednoduše uvozeného JS řetězce v inline
+        // event handleru (např. onclick="fn('${id}')"): nejprve escapuje pro JS
+        // kontext (zpětné lomítko, apostrof), teprve poté pro HTML atribut.
+        function escapeJsAttr(value) {
+            const jsEscaped = String(value === null || value === undefined ? '' : value)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'");
+            return escapeHtml(jsEscaped);
+        }
+        // Vrátí URL jen pokud je to bezpečný http(s) odkaz, jinak "#"
+        // (ochrana proti javascript: apod. v href pocházejícím z externích dat).
+        function safeUrl(value) {
+            const s = String(value === null || value === undefined ? '' : value).trim();
+            if (/^https?:\/\//i.test(s)) return escapeHtml(s);
+            return '#';
+        }
+        // Bezpečně převede hodnotu na číslo pro vložení do inline JS (bez uvozovek).
+        // Když hodnota není platné číslo, vrátí 0 - zabrání to injekci libovolného
+        // JS kódu přes needatovaná pole jako rok/souřadnice.
+        function safeNum(value) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        // =========================================================================
+        // === PŘÍSTUPNOST: klávesová aktivace klikatelných div/span prvků ===
+        // Prvky s role="button" (viz mission-card, archive-entry, ai-btn-inner atd.)
+        // mají tabindex="0", ale div/span nativně nereaguje na Enter/mezerník jako
+        // <button>. Tento delegovaný listener to dorovnává pro klávesnicové ovládání
+        // a čtečky obrazovky, a to i pro prvky vykreslené dynamicky později.
+        // =========================================================================
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            const target = e.target;
+            if (!target || target.getAttribute('role') !== 'button') return;
+            const tag = target.tagName;
+            if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA') return;
+            e.preventDefault();
+            target.click();
+        });
+
         const translations = {
             cs: {
+                // Popisky pro čtečky obrazovky (aria-label) u ikonových ovládacích prvků
+                ariaClosePanel: "Zavřít panel",
+                ariaMenuToggle: "Otevřít/zavřít menu",
+                ariaLangSwitch: "Přepnout jazyk",
+                ariaYearDecrease: "Snížit rok",
+                ariaYearIncrease: "Zvýšit rok",
                 menuHelp: "❓ Nápověda",
                 helpContent: `
                     <h3>Uživatelský manuál: Interaktivní mapa UAP/UFO</h3>
@@ -1886,8 +1977,8 @@ function updateMapWithLoader(customAction = null, customText = null) {
                     <strong>Konkrétní rok:</strong> Zadejte přesný rok pro rychlé vyhledání.<br>
                     <strong>Roční období a denní doba:</strong> Zjistěte, zda je více pozorování v létě nebo v zimě, ve dne nebo v noci.</p>
 
-                    <h4>4. Panel: 🔍 Hledání podle tvaru objektu a v komentářích pozorování</h4>
-                    <p>Umožňuje filtrovat pozorování podle nahlášeného tvaru objektu.<br>
+                    <h4>4. Panel: 🔍 Filtrování podle tvaru objektu a ve fulltextu</h4>
+                    <p>Umožňuje filtrovat pozorování podle nahlášeného tvaru objektu. Také umožňuje filtrovat pozorování dle kategorií A, B, C a Neanalyzováno, přičemž jsou A (Vysvětlené IFO), B (Málo dat), C (UFO/UAP).<br>
                     <strong>Tvar (Shape) objektu:</strong> Vyberte např. "Triangle" (Trojúhelník), "Disk" (Talíř), "Light" (Světlo) a další (Tic-tac).<br>
                     <strong>Fulltext:</strong> Pole pro textové vyhledávání v popisech (komentářích) pozorování. Zkuste hledat klíčová slova jako "pilot", "nuclear", "school", "tic-tac" atd.</p>
 
@@ -1990,6 +2081,10 @@ function updateMapWithLoader(customAction = null, customText = null) {
                 filterShapeOptionAll: "-- Všechny tvary --",
                 filterSearch: "Fulltextové vyhledávání v komentářích:",
                 filterSearchPlaceholder: "Hledat např. 'Nimitz', 'triangle', 'červený'",
+                filterCatA: "Kategorie A (Vysvětlené IFO)",
+                filterCatB: "Kategorie B (Málo dat)",
+                filterCatC: "Kategorie C (UFO/UAP)",
+                filterCatUnanalyzed: "Neanalyzováno",
                 filterApply: "Aplikovat manuální filtry",
                 filterReset: "Resetovat filtry",
                 analysisTitle: "📊 Analýza a export dat",
@@ -2283,6 +2378,12 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 reportCopyright: "© Jaroslav Svoboda - Interaktivní mapa UAP",
             },
             en: {
+                // Screen-reader labels (aria-label) for icon-only controls
+                ariaClosePanel: "Close panel",
+                ariaMenuToggle: "Open/close menu",
+                ariaLangSwitch: "Switch language",
+                ariaYearDecrease: "Decrease year",
+                ariaYearIncrease: "Increase year",
                 menuHelp: "❓ Help",
                 helpContent: `
                     <h3>User Manual: Interactive UAP/UFO Map</h3>
@@ -2317,7 +2418,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <h4>Floating panel: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px; color: #00bcd4;"> 
 <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
 <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
-</svg> IN-DEPTH ANALYSIS</h4>
+</svg> DEEP ANALYSIS</h4>
 <p>Allows in-depth analysis for more specific types of occurrences.<br>These features allow uncover detailed patterns of behavior of UFO/UAP phenomena.</p>
 
                     <h4>1. Panel: ⭐ Famous cases of UFO/UAP sightings</h4>
@@ -2336,7 +2437,7 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                     <br><em>Tip: Use the <strong>🔴 REC</strong> button to record the animation. Select "This Tab" for best quality.</em></p>
 
                     <h4>4. Panel: 🔍 Filtering by object shape & by fulltext in comments</h4>
-                    <p>Allows filtering sightings by the reported shape of the object.<br>
+                    <p>Allows filtering sightings by the reported shape of the object. It also allows you to filter observations by categories A, B, C and Unanalyzed, where are A (Explained IFOs), B (Insufficient data), C (UFO/UAP).<br>
                     <strong>Object shape:</strong> Filter observations by reported shape (e.g. Triangle, Disk, Cigar, Light, tic-tac etc.).<br>
                     <strong>Fulltext search:</strong> Text search field for descriptions (comments) of sightings. Try searching for keywords like "pilot", "tic-tac", "school", etc.</p>
 
@@ -2439,6 +2540,10 @@ Používáním webu UAP/UFO MAPA souhlasíte s tím, že budete vázáni těmito
                 filterShapeOptionAll: "-- All shapes --",
                 filterSearch: "Full-text search in comments:",
                 filterSearchPlaceholder: "Search e.g. 'Nimitz', 'triangle', 'red'",
+                filterCatA: "Category A (Explained IFOs)",
+                filterCatB: "Category B (Insufficient data)",
+                filterCatC: "Category C (UFO/UAP)",
+                filterCatUnanalyzed: "Unanalyzed",
                 filterApply: "Apply Manual Filters",
                 filterReset: "Reset Filters",
                 analysisTitle: "📊 Data Analysis & Export",
@@ -2772,6 +2877,14 @@ document.querySelectorAll('[data-translate-key-title]').forEach(el => {
     const key = el.getAttribute('data-translate-key-title');
     if (langData[key]) {
         el.setAttribute('title', langData[key]);
+    }
+});
+
+// Aktualizace aria-label (přístupnost - popisky pro čtečky obrazovky u ikonových tlačítek)
+document.querySelectorAll('[data-translate-key-aria]').forEach(el => {
+    const key = el.getAttribute('data-translate-key-aria');
+    if (langData[key]) {
+        el.setAttribute('aria-label', langData[key]);
     }
 });
 
@@ -3648,15 +3761,57 @@ function loadDataWithPapaParse() {
     if(infoOutput) infoOutput.innerText = translations[currentLanguage].infoLoadingPapa;
     if(preloaderText) preloaderText.innerText = "Stahuji databázi (300 000+ záznamů)... / Downloading database...";
 
+    // === Cachování 59MB databáze přes Cache Storage API, aby se nestahovala znovu při každé návštěvě ===
+    const DB_URL = 'databaze.txt';
+    const DB_CACHE_NAME = 'uap-db-cache-v1';
+    const DB_TS_KEY = 'uap_databaze_cached_at';
+    const DB_TTL_MS = 6 * 60 * 60 * 1000; // 6 hodin - poté se zkusí stáhnout čerstvá data
+
+    function getFreshBlob() {
+        return fetch(DB_URL).then(function (resp) {
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            return resp.blob();
+        }).then(function (blob) {
+            if ('caches' in window) {
+                caches.open(DB_CACHE_NAME).then(function (cache) {
+                    cache.put(DB_URL, new Response(blob));
+                }).catch(function () {});
+            }
+            try { localStorage.setItem(DB_TS_KEY, String(Date.now())); } catch (e) {}
+            return blob;
+        });
+    }
+
+    function getDatabaseBlob() {
+        if (!('caches' in window)) return getFreshBlob();
+        return caches.open(DB_CACHE_NAME).then(function (cache) {
+            return cache.match(DB_URL);
+        }).then(function (cachedResponse) {
+            let cachedAt = 0;
+            try { cachedAt = parseInt(localStorage.getItem(DB_TS_KEY) || '0', 10); } catch (e) {}
+            const isFresh = cachedAt && (Date.now() - cachedAt < DB_TTL_MS);
+            if (cachedResponse && isFresh) {
+                return cachedResponse.blob();
+            }
+            return getFreshBlob().catch(function (err) {
+                if (cachedResponse) {
+                    if (preloaderText) preloaderText.innerText = "Síť nedostupná, používám uloženou databázi... / Network unavailable, using cached database...";
+                    return cachedResponse.blob();
+                }
+                throw err;
+            });
+        });
+    }
+
     // Krátká pauza, aby se vykreslil text a roztočil spinner
     setTimeout(() => {
-        Papa.parse('databaze.txt', {
-            download: true,
+        getDatabaseBlob().then(function (dbBlob) {
+        Papa.parse(dbBlob, {
             header: false,
             skipEmptyLines: true,
             delimiter: ',',
             quoteChar: '"',
-            worker: false, // Worker false blokuje UI, proto musíme text změnit PŘEDTÍM pomocí setTimeout
+            worker: true, // Blob se parsuje ve Web Workeru, hlavní vlákno UI se neblokuje
             
             complete: function (results) {
                 // 2. FÁZE: Data jsou stažena, začíná zpracování
@@ -3871,6 +4026,8 @@ function loadDataWithPapaParse() {
                         // Záchranná brzda pro USA
                         if (finalCountryCode === 'usa' || finalCountryCode === 'united states') finalCountryCode = 'us';
 
+                        const category_val = columns[12] ? columns[12].trim() : 'Neanalyzováno';
+
                         const dataObject = {
                             dt: datetimeStr,
                             lat: lat,
@@ -3883,7 +4040,8 @@ function loadDataWithPapaParse() {
                             year: year,
                             month: month,
                             hour: hour,
-                            archive_id: archive_id
+                            archive_id: archive_id,
+                            category: category_val
                         };
 
                         if (archive_id) archiveIdLookup[archive_id] = { lat: lat, lon: lon, city: dataObject.city };
@@ -3913,9 +4071,30 @@ function loadDataWithPapaParse() {
             error: function (error) {
                 if(infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(error.message);
                 if(preloaderText) preloaderText.innerText = "Chyba načítání / Error loading";
+                showDatabaseFatalError(error);
             }
         });
+        }).catch(function (err) {
+            if (infoOutput) infoOutput.textContent = translations[currentLanguage].infoLoadingPapaFail(err.message);
+            if (preloaderText) preloaderText.innerText = "Chyba načítání / Error loading";
+            showDatabaseFatalError(err);
+        });
     }, 100); // Úvodní timeout pro zobrazení spinneru
+}
+
+// Zobrazí chybový stav s tlačítkem pro nový pokus, pokud selže stažení i cache databáze
+function showDatabaseFatalError(err) {
+    const preloader = document.getElementById('preloader');
+    if (!preloader || preloader.querySelector('.db-retry-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'db-retry-btn';
+    btn.textContent = (typeof currentLanguage !== 'undefined' && currentLanguage === 'en') ? 'Retry loading data' : 'Zkusit znovu načíst data';
+    btn.style.cssText = 'margin-top:16px;padding:10px 22px;font-size:1em;cursor:pointer;border-radius:6px;border:none;background:#2d7dd2;color:#fff;';
+    btn.onclick = function () {
+        btn.remove();
+        loadDataWithPapaParse();
+    };
+    preloader.appendChild(btn);
 }
         // =========================================================================
         // 2. MAPA A INICIALIZACE
@@ -3983,7 +4162,7 @@ function loadDataWithPapaParse() {
                     if (detekovanyJazyk.toLowerCase() === targetLanguage) {
                         translationContainer.innerHTML = langData.fetchTranslationAlreadyInLang(targetLanguage.toUpperCase());
                     } else {
-                        translationContainer.innerHTML = langData.fetchTranslationSuccess(detekovanyJazyk, targetLanguage.toUpperCase(), preklad);
+                        translationContainer.innerHTML = langData.fetchTranslationSuccess(escapeHtml(detekovanyJazyk), targetLanguage.toUpperCase(), escapeHtml(preklad));
                     }
                 }).catch(error => {
                     console.error("Chyba při překladu:", error);
@@ -4267,6 +4446,10 @@ if (applyBtnNew) {
 document.getElementById('shape-filter').addEventListener('change', () => updateMapWithLoader());
 document.getElementById('season-filter').addEventListener('change', () => updateMapWithLoader());
 document.getElementById('timeofday-filter').addEventListener('change', () => updateMapWithLoader());
+['show-cat-a', 'show-cat-b', 'show-cat-c', 'show-cat-unanalyzed'].forEach(id => {
+    const cb = document.getElementById(id);
+    if(cb) cb.addEventListener('change', () => updateMapWithLoader());
+});
 
                 // Přepínač zobrazení (Body/Heatmapa) s vizuální indikací práce
                 // Přepínač zobrazení (Body/Heatmapa) s animací
@@ -4459,8 +4642,8 @@ if (commentSearchInput) {
                             // 4. Sestavení obsahu Popup (stejné jako dříve)
                             const langData = translations[currentLanguage];
                             const popupIconSvg = `<div class="popup-icon-wrapper ${iconDetails.className}">${iconDetails.svgPopup}</div>`;
-                            const commentText = item.comment || langData.noComment;
-                            
+                            const commentText = escapeHtml(item.comment || langData.noComment);
+
                             let extraLink = "";
                             if (manualCase) {
                                 const caseTitle = manualCase.title[currentLanguage] || manualCase.title['en'];
@@ -4468,7 +4651,7 @@ if (commentSearchInput) {
                                 <hr>
                                 <p style="margin-bottom: 0; margin-top: 10px;">
                                     <strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong>
-                                    <a href="${manualCase.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>
+                                    <a href="${safeUrl(manualCase.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>
                                 </p>`;
                             }
 
@@ -4476,16 +4659,16 @@ if (commentSearchInput) {
                             let archiveBtn = "";
                             if (item.archive_id) {
                                 archiveBtn = `
-                                <button class="custom-button" style="background-color: #f4b400; margin-top: 10px;" 
-                                        onclick="openArchiveDetail('${item.archive_id}', ${item.year})">
+                                <button class="custom-button" style="background-color: #f4b400; margin-top: 10px;"
+                                        onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">
                                     📖 Otevřít zprávu z archivu
                                 </button>`;
                             }
 
                             const popupContent = `
-                                ${popupIconSvg}<strong>${langData.popupDate}</strong> ${item.dt}<br>
-                                <strong>${langData.popupCity}</strong> ${item.city}<br>
-                                <strong>${langData.popupShape}</strong> ${item.shape || 'Neznámý'}<br>
+                                ${popupIconSvg}<strong>${langData.popupDate}</strong> ${escapeHtml(item.dt)}<br>
+                                <strong>${langData.popupCity}</strong> ${escapeHtml(item.city)}<br>
+                                <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || 'Neznámý')}<br>
                                 ${archiveBtn}
                                 <hr style="clear: both;">
                                 <div><strong>${langData.popupComment}</strong> ${commentText}</div>
@@ -4541,6 +4724,10 @@ function updateMarkers(data, skipFilters = false) {
         const searchText = document.getElementById('comment-search').value.toLowerCase().trim();
         const selectedSeason = document.getElementById('season-filter').value;
         const selectedTimeOfDay = document.getElementById('timeofday-filter').value;
+        const showCatA = document.getElementById('show-cat-a') ? document.getElementById('show-cat-a').checked : false;
+        const showCatB = document.getElementById('show-cat-b') ? document.getElementById('show-cat-b').checked : true;
+        const showCatC = document.getElementById('show-cat-c') ? document.getElementById('show-cat-c').checked : true;
+        const showCatUnanalyzed = document.getElementById('show-cat-unanalyzed') ? document.getElementById('show-cat-unanalyzed').checked : true;
 
         // Filtr regionu
         let regionCodes = null;
@@ -4560,6 +4747,12 @@ function updateMarkers(data, skipFilters = false) {
                 }
             }
             if (!item || !item.lat || !item.lon) return false;
+            // Filtrace podle kategorií
+            const cat = item.category || 'Neanalyzováno';
+            if (!showCatA && cat === 'A') return false;
+            if (!showCatB && cat === 'B') return false;
+            if (!showCatC && cat === 'C') return false;
+            if (!showCatUnanalyzed && cat === 'Neanalyzováno') return false;
             if (item.year < yearMin || item.year > yearMax) return false;
             if (selectedShape !== 'all' && (item.shape || '').toLowerCase() !== selectedShape) return false;
 
@@ -4652,12 +4845,12 @@ function updateMarkers(data, skipFilters = false) {
                         const commentId = `comment-original-${uniqueId}`;
                         const translationId = `translation-output-${uniqueId}`;
                         const safeComment = (item.comment || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                        const commentText = item.comment || langData.noComment;
+                        const commentText = escapeHtml(item.comment || langData.noComment);
 
                         // 3. Tlačítko archiv (pokud existuje)
                         let archiveBtn = "";
                         if (item.archive_id) {
-                             archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${item.archive_id}', ${item.year})">📖 Archiv</button>`;
+                             archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">📖 Archiv</button>`;
                         }
 
                         // 4. Odkaz na známý případ
@@ -4665,19 +4858,19 @@ function updateMarkers(data, skipFilters = false) {
                         if (item.dt && famousCases[item.dt.trim()]) {
                              const caseInfo = famousCases[item.dt.trim()];
                              const caseTitle = caseInfo.title[currentLanguage] || caseInfo.title['en'];
-                             extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${caseInfo.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>`;
+                             extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${safeUrl(caseInfo.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>`;
                         }
 
                         // === SESTAVENÍ POPUPU (PŮVODNÍ VZHLED) ===
                         const content = `
                             ${popupIconSvg}
-                            <strong>${langData.popupDate}</strong> ${item.dt || langData.unknown}<br>
-                            <strong>${langData.popupCity}</strong> ${item.city || langData.unknown}<br>
-                            <strong>${langData.popupShape}</strong> ${item.shape || langData.unknown}<br>
+                            <strong>${langData.popupDate}</strong> ${escapeHtml(item.dt || langData.unknown)}<br>
+                            <strong>${langData.popupCity}</strong> ${escapeHtml(item.city || langData.unknown)}<br>
+                            <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || langData.unknown)}<br>
                             ${archiveBtn}
-                            
+
                             <hr style="clear: both; border-color: #555;">
-                            
+
                             <div id="${commentId}" data-original-comment="${safeComment}">
                                 <strong>${langData.popupComment}</strong> ${commentText}
                             </div>
@@ -4746,30 +4939,30 @@ function updateMarkers(data, skipFilters = false) {
                             const commentId = `comment-original-${uniqueId}`;
                             const translationId = `translation-output-${uniqueId}`;
                             const safeComment = (item.comment || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                            const commentText = item.comment || langData.noComment;
+                            const commentText = escapeHtml(item.comment || langData.noComment);
 
                             let archiveBtn = "";
                             if (item.archive_id) {
-                                archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${item.archive_id}', ${item.year})">📖 Archiv</button>`;
+                                archiveBtn = `<button class="custom-button" style="background-color: #f4b400; font-size:0.8em; padding:3px; margin-top:5px; width:auto;" onclick="openArchiveDetail('${escapeJsAttr(item.archive_id)}', ${safeNum(item.year)})">📖 Archiv</button>`;
                             }
-                            
+
                             let extraLink = "";
                             if (item.dt && famousCases[item.dt.trim()]) {
                                  const caseInfo = famousCases[item.dt.trim()];
                                  const caseTitle = caseInfo.title[currentLanguage] || caseInfo.title['en'];
-                                 extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${caseInfo.url}" target="_blank" style="color: #FFF; text-decoration: underline;">${caseTitle}</a>`;
+                                 extraLink = `<br><strong style="color: var(--primary-color);">${langData.popupCaseLink}</strong> <a href="${safeUrl(caseInfo.url)}" target="_blank" style="color: #FFF; text-decoration: underline;">${escapeHtml(caseTitle)}</a>`;
                             }
 
                             // === SESTAVENÍ POPUPU (PŮVODNÍ VZHLED) ===
                             const content = `
                                 ${popupIconSvg}
-                                <strong>${langData.popupDate}</strong> ${item.dt || langData.unknown}<br>
-                                <strong>${langData.popupCity}</strong> ${item.city || langData.unknown}<br>
-                                <strong>${langData.popupShape}</strong> ${item.shape || langData.unknown}<br>
+                                <strong>${langData.popupDate}</strong> ${escapeHtml(item.dt || langData.unknown)}<br>
+                                <strong>${langData.popupCity}</strong> ${escapeHtml(item.city || langData.unknown)}<br>
+                                <strong>${langData.popupShape}</strong> ${escapeHtml(item.shape || langData.unknown)}<br>
                                 ${archiveBtn}
 
                                 <hr style="clear: both; border-color: #555;">
-                                
+
                                 <div id="${commentId}" data-original-comment="${safeComment}">
                                     <strong>${langData.popupComment}</strong> ${commentText}
                                 </div>
@@ -4844,7 +5037,7 @@ function updateMarkers(data, skipFilters = false) {
                             },
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties && feature.properties.name) {
-                                    layer.bindPopup(translations[currentLanguage].popupMountain + feature.properties.name);
+                                    layer.bindPopup(translations[currentLanguage].popupMountain + escapeHtml(feature.properties.name));
                                 }
                             }
                         });
@@ -5075,7 +5268,7 @@ function updateMarkers(data, skipFilters = false) {
                     const archive = await ensureArchiveLoaded(year);
                     
                     if (!archive) {
-                        results.innerHTML = `<p style='color:red;'>Soubor pro rok ${year} nebyl nalezen.</p>`;
+                        results.innerHTML = `<p style='color:red;'>Soubor pro rok ${escapeHtml(year)} nebyl nalezen.</p>`;
                         return;
                     }
                     // Zkusíme najít znovu v čerstvě načtených datech
@@ -5085,17 +5278,18 @@ function updateMarkers(data, skipFilters = false) {
                 // 3. POKUD ZÁZNAM MÁME, VYKRESLÍME HO
                 if (entry) {
                     const transId = "trans-archive-" + String(archiveId).replace(/[^a-zA-Z0-9]/g, '-');
-                    
+
                     // Příprava textu
                     const archiveText = entry.description || entry.full_text || "Text nebyl nalezen.";
                     // Bezpečný text pro atribut (překladač)
                     const safeText = archiveText.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const safeArchiveText = escapeHtml(archiveText);
 
                     // Tlačítko: Odkaz na původní článek (pokud existuje)
                     let linkButtonHtml = "";
                     if (entry.link) {
                         linkButtonHtml = `
-                        <a href="${entry.link}" target="_blank" class="custom-button" style="display:block; text-align:center; text-decoration:none; background-color: #00bcd4; margin-top:10px; line-height: 20px;">
+                        <a href="${safeUrl(entry.link)}" target="_blank" class="custom-button" style="display:block; text-align:center; text-decoration:none; background-color: #00bcd4; margin-top:10px; line-height: 20px;">
                             ${langData.archiveLinkBtn}
                         </a>`;
                     }
@@ -5104,15 +5298,15 @@ function updateMarkers(data, skipFilters = false) {
                     let mapButtonHtml = "";
                     if (entry.lat && entry.lon && entry.lat !== 0 && entry.lon !== 0) {
                          mapButtonHtml = `
-                        <button class="custom-button" style="margin-top:5px; background-color: #2a9f62;" 
-                                onclick="window.map.flyTo([${entry.lat}, ${entry.lon}], 12); window.zoomToArchivePoint('${entry.id}');">
-                            ${langData.newsShowOnMap} 
+                        <button class="custom-button" style="margin-top:5px; background-color: #2a9f62;"
+                                onclick="window.map.flyTo([${safeNum(entry.lat)}, ${safeNum(entry.lon)}], 12); window.zoomToArchivePoint('${escapeJsAttr(entry.id)}');">
+                            ${langData.newsShowOnMap}
                         </button>`;
                     } else {
                         const aiStatusId = `ai-status-${String(archiveId).replace(/[^a-zA-Z0-9]/g, '')}`;
                         mapButtonHtml = `
-                        <button class="custom-button" style="margin-top:5px; background-color: #673ab7; border: 1px solid #9575cd;" 
-                                onclick="analyzeLocationFromText('${archiveId}', '${aiStatusId}')">
+                        <button class="custom-button" style="margin-top:5px; background-color: #673ab7; border: 1px solid #9575cd;"
+                                onclick="analyzeLocationFromText('${escapeJsAttr(archiveId)}', '${aiStatusId}')">
                             ${langData.archiveAiBtn}
                         </button>
                         <div id="${aiStatusId}" style="margin-top: 5px; font-size: 0.85em; color: #bbb;"></div>
@@ -5122,10 +5316,10 @@ function updateMarkers(data, skipFilters = false) {
                     // Tlačítko: ZPĚT (Klíčová úprava)
                     let backBtnHtml = "";
                     if (lastRenderedArchiveEvents && lastRenderedArchiveEvents.length > 0) {
-                        const btnLabel = currentLanguage === 'cs' ? 
-                            `⬅ Zpět na seznam (${lastRenderedArchiveEvents.length})` : 
+                        const btnLabel = currentLanguage === 'cs' ?
+                            `⬅ Zpět na seznam (${lastRenderedArchiveEvents.length})` :
                             `⬅ Back to list (${lastRenderedArchiveEvents.length})`;
-                        
+
                         // Zde voláme renderArchiveList s uloženými daty
                         backBtnHtml = `<button class="custom-button" style="margin-top:15px; background-color: #607d8b;" onclick="renderArchiveList(lastRenderedArchiveEvents)">${btnLabel}</button>`;
                     }
@@ -5133,32 +5327,32 @@ function updateMarkers(data, skipFilters = false) {
                     // FINÁLNÍ VYKRESLENÍ (Vše najednou)
                     results.innerHTML = `
                         <div class="archive-entry" style="cursor:default; border:none;">
-                            <h4 style="margin:0; color:var(--primary-color);">${entry.location || langData.unknown}</h4>
-                            <small>${entry.date || entry.datetime || langData.unknown}</small>
+                            <h4 style="margin:0; color:var(--primary-color);">${escapeHtml(entry.location || langData.unknown)}</h4>
+                            <small>${escapeHtml(entry.date || entry.datetime || langData.unknown)}</small>
                         </div>
-                        
+
                         <div id="archive-orig-text" data-original-comment="${safeText}" class="archive-full-text">
-                            ${archiveText}
+                            ${safeArchiveText}
                         </div>
 
                         ${linkButtonHtml}
                         ${mapButtonHtml}
 
-                        <button class="custom-button" style="margin-top:10px; background-color:#3f51b5;" 
+                        <button class="custom-button" style="margin-top:10px; background-color:#3f51b5;"
                                 onclick="fetchTranslation('${transId}', 'cs')">
                             ${langData.archiveTranslateBtn}
                         </button>
                         <div id="${transId}" style="margin-top:10px; font-style:italic; color:#00bcd4; background: #222; padding: 10px; border-radius: 5px;"></div>
-                        
+
                         <p style="font-size:0.8em; margin-top:15px; color:#888;">
-                            ID: ${entry.id}<br>
-                            ${langData.archiveSource} ${entry.source || entry.source_id || langData.unknown}
+                            ID: ${escapeHtml(entry.id)}<br>
+                            ${langData.archiveSource} ${escapeHtml(entry.source || entry.source_id || langData.unknown)}
                         </p>
 
                         ${backBtnHtml} `;
                 } else {
                     // Pokud se záznam nepodařilo najít
-                    results.innerHTML = `<p style='color:orange;'>Záznam s ID <strong>${archiveId}</strong> nebyl nalezen v načtených datech.</p>`;
+                    results.innerHTML = `<p style='color:orange;'>Záznam s ID <strong>${escapeHtml(archiveId)}</strong> nebyl nalezen v načtených datech.</p>`;
                 }
             };
 
@@ -5181,10 +5375,10 @@ function updateMarkers(data, skipFilters = false) {
                         if (event.full_text.toLowerCase().includes(query) || event.location.toLowerCase().includes(query)) {
                             found = true;
                             html += `
-                    <div class="archive-entry" onclick="openArchiveDetail('${event.id}', ${archive.year})">
-                        <strong>${event.datetime}</strong><br>
-                        <small>${event.location}</small>
-                        <p style="font-size:0.8em; margin:5px 0;">${event.full_text.substring(0, 80)}...</p>
+                    <div class="archive-entry" role="button" tabindex="0" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                        <strong>${escapeHtml(event.datetime)}</strong><br>
+                        <small>${escapeHtml(event.location)}</small>
+                        <p style="font-size:0.8em; margin:5px 0;">${escapeHtml(event.full_text.substring(0, 80))}...</p>
                     </div>`;
                         }
                     });
@@ -5254,17 +5448,13 @@ async function resolveLocation(query) {
         statusEl.style.color = '#ffeb3b'; 
     }
     
+    let serviceError = false;
     try {
-        // 1. Odstraněna hlavička User-Agent (zakázáno v prohlížeči)
-        // 2. Přidána CORS Proxy (corsproxy.io)
-        const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&polygon_geojson=1&polygon_threshold=0.005&accept-language=${currentLanguage}&email=demo@uapmap.com`;
-        
-        // Obalíme URL do proxy
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
-        
-        // DŮLEŽITÉ: Odstraněn parametr headers s User-Agent!
-        const response = await fetch(proxyUrl);
-        
+        // Geokódování přes vlastní proxy (Cloudflare Worker) místo cizí
+        // veřejné CORS proxy - viz WORKER_BASE_URL výše.
+        const geocodeUrl = `${WORKER_BASE_URL}/geocode?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(currentLanguage)}&detail=1`;
+        const response = await fetch(geocodeUrl);
+
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
         const data = await response.json();
@@ -5276,17 +5466,25 @@ async function resolveLocation(query) {
             const geojson = result.geojson;
 
             if (statusEl) {
-                statusEl.innerHTML = `✅ Zaměřeno: <strong>${result.display_name.split(',')[0]}</strong>`;
+                statusEl.innerHTML = `✅ Zaměřeno: <strong>${escapeHtml(result.display_name.split(',')[0])}</strong>`;
                 statusEl.style.color = "#4caf50";
             }
             return { found: true, code: countryCode, name: result.display_name, bbox: bbox, geojson: geojson };
         }
-    } catch (e) { 
-        console.error("Chyba při hledání lokace:", e); 
+    } catch (e) {
+        serviceError = true;
+        console.error("Chyba při hledání lokace:", e);
     }
 
-    if (statusEl) { statusEl.innerHTML = "❌ Území nenalezeno (zkuste anglický název)."; statusEl.style.color = "#ff9800"; }
-    return { found: false, name: query };
+    // Rozlišíme, zda hledaná lokace skutečně nebyla nalezena, nebo zda je
+    // problém na straně geokódovací služby - uživatel pak ví, co má dělat.
+    if (statusEl) {
+        statusEl.innerHTML = serviceError
+            ? "⚠️ Geokódovací služba je momentálně nedostupná, zkuste to prosím za chvíli znovu."
+            : "❌ Území nenalezeno (zkuste anglický název).";
+        statusEl.style.color = "#ff9800";
+    }
+    return { found: false, name: query, serviceError: serviceError };
 }
 // B) Pouze zazoomuje mapu (Volá se při ENTER)
 async function searchLocationAndZoom(query) {
@@ -5300,38 +5498,76 @@ async function searchLocationAndZoom(query) {
 }
 
 // C) Připraví vyfiltrovaná data pro Graf/Report (Volá se při kliknutí na tlačítka)
-// === PROFESIONÁLNÍ GEOPROSTOROVÝ FILTR (POINT IN POLYGON) ===
+// C) Připraví vyfiltrovaná data pro Graf/Report (Volá se při kliknutí na tlačítka)
+// === PROFESIONÁLNÍ GEOPROSTOROVÝ FILTR S LOKÁLNÍ CACHE A PODPOROU STÁTŮ ===
 async function getFilteredDataForAnalysis(query) {
-    // 1. Získáme informace o lokaci včetně přesných hranic (GeoJSON)
-    const locInfo = await resolveLocation(query);
-    
-    const bbox = (locInfo && locInfo.found && locInfo.bbox) ? locInfo.bbox : null;
-    const geoShape = (locInfo && locInfo.found && locInfo.geojson) ? locInfo.geojson : null;
-    const fallbackText = query.toLowerCase();
-
-    // Načteme nastavení filtrů (čas, rok)
+    const fallbackText = query.toLowerCase().trim();
     const yearMin = parseInt(document.getElementById('year-min').value);
     const yearMax = parseInt(document.getElementById('year-max').value);
 
-    // Pokud nemáme ani obdélník, musíme spoléhat na text (fallback)
+    // === KROK 1: RYCHLÝ LOKÁLNÍ FILTR PRO ZEMĚ A STÁTY ===
+    // Pokud uživatel zadal známý stát nebo region (např. "cz", "Nevada", "USA")
+    if (typeof countryNameMap !== 'undefined' && countryNameMap[fallbackText]) {
+        const targetCode = countryNameMap[fallbackText];
+        
+        const localFiltered = allData.filter(item => {
+            if (item.year < yearMin || item.year > yearMax) return false;
+            
+            // Pokud kód obsahuje pomlčku (např. 'us-nv' pro Nevadu nebo 'ca-ab' pro Albertu)
+            if (targetCode.includes('-')) {
+                const parts = targetCode.split('-');
+                const cCode = parts[0]; // např. 'us'
+                const sCode = parts[1]; // např. 'nv'
+                // Musí přesně sedět jak země, tak konkrétní stát
+                return item.country === cCode && item.state === sCode;
+            } else {
+                // Pro celé státy jako je Česká republika ('cz'), Francie ('fr') atd.
+                return item.country === targetCode || item.state === targetCode;
+            }
+        });
+
+        // Pokusíme se najít hezký název pro výstupní report (s velkým počátečním písmenem)
+        let niceName = query;
+        if (fallbackText === targetCode || targetCode.includes('-')) {
+           const humanName = Object.keys(countryNameMap).find(key => countryNameMap[key] === targetCode && key.length > 3);
+           if (humanName) niceName = humanName.charAt(0).toUpperCase() + humanName.slice(1);
+        }
+
+        // Aby mapa i ukázala, co analyzujeme, posuneme pohled (zoom)
+        if (localFiltered.length > 0 && map) {
+            const latLngs = localFiltered.map(p => [p.lat, p.lon]);
+            // Vezmeme každý desátý bod pro rychlejší výpočet hranic u velkých území
+            const sample = latLngs.filter((_, i) => i % 10 === 0); 
+            map.fitBounds(L.latLngBounds(sample.length > 0 ? sample : latLngs), { padding: [50, 50], maxZoom: 6 });
+        }
+
+        return { data: localFiltered, name: niceName };
+    }
+
+    // === KROK 2: EXTERNÍ API (PRO MĚSTA, KRAJE A SPECIFICKÉ OBLASTI) ===
+    const locInfo = await resolveLocation(query);
+    const bbox = (locInfo && locInfo.found && locInfo.bbox) ? locInfo.bbox : null;
+    const geoShape = (locInfo && locInfo.found && locInfo.geojson) ? locInfo.geojson : null;
+
+    // Pokud nemáme ani obdélník z API, spoléháme na bezpečný fulltext
     if (!bbox) {
         const textFiltered = allData.filter(item => {
              if (item.year < yearMin || item.year > yearMax) return false;
-             return (item.city || "").toLowerCase().includes(fallbackText);
+             
+             const cityMatch = (item.city || "").toLowerCase().includes(fallbackText);
+             const exactCountryMatch = (item.country || "").toLowerCase() === fallbackText;
+             const exactStateMatch = (item.state || "").toLowerCase() === fallbackText;
+             
+             return cityMatch || exactCountryMatch || exactStateMatch;
         });
         return { data: textFiltered, name: query };
     }
 
     // === KROK A: RYCHLÁ ELIMINACE (BOUNDING BOX) ===
-    // Nejprve vybereme body, které jsou v "obdélníku" kolem státu.
-    // To zredukuje 300 000 bodů na např. 5 000, což už lze zpracovat detailně.
-    // bbox z Nominatim je: [minLat, maxLat, minLon, maxLon]
     const [minLat, maxLat, minLon, maxLon] = bbox;
 
     let candidates = allData.filter(item => {
-        // Filtr času
         if (item.year < yearMin || item.year > yearMax) return false;
-        // Filtr souřadnic (hrubý obdélník)
         if (item.lat && item.lon) {
             return (item.lat >= minLat && item.lat <= maxLat &&
                     item.lon >= minLon && item.lon <= maxLon);
@@ -5339,40 +5575,24 @@ async function getFilteredDataForAnalysis(query) {
         return false;
     });
 
-    console.log(`Krok A (Obdélník): Nalezeno ${candidates.length} kandidátů.`);
-
     // === KROK B: PŘESNÁ ANALÝZA (POINT IN POLYGON) ===
-    // Pokud máme přesný tvar (GeoJSON) a máme knihovnu Turf, provedeme detailní řez.
     let finalData = [];
-    
     if (geoShape && typeof turf !== 'undefined') {
-        // Převedeme shape na Turf Feature
-        // Nominatim vrací geometrii, Turf potřebuje Feature
         const searchPolygon = {
             type: "Feature",
             properties: {},
             geometry: geoShape
         };
 
-        // Projdeme kandidáty a zjistíme, zda leží přesně uvnitř hranic
         finalData = candidates.filter(item => {
-            // Turf očekává [lon, lat] !!!
             const pt = turf.point([item.lon, item.lat]);
-            
-            // Funkce booleanPointInPolygon vrací true/false
-            // Zvládá i MultiPolygon (ostrovy, jako má NZ)
             return turf.booleanPointInPolygon(pt, searchPolygon);
         });
-        
-        console.log(`Krok B (Přesné hranice): Nalezeno ${finalData.length} bodů.`);
     } else {
-        // Pokud nemáme přesný tvar (nebo chybí Turf), vrátíme alespoň ten obdélník
         finalData = candidates;
     }
 
-    // Aktualizace UI - pokud jsme našli hodně bodů, zazoomujeme mapu
     if (map && bbox) {
-         // Leaflet chce [SouthWest, NorthEast] -> [minLat, minLon], [maxLat, maxLon]
          map.fitBounds([[minLat, minLon], [maxLat, maxLon]]);
     }
 
@@ -5793,7 +6013,7 @@ function renderReport(stats, locationName, rawData) {
     const actions = document.querySelector('.report-actions');
     actions.innerHTML = `
         <button id="download-report-img-btn" onclick="downloadReportAsImage()">💾 Stáhnout jako obrázek</button>
-        <button id="close-report-btn" onclick="document.getElementById('report-modal').style.display='none'">ZAVŘÍT</button>
+        <button id="close-report-btn" onclick="window.closeAndResetReport()">ZAVŘÍT</button>
     `;
 }
 
@@ -5801,17 +6021,7 @@ function renderReport(stats, locationName, rawData) {
             document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.getElementById('generate-geo-report');
                 if (btn) btn.addEventListener('click', generateGeoReport);
-
-                const closeBtn = document.getElementById('close-report-btn');
-                if (closeBtn) closeBtn.addEventListener('click', () => {
-                    document.getElementById('report-modal').style.display = 'none';
-                });
-                
-                // Zavření klikem mimo papír
-                const modal = document.getElementById('report-modal');
-                window.addEventListener('click', (e) => {
-                    if (e.target === modal) modal.style.display = 'none';
-                });
+                // (Zavírání reportů už je řešeno centrálně přes window.closeAndResetReport)
             });
 
             // =========================================================================
@@ -5821,9 +6031,9 @@ function renderReport(stats, locationName, rawData) {
                 const counterElement = document.getElementById('visit-counter');
                 if (!counterElement) return;
 
-                // Použijeme službu counterapi.dev (náhrada za nefunkční countapi.xyz).
-                // Namespace 'uap-map-svoboda-v1' zajistí unikátnost pro tvůj projekt.
-                const apiUrl = 'https://api.counterapi.dev/v1/uap-map-svoboda-v1/visits/up';
+                // Počítadlo nyní jede přes vlastní proxy (Cloudflare Worker +
+                // Workers KV) místo veřejné counterapi.dev - viz WORKER_BASE_URL výše.
+                const apiUrl = `${WORKER_BASE_URL}/counter`;
 
                 fetch(apiUrl)
                     .then(response => {
@@ -6042,6 +6252,14 @@ if (resetMtnBtn) {
                 document.getElementById('season-filter').value = "all";
                 document.getElementById('timeofday-filter').value = "all";
                 document.getElementById('shape-filter').value = "all";
+                const cbA = document.getElementById('show-cat-a');
+                if(cbA) cbA.checked = false;
+                const cbB = document.getElementById('show-cat-b');
+                if(cbB) cbB.checked = true;
+                const cbC = document.getElementById('show-cat-c');
+                if(cbC) cbC.checked = true;
+                const cbUn = document.getElementById('show-cat-unanalyzed');
+                if(cbUn) cbUn.checked = true;
 
                 // 2. Resetovat posuvníky roků (Range)
                 const minYear = 1900;
@@ -6224,8 +6442,9 @@ async function loadLiveData() {
         statusEl.innerHTML = `<strong style='color: #ff5722;'>${translations[currentLanguage].newsDownloading}</strong>`;
     }
 
-    const googleNewsUrl = 'https://news.google.com/rss/search?q=UFO+sighting&hl=en-US&gl=US&ceid=US:en';
-    const rssUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(googleNewsUrl);
+    // Živé zprávy nyní jdou přes vlastní proxy (Cloudflare Worker), která
+    // stahuje a parsuje Google News RSS přímo - viz WORKER_BASE_URL výše.
+    const rssUrl = `${WORKER_BASE_URL}/news`;
 
     try {
         const response = await fetch(rssUrl);
@@ -6243,14 +6462,14 @@ async function loadLiveData() {
                 listHtml += `
                 <div style="margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${dateStr}</span>
+                        <span style="color: #00bcd4; font-weight:bold; font-size: 0.85em;">${escapeHtml(dateStr)}</span>
                     </div>
-                    <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${item.title}</div>
+                    <div style="margin: 4px 0; font-weight: bold; font-size: 0.95em;">${escapeHtml(item.title)}</div>
                     <div style="display:flex; justify-content:space-between; margin-top:8px;">
                         <button onclick="focusOnLiveMarker(${index})" style="background:transparent; border:1px solid #2a9f62; color:#2a9f62; border-radius:3px; cursor:pointer; padding:2px 6px; font-size:0.85em;">
                             ${translations[currentLanguage].newsShowOnMap}
                         </button>
-                        <a href="${item.link}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
+                        <a href="${safeUrl(item.link)}" target="_blank" style="color: #aaa; text-decoration: underline; font-size: 0.85em; padding-top:2px;">
                             ${translations[currentLanguage].newsReadArticle}
                         </a>
                     </div>
@@ -6297,7 +6516,7 @@ async function loadLiveData() {
                 }
 
                 if (newsStatusEl) {
-                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${locationCandidate}</strong>"</span>`;
+                    newsStatusEl.innerHTML = `${translations[currentLanguage].newsAnalyzing}: ${processedCount + 1} / ${recentItems.length}<br><span style="color:#aaa; font-size:0.8em;">${translations[currentLanguage].newsSearching}: "<strong>${escapeHtml(locationCandidate)}</strong>"</span>`;
                 }
 
                 await new Promise(r => setTimeout(r, 3000));
@@ -6326,10 +6545,9 @@ async function loadLiveData() {
 }
             // Robustní funkce pro přímé geokódování s ošetřením chyb
             async function geocodeAndAddToMap(locationQuery, rssItem, index) {
-    // Použijeme veřejnou CORS proxy pro obejití restrikcí během vývoje
-    const proxyUrl = "https://corsproxy.io/?";
-    const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&email=demo@uapmap.com`;
-    const url = proxyUrl + encodeURIComponent(targetUrl);
+    // Geokódování přes vlastní proxy (Cloudflare Worker) místo cizí veřejné
+    // CORS proxy - viz WORKER_BASE_URL výše.
+    const url = `${WORKER_BASE_URL}/geocode?q=${encodeURIComponent(locationQuery)}&lang=${encodeURIComponent(currentLanguage)}`;
 
     try {
         const response = await fetch(url, {
@@ -6373,10 +6591,10 @@ async function loadLiveData() {
 
                         const popupContent = `
                 <div style="text-align:center;">
-                    <h3 style="color: #ff5722; margin: 0; font-size:1.1em;">LIVE: ${bestResult.display_name.split(',')[0]}</h3>
+                    <h3 style="color: #ff5722; margin: 0; font-size:1.1em;">LIVE: ${escapeHtml(bestResult.display_name.split(',')[0])}</h3>
                     <hr style="border-color: #555; margin:5px 0;">
-                    <div style="margin:5px 0; font-style:italic; font-size:0.9em;">"${rssItem.title}"</div>
-                    <a href="${rssItem.link}" target="_blank" style="color: #00bcd4;">${translations[currentLanguage].newsPopupOpen}</a>
+                    <div style="margin:5px 0; font-style:italic; font-size:0.9em;">"${escapeHtml(rssItem.title)}"</div>
+                    <a href="${safeUrl(rssItem.link)}" target="_blank" style="color: #00bcd4;">${translations[currentLanguage].newsPopupOpen}</a>
                 </div>
             `;
 
@@ -6496,8 +6714,8 @@ if (resetBtn) {
                         const locationToSearch = (event.location || "").toLowerCase();
 
                         if (textToSearch.includes(query) || locationToSearch.includes(query)) {
-                            html += `<div class="archive-entry" onclick="openArchiveDetail('${event.id}', ${archive.year})">
-                                 <strong>${event.date || event.datetime}</strong>: ${event.location || 'Neznámé místo'}</div>`;
+                            html += `<div class="archive-entry" role="button" tabindex="0" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', ${safeNum(archive.year)})">
+                                 <strong>${escapeHtml(event.date || event.datetime)}</strong>: ${escapeHtml(event.location || 'Neznámé místo')}</div>`;
                             }
                         });
                     });
@@ -6629,13 +6847,13 @@ function populateArchiveYears() {
                     const hasGeo = (event.lat && event.lon) ? "📍" : "";
 
                     html += `
-                    <div class="archive-entry" onclick="zoomToArchivePoint('${event.id}')">
+                    <div class="archive-entry" role="button" tabindex="0" onclick="zoomToArchivePoint('${escapeJsAttr(event.id)}')">
                         <div style="display:flex; justify-content:space-between;">
-                            <strong>${date}</strong>
+                            <strong>${escapeHtml(date)}</strong>
                             <span>${hasGeo}</span>
                         </div>
-                        <div style="color:var(--primary-color); font-weight:bold;">${loc}</div>
-                        <div style="font-size:0.85em; color:#ccc; margin-top:4px;">${shortDesc}</div>
+                        <div style="color:var(--primary-color); font-weight:bold;">${escapeHtml(loc)}</div>
+                        <div style="font-size:0.85em; color:#ccc; margin-top:4px;">${escapeHtml(shortDesc)}</div>
                     </div>`;
                 });
                 resultsContainer.innerHTML = html || `<p>${translations[currentLanguage].archiveNothingFound}</p>`;
@@ -6681,12 +6899,12 @@ function populateArchiveYears() {
                     // Popup
                     const popupContent = `
             <strong style="color:#9c27b0">${langData.archiveMapPopupTitle}</strong><br>
-            <b>${langData.archiveMapPlace}</b> ${event.location}<br>
-            <b>${langData.archiveMapDate}</b> ${event.date || event.datetime}<br>
+            <b>${langData.archiveMapPlace}</b> ${escapeHtml(event.location)}<br>
+            <b>${langData.archiveMapDate}</b> ${escapeHtml(event.date || event.datetime)}<br>
             <hr>
-            ${(event.description || event.full_text || "").substring(0, 200)}...
+            ${escapeHtml((event.description || event.full_text || "").substring(0, 200))}...
             <br>
-            <button class="custom-button" style="margin-top:5px; font-size:0.8em; padding:5px;" onclick="openArchiveDetail('${event.id}', document.getElementById('archive-year-input').value)">
+            <button class="custom-button" style="margin-top:5px; font-size:0.8em; padding:5px;" onclick="openArchiveDetail('${escapeJsAttr(event.id)}', document.getElementById('archive-year-input').value)">
                 ${langData.archiveDetailBtn}
             </button>
         `;
@@ -6846,7 +7064,7 @@ window.resetArchivePanel = function() {
                             console.error("Chyba při čtení souboru:", err);
                             statusText.innerText = "Error";
                             statusText.style.color = "red";
-                            resultsContainer.innerHTML = `<p style='color:red;'>${langData.archiveFileError} ${err.message}</p>`;
+                            resultsContainer.innerHTML = `<p style='color:red;'>${langData.archiveFileError} ${escapeHtml(err.message)}</p>`;
                         }
                     };
 
@@ -6962,7 +7180,7 @@ window.resetArchivePanel = function() {
 
                 // === 4. PROVÁDĚNÍ DOTAZŮ ===
                 for (const query of searchQueries) {
-                    statusEl.innerHTML = `<div class="ai-loader"></div> <span style='color:#00bcd4'>Zkouším: "<b>${query}</b>"</span>`;
+                    statusEl.innerHTML = `<div class="ai-loader"></div> <span style='color:#00bcd4'>Zkouším: "<b>${escapeHtml(query)}</b>"</span>`;
                     
                     try {
                         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
@@ -6992,7 +7210,7 @@ window.resetArchivePanel = function() {
 
                     let shortName = successResult.display_name.split(',').slice(0, 3).join(',');
 
-                    statusEl.innerHTML = `<span style='color:#4caf50'>✅ Nalezeno: ${shortName}</span>`;
+                    statusEl.innerHTML = `<span style='color:#4caf50'>✅ Nalezeno: ${escapeHtml(shortName)}</span>`;
 
                     const aiIcon = L.divIcon({
                         className: 'custom-div-icon',
@@ -7003,7 +7221,7 @@ window.resetArchivePanel = function() {
                     });
 
                     const marker = L.marker([lat, lon], { icon: aiIcon })
-                        .bindPopup(`<strong style="color:#673ab7">AI NALEZENÁ POZICE</strong><br>Dotaz: ${usedQuery}<br>${shortName}`);
+                        .bindPopup(`<strong style="color:#673ab7">AI NALEZENÁ POZICE</strong><br>Dotaz: ${escapeHtml(usedQuery)}<br>${escapeHtml(shortName)}`);
                     
                     if (archiveLayerGroup) {
                         archiveLayerGroup.addLayer(marker);
@@ -8014,7 +8232,7 @@ async function generateGrandReport() {
             <button onclick="window.print()" class="custom-button" style="background: #e91e63; font-weight:bold;">
                 ${t.grandReportPrint}
             </button>
-            <button onclick="document.getElementById('report-modal').style.display='none'" class="custom-button" style="background: #333;">
+            <button onclick="window.closeAndResetReport()" class="custom-button" style="background: #333;">
                 ${t.grandReportClose}
             </button>
         `;
@@ -8290,7 +8508,7 @@ function renderGlobalTrendChart() {
     </div>
 
     <div id="panel-ai" class="sidebar-panel" style="width: 340px; max-height: 85vh; top: 80px; right: 80px; display: none;">
-        <button class="panel-close-btn" onclick="togglePanel('panel-ai')">✕</button>
+        <button class="panel-close-btn" data-translate-key-aria="ariaClosePanel" onclick="togglePanel('panel-ai')">✕</button>
         
         <div class="panel-header" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-robot" style="font-size: 1.4em; color: #00bcd4;"></i>
@@ -8306,98 +8524,98 @@ function renderGlobalTrendChart() {
             </p>
     
             <div class="mission-grid">
-                <div class="mission-card" onclick="runResearchMission('water')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('water')">
                     <span class="mission-icon">🌊</span>
                     <span class="mission-title" data-translate-key="missWater">Vodní světy</span>
                     <span class="mission-desc" data-translate-key="missWaterDesc">USO nad oceány a jezery.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('nuclear')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('nuclear')">
                     <span class="mission-icon">☢️</span>
                     <span class="mission-title" data-translate-key="missNuke">Jaderná stopa</span>
                     <span class="mission-desc" data-translate-key="missNukeDesc">Výskyt u základen a elektráren.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('swarm')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('swarm')">
                     <span class="mission-icon">🐝</span>
                     <span class="mission-title" data-translate-key="missSwarm">Roj / Flap</span>
                     <span class="mission-desc" data-translate-key="missSwarmDesc">Dny s extrémní aktivitou.</span>
                 </div>
     
-                <div class="mission-card" onclick="runResearchMission('strangeness')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('strangeness')">
                     <span class="mission-icon">👽</span>
                     <span class="mission-title" data-translate-key="missStrange">Kontakt</span>
                     <span class="mission-desc" data-translate-key="missStrangeDesc">Entity, únosy a přistání.</span>
                 </div>
-                 <div class="mission-card" onclick="runResearchMission('triangle_wave')">
+                 <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('triangle_wave')">
                     <span class="mission-icon">🔺</span>
                     <span class="mission-title" data-translate-key="missTriangle">Trojúhelníky</span>
                     <span class="mission-desc" data-translate-key="missTriangleDesc">Velké tiché objekty.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('tictac')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('tictac')">
                     <span class="mission-icon">💊</span>
                     <span class="mission-title" data-translate-key="missTicTac">Tic-Tac / Doutník</span>
                     <span class="mission-desc" data-translate-key="missTicTacDesc">Objekty tvaru válce či kapsle.</span>
                 </div>
 
-                 <div class="mission-card" onclick="runResearchMission('fast_mover')">
+                 <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('fast_mover')">
                     <span class="mission-icon">⚡</span>
                     <span class="mission-title" data-translate-key="missFast">Extrémní rychlost</span>
                     <span class="mission-desc" data-translate-key="missFastDesc">Okamžité zrychlení a manévry.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('pilot')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('pilot')">
                     <span class="mission-icon">✈️</span>
                     <span class="mission-title" data-translate-key="missPilot">Letecká pozorování</span>
                     <span class="mission-desc" data-translate-key="missPilotDesc">Hlášení pilotů a posádek.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('military')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('military')">
                     <span class="mission-icon">🎖️</span>
                     <span class="mission-title" data-translate-key="missMilitary">Vojenské / Radar</span>
                     <span class="mission-desc" data-translate-key="missMilitaryDesc">Armáda a radarová data.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('silent')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('silent')">
                     <span class="mission-icon">🤫</span>
                     <span class="mission-title" data-translate-key="missSilent">Tichý let</span>
                     <span class="mission-desc" data-translate-key="missSilentDesc">Objekty bez hluku.</span>
                 </div>
 
-                <div class="mission-card" onclick="runResearchMission('em_effect')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('em_effect')">
                     <span class="mission-icon">⚡</span>
                     <span class="mission-title" data-translate-key="missEM">EM Efekty</span>
                     <span class="mission-desc" data-translate-key="missEMDesc">Výpadky proudu a motorů.</span>
                 </div>
-                <div class="mission-card" onclick="runResearchMission('credible')">
+                <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('credible')">
                 <span class="mission-icon">👮</span>
                 <span class="mission-title" data-translate-key="missCredible">Důvěryhodný svědek</span>
                 <span class="mission-desc" data-translate-key="missCredibleDesc">Piloti, policie + radar.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('long_duration')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('long_duration')">
                 <span class="mission-icon">⏱️</span>
                 <span class="mission-title" data-translate-key="missDuration">Dlouhé trvání</span>
                 <span class="mission-desc" data-translate-key="missDurationDesc">> 30 minut.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('psycho')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('psycho')">
                 <span class="mission-icon">🧠</span>
                 <span class="mission-title" data-translate-key="missPsycho">Psychologický dopad</span>
                 <span class="mission-desc" data-translate-key="missPsychoDesc">Strach, klid, telepatie.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('mass')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('mass')">
                 <span class="mission-icon">👥</span>
                 <span class="mission-title" data-translate-key="missMass">Hromadná pozorování</span>
                 <span class="mission-desc" data-translate-key="missMassDesc">Školy, davy lidí.</span>
             </div>
 
-            <div class="mission-card" onclick="runResearchMission('evolution')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('evolution')">
                 <span class="mission-icon">📈</span>
                 <span class="mission-title" data-translate-key="missEvo">Tvarová evoluce</span>
                 <span class="mission-desc" data-translate-key="missEvoDesc">Trendy tvarů v čase.</span>
             </div>
-            <div class="mission-card" onclick="runResearchMission('deep_scan')">
+            <div class="mission-card" role="button" tabindex="0" onclick="runResearchMission('deep_scan')">
                     <span class="mission-icon">🔎</span>
                     <span class="mission-title" data-translate-key="missScan">Sken oblasti</span>
                     <span class="mission-desc" data-translate-key="missScanDesc">Co vidím právě teď na mapě?</span>
@@ -8472,7 +8690,7 @@ function renderGlobalTrendChart() {
         <hr class="custom-hr">
 
 <div id="ai-assistant-widget" title="Kliknutím otevřete nabídku hloubkových tematických analýz">
-    <div id="ai-btn-inner" onclick="togglePanel('panel-ai')">
+    <div id="ai-btn-inner" role="button" tabindex="0" onclick="togglePanel('panel-ai')">
         <i class="fas fa-brain"></i>
         <span data-translate-key="aiWidgetText">Hloubková<br>analýza</span>
     </div>
@@ -8560,11 +8778,11 @@ function renderGlobalTrendChart() {
                 <span class="stat-label">Případů v pohledu</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">${topShape[0].toUpperCase()}</span>
+                <span class="stat-value">${escapeHtml(topShape[0].toUpperCase())}</span>
                 <span class="stat-label">Top tvar (${Math.round((topShape[1]/datasetToAnalyze.length)*100)}%)</span>
             </div>
             <div class="stat-box">
-                <span class="stat-value">${topYear[0]}</span>
+                <span class="stat-value">${escapeHtml(topYear[0])}</span>
                 <span class="stat-label">Top rok</span>
             </div>
             <div class="stat-box">
@@ -8581,7 +8799,7 @@ function renderGlobalTrendChart() {
         if (topShape[1] > 0 && (topShape[1] / datasetToAnalyze.length) > 0.40) {
             anomaliesHTML += `<div class="anomaly-item">
                 <i class="fas fa-exclamation-triangle anomaly-icon"></i> 
-                <div><strong>Dominance tvaru '${topShape[0]}'.</strong><br>Tento tvar tvoří přes 40 % pozorování v této oblasti.</div>
+                <div><strong>Dominance tvaru '${escapeHtml(topShape[0])}'.</strong><br>Tento tvar tvoří přes 40 % pozorování v této oblasti.</div>
             </div>`;
         }
 
@@ -8645,52 +8863,36 @@ Odpověz česky, stručně a formou odrážek.`;
             });
         }
     }
-    // === 1. RESETOVÁNÍ MAPY PO ZAVŘENÍ REPORTU (Fix bodů 3, 4, 5) ===
-    document.addEventListener('DOMContentLoaded', () => {
-        const closeReportBtn = document.getElementById('close-report-btn');
+    // === 1. RESETOVÁNÍ MAPY PO ZAVŘENÍ REPORTU (Globální funkce pro všechna okna) ===
+    window.closeAndResetReport = function() {
         const reportModal = document.getElementById('report-modal');
-
-        // Funkce pro reset mapy a UI s animací
-        function closeAndResetReport() {
-            const reportModal = document.getElementById('report-modal');
+        
+        // Zobrazíme loader a vyresetujeme mapu do původního stavu
+        updateMapWithLoader(() => {
+            // 1. Zavřít okno
+            if(reportModal) reportModal.style.display = 'none';
             
-            // Pokud nebyla aktivní mise, jen zavřeme okno (rychlé)
-            if (!window.isMissionActive) {
-                reportModal.style.display = 'none';
-                return;
-            }
+            // 2. Resetovat mapu (těžká operace pro 300k+ bodů)
+            console.log("Zavírám report a plně resetuji mapu...");
+            resetFilters(); 
+            window.isMissionActive = false; 
 
-            // Pokud byla mise aktivní, bude to trvat -> ZAPNOUT LOADER
-            // Použijeme updateMapWithLoader, který zajistí zobrazení točícího se kolečka
-            updateMapWithLoader(() => {
-                // 1. Zavřít okno
-                reportModal.style.display = 'none';
-                
-                // 2. Resetovat mapu (těžká operace)
-                console.log("Mise ukončena, resetuji mapu...");
-                resetFilters(); 
-                window.isMissionActive = false; 
-
-                // 3. Vymazat text v panelu
-                const aiStatus = document.getElementById('ai-status-output');
-                if(aiStatus) aiStatus.innerHTML = "";
-                
-            }, "Obnovuji původní data mapy..."); // Text, který uvidí uživatel
-        }
-
-        // Listener na tlačítko "Zavřít"
-        if (closeReportBtn) {
-            // Odstraníme staré listenery (pomocí klonování, pro jistotu)
-            const newBtn = closeReportBtn.cloneNode(true);
-            closeReportBtn.parentNode.replaceChild(newBtn, closeReportBtn);
+            // 3. Vymazat stavové texty v AI panelu a hledání států
+            const aiStatus = document.getElementById('ai-status-output');
+            if(aiStatus) aiStatus.innerHTML = "";
+            const analysisStatus = document.getElementById('analysis-search-status');
+            if(analysisStatus) analysisStatus.innerHTML = "";
             
-            newBtn.addEventListener('click', closeAndResetReport);
-        }
+        }, "Obnovuji původní data mapy..."); 
+    };
 
-        // Listener na kliknutí mimo okno (šedé pozadí)
+    document.addEventListener('DOMContentLoaded', () => {
+        const reportModal = document.getElementById('report-modal');
+        
+        // Vylepšený listener na kliknutí mimo okno (na šedé pozadí)
         window.addEventListener('click', (e) => {
-            if (e.target === reportModal) {
-                closeAndResetReport();
+            if (e.target === reportModal && reportModal.style.display !== 'none') {
+                window.closeAndResetReport();
             }
         });
     });
